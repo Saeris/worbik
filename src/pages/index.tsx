@@ -111,8 +111,10 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
         </div>
       </div>
       {winner
-        ? `Congratulations, you won in ${moves}!${
-            moves === target ? ` Wow! You got a perfect score!` : ``
+        ? `${
+            moves === target
+              ? ` Wow! You won in only ${moves} moves! You're a wizard at this!`
+              : `Congratulations, you won in ${moves} moves! Can you do better?`
           }`
         : `Moves: ${moves}`}
     </div>

@@ -3,7 +3,6 @@ export { getNextState } from "./getNextState";
 export { group } from "./group";
 export { randomize } from "./randomize";
 export { range } from "./range";
-export { randomize } from "./randomize";
 export { rotate2DCCW } from "./rotate2DCCW";
 export { rotate2DCW } from "./rotate2DCW";
 export { rotateCCW } from "./rotateCCW";

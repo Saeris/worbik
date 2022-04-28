@@ -6,7 +6,7 @@ const challenge: NextApiHandler = async (req, res) => {
     res.status(400).send(`Only GET requests are accepted!`);
     return;
   }
-  res.status(200).json(jumbled);
+  res.status(200).json(jumbled.state);
 };
 
 export default challenge;

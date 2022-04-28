@@ -1,4 +1,4 @@
-import { shuffle2D } from "./utils/shuffle2D";
+import { randomize } from "./utils";
 
 export const solution = [
   ["t", "e", "a", "c", "h"],
@@ -8,4 +8,4 @@ export const solution = [
   ["c", "l", "o", "s", "e"]
 ];
 
-export const jumbled = shuffle2D(solution);
+export const jumbled = randomize(solution);

@@ -6,7 +6,7 @@ import { rotate2DCCW } from "./rotate2DCCW";
 export const getNextState = (
   matrix: string[][],
   pos: number,
-  dig: boolean,
+  dir: boolean,
   axis: boolean
 ): string[][] => {
   const temp = axis ? matrix : rotate2DCW(matrix);

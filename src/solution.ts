@@ -1,4 +1,4 @@
-import { randomize } from "./utils";
+import { group, randomize } from "./utils";
 
 export const solution = [
   ["t", "e", "a", "c", "h"],
@@ -8,4 +8,6 @@ export const solution = [
   ["c", "l", "o", "s", "e"]
 ];
 
-export const jumbled = randomize(solution.slice());
+export const jumbled = randomize(
+  group(solution.flat().slice(), solution[0].length)
+);

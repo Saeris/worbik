@@ -8,6 +8,4 @@ export const solution = [
   ["c", "l", "o", "s", "e"]
 ];
 
-export const jumbled = randomize(
-  group(solution.flat().slice(), solution[0].length)
-);
+export const jumbled = randomize(group(solution.flat(), solution[0].length));

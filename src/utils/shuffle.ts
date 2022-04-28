@@ -1,4 +1,4 @@
-export type TransformArr = <T>(arr: T[]) => T[];
+import type { TransformArr } from "./types";
 
 export const shuffle: TransformArr = (arr) => {
   let len = arr.length;

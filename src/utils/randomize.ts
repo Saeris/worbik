@@ -1,13 +1,15 @@
 import { getNextState } from "./getNextState";
 import { range } from "./range";
+import type { Matrix2D } from "./types";
 
 const randomInt = (min: number, max: number): number =>
+  // eslint-disable-next-line no-bitwise
   (Math.random() * max + min) | 0;
 const randomBool = (): boolean => Boolean(Math.random() < 0.5);
 
 export const randomize = (
-  init: string[][]
-): { state: string[][]; moves: number } => {
+  init: Matrix2D<string>
+): { state: Matrix2D<string>; moves: number } => {
   const size = init[0].length - 1;
   const words = init.length - 1;
   // Generate a random number of moves between our bounds

@@ -1,7 +1,7 @@
-import { NextApiHandler } from "next";
+import type { NextApiHandler } from "next";
 import { jumbled } from "../../solution";
 
-const challenge: NextApiHandler = async (req, res) => {
+const challenge: NextApiHandler<typeof jumbled | string> = (req, res) => {
   if (req.method !== `GET`) {
     res.status(400).send(`Only GET requests are accepted!`);
     return;

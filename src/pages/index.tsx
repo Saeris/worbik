@@ -1,14 +1,16 @@
+/* eslint-disable react/no-array-index-key */
 import React, { useState, useCallback } from "react";
-import { GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
+import type { GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
 import { DirectioonBtn } from "../components/DirectionBtn";
 import { deserialize, range, getNextState } from "../utils";
+import type { Matrix2D } from "../utils/types";
 
 // This tells Nextjs that we want to generate a static page
 // All visitors will get a cached version of the page
 // Nextjs will only regenerate it on request after the
 // `revalidate` time has expired, in this case 24hrs
 export const getStaticProps: GetStaticProps<{
-  initial: string[][];
+  initial: Matrix2D<string>;
   target: number;
 }> = async () => {
   const { state, moves } = await (
@@ -39,35 +41,36 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
 
   const handleClick = useCallback(
     (
-      // row or col number
-      pos: number,
-      // true = increment, false = decriment
-      dir: boolean = false,
-      // true = horizontal, false = vertical
-      axis: boolean = false
-    ): React.MouseEventHandler<HTMLButtonElement> => (e) => {
-      e.preventDefault();
-      if (!winner) {
-        const check = async () => {
-          const url = new URL(`/api/check`, window.location.origin);
-          url.searchParams.set(
-            `solution`,
-            getNextState(matrix, pos, dir, axis).flat().join(``)
-          );
-          const res = await (await fetch(url.toString())).json();
-          // We'll update the game state with the response we got
-          // from our server
-          const nextState = deserialize(res);
-          const stateStr = nextState.flat().join(``);
-          setMatrix(nextState);
-          setMoves((x) => x + 1);
-          if (stateStr === stateStr.toUpperCase()) {
-            setWinner(true);
-          }
-        };
-        void check();
-      }
-    },
+        // row or col number
+        pos: number,
+        // true = increment, false = decriment
+        dir: boolean = false,
+        // true = horizontal, false = vertical
+        axis: boolean = false
+      ): React.MouseEventHandler<HTMLButtonElement> =>
+      (e) => {
+        e.preventDefault();
+        if (!winner) {
+          const check = async (): Promise<void> => {
+            const url = new URL(`/api/check`, window.location.origin);
+            url.searchParams.set(
+              `solution`,
+              getNextState(matrix, pos, dir, axis).flat().join(``)
+            );
+            const res = await (await fetch(url.toString())).json();
+            // We'll update the game state with the response we got
+            // from our server
+            const nextState = deserialize(res);
+            const stateStr = nextState.flat().join(``);
+            setMatrix(nextState);
+            setMoves((x) => x + 1);
+            if (stateStr === stateStr.toUpperCase()) {
+              setWinner(true);
+            }
+          };
+          void check();
+        }
+      },
     [winner, matrix]
   );
 

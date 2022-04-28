@@ -1,10 +1,10 @@
 import React from "react";
 
 const directions = {
-  up: "🔼",
-  down: "🔽",
-  left: "◀️",
-  right: "▶️"
+  up: `🔼`,
+  down: `🔽`,
+  left: `◀️`,
+  right: `▶️`
 };
 
 interface DirectioonBtnProps extends React.HTMLAttributes<HTMLButtonElement> {
@@ -13,12 +13,10 @@ interface DirectioonBtnProps extends React.HTMLAttributes<HTMLButtonElement> {
 
 export const DirectioonBtn: React.FC<DirectioonBtnProps> = ({
   direction,
-  onClick = () => {},
+  onClick = (): void => {},
   ...props
-}) => {
-  return (
-    <button type="button" onClick={onClick} {...props} className="directionBtn">
-      {directions[direction]}
-    </button>
-  );
-};
+}) => (
+  <button type="button" onClick={onClick} {...props} className="directionBtn">
+    {directions[direction]}
+  </button>
+);

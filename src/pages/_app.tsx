@@ -1,9 +1,13 @@
 import React from "react";
-import { AppProps } from "next/app";
+import type { AppProps } from "next/app";
+import { ClickToComponent } from "click-to-react-component";
 import "../theme/styles.css";
 
-const App: React.VFC<AppProps> = ({ Component, pageProps }) => (
-  <Component {...pageProps} />
+const _app: React.FC<AppProps> = ({ Component, pageProps }) => (
+  <>
+    <ClickToComponent />
+    <Component {...pageProps} />
+  </>
 );
 
-export default App;
+export default _app;

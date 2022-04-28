@@ -1,10 +1,7 @@
-import { NextApiHandler } from "next";
+import type { NextApiHandler } from "next";
 import { solution } from "../../solution";
 
-const check: NextApiHandler<{ s: string; c: number } | string> = async (
-  req,
-  res
-) => {
+const check: NextApiHandler<{ s: string; c: number } | string> = (req, res) => {
   if (req.method !== `GET`) {
     res.status(400).send(`Only GET requests are accepted!`);
     return;

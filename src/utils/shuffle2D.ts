@@ -1,7 +1,6 @@
 import { group } from "./group";
 import { shuffle } from "./shuffle";
-
-export type Transform2DArr = <T>(arr: T[][]) => T[][];
+import type { Transform2DArr } from "./types";
 
 export const shuffle2D: Transform2DArr = (arr) =>
   group(shuffle(arr.flat()), arr[0].length);

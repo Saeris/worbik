@@ -1,33 +1,49 @@
 {
+  "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/tsconfig.json",
+  "ts-node": {
+    "transpileOnly": true
+  },
+  "include": ["./src/**/*", "server/**/*"],
+  "exclude": [
+    "node_modules",
+    "**/__mocks__/**/*",
+    "**/__test__/**/*",
+    "**/*.spec.ts"
+  ],
   "compilerOptions": {
-    "allowJs": true,
-    "alwaysStrict": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "lib": [
-      "dom",
-      "es2017"
-    ],
-    "module": "esnext",
-    "moduleResolution": "node",
-    "noImplicitAny": true,
+    "outDir": "dist",
     "noEmit": true,
-    "noFallthroughCasesInSwitch": true,
+    "isolatedModules": true,
+    // Always include these settings
+    "declarationMap": true,
+    "sourceMap": true,
+    "importHelpers": true,
+    /* Basic Options */
+    "target": "ESNext",
+    "module": "ESNext",
+    "lib": [
+      "ESNext", // adds support for ESNext functionality
+      "DOM" // adds support for 'window' other dom methods
+    ],
+    "allowJs": true,
+    /* JSX support */
+    "jsx": "preserve",
+    "declaration": true,
+    /* Strict Type-Checking Options */
+    "strict": false,
+    "strictNullChecks": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    // "strictFunctionTypes": true,
+    /* Module Resolution Options */
+    "moduleResolution": "node",
+    "esModuleInterop": true,
     "resolveJsonModule": true,
+    /* Advanced Options */
+    "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "strict": true,
-    "target": "esnext",
-    "incremental": true
-  },
-  "exclude": [
-    "node_modules"
-  ],
-  "include": [
-    "**/*.ts",
-    "**/*.tsx"
-  ]
+    "incremental": true,
+    "noErrorTruncation": true
+  }
 }

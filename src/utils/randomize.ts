@@ -21,7 +21,7 @@ export const randomize = (
       const dir = randomBool();
       const pos = randomInt(0, axis ? size : words);
       return getNextState(state, pos, dir, axis);
-    }, init.slice()),
+    }, init),
     moves
   };
 };

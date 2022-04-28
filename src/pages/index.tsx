@@ -9,14 +9,16 @@ import { deserialize, range, getNextState } from "../utils";
 // `revalidate` time has expired, in this case 24hrs
 export const getStaticProps: GetStaticProps<{
   initial: string[][];
+  target: number;
 }> = async () => {
-  const initial = await (
+  const { state, moves } = await (
     await fetch(`http://localhost:3000/api/challenge`)
   ).json();
 
   return {
     props: {
-      initial
+      initial: state,
+      target: moves
     },
     // https://nextjs.org/docs/basic-features/data-fetching/incremental-static-regeneration
     revalidate: 60 * 60 * 24 // Revalidate every 24hrs
@@ -27,10 +29,12 @@ export const getStaticProps: GetStaticProps<{
 // a user first visits the page, so we use it to set our initial
 // game state
 const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
-  initial
+  initial,
+  target
 }) => {
   const [matrix, setMatrix] = useState(initial);
   const [moves, setMoves] = useState(0);
+  const [winner, setWinner] = useState(false);
   const repeat = range(matrix.length);
 
   const handleClick = useCallback(
@@ -43,21 +47,28 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
       axis: boolean = false
     ): React.MouseEventHandler<HTMLButtonElement> => (e) => {
       e.preventDefault();
-      const check = async () => {
-        const url = new URL(`/api/check`, window.location.origin);
-        url.searchParams.set(
-          `solution`,
-          getNextState(matrix, pos, dir, axis).flat().join(``)
-        );
-        const res = await (await fetch(url.toString())).json();
-        // We'll update the game state with the response we got
-        // from our server
-        setMatrix(deserialize(res));
-        setMoves((x) => x + 1);
-      };
-      void check();
+      if (!winner) {
+        const check = async () => {
+          const url = new URL(`/api/check`, window.location.origin);
+          url.searchParams.set(
+            `solution`,
+            getNextState(matrix, pos, dir, axis).flat().join(``)
+          );
+          const res = await (await fetch(url.toString())).json();
+          // We'll update the game state with the response we got
+          // from our server
+          const nextState = deserialize(res);
+          const stateStr = nextState.flat().join(``);
+          setMatrix(nextState);
+          setMoves((x) => x + 1);
+          if (stateStr === stateStr.toUpperCase()) {
+            setWinner(true);
+          }
+        };
+        void check();
+      }
     },
-    [matrix]
+    [winner, matrix]
   );
 
   return (
@@ -101,7 +112,11 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
           ))}
         </div>
       </div>
-      Moves: {moves}
+      {winner
+        ? `Congratulations, you won in ${moves}!${
+            moves === target ? ` Wow! You got a perfect score!` : ``
+          }`
+        : `Moves: ${moves}`}
     </div>
   );
 };

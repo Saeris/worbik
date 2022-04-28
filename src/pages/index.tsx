@@ -4,6 +4,7 @@ import type { GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
 import { DirectioonBtn } from "../components/DirectionBtn";
 import { deserialize, range, getNextState } from "../utils";
 import type { Matrix2D } from "../utils/types";
+import { jumbled } from "../solution";
 
 // This tells Nextjs that we want to generate a static page
 // All visitors will get a cached version of the page
@@ -12,20 +13,14 @@ import type { Matrix2D } from "../utils/types";
 export const getStaticProps: GetStaticProps<{
   initial: Matrix2D<string>;
   target: number;
-}> = async () => {
-  const { state, moves } = await (
-    await fetch(`http://localhost:3000/api/challenge`)
-  ).json();
-
-  return {
-    props: {
-      initial: state,
-      target: moves
-    },
-    // https://nextjs.org/docs/basic-features/data-fetching/incremental-static-regeneration
-    revalidate: 60 * 60 * 24 // Revalidate every 24hrs
-  };
-};
+}> = () => ({
+  props: {
+    initial: jumbled.state,
+    target: jumbled.moves
+  },
+  // https://nextjs.org/docs/basic-features/data-fetching/incremental-static-regeneration
+  revalidate: 60 * 60 * 24 // Revalidate every 24hrs
+});
 
 // Our Home page component will only recieve the initial prop when
 // a user first visits the page, so we use it to set our initial

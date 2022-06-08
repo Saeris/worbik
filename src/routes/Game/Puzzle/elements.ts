@@ -22,6 +22,7 @@ export const Grid = styled(CompositeGroup)(
     flex-direction: column;
     text-align: center;
     gap: 2px;
+    touch-action: manipulation;
   `
 );
 
@@ -52,6 +53,7 @@ export const Character = styled(CompositeItem)<{
     font-size: 24px;
     box-sizing: border-box;
     user-select: none;
+    touch-action: manipulation;
 
     &:focus {
       background: ${theme.colors.info.bg};

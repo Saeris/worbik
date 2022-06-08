@@ -1,12 +1,10 @@
 import { createGlobalStyle, css } from "styled-components";
-import { extractCSSProps } from "./utils";
 import { theme } from "./theme";
 import { reset } from "./reset";
 
 export const Global = createGlobalStyle(
   () => css`
     ${reset}
-    ${extractCSSProps(theme)};
 
     body {
       background-color: #fefefe;

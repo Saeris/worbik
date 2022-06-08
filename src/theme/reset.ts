@@ -31,7 +31,8 @@ export const reset = css`
 
   /* Force Body to fill available viewport height, remove default padding */
   body {
-    min-height: 100%;
+    min-height: -webkit-fill-available;
+    min-height: 100vh;
     padding: 0;
   }
 

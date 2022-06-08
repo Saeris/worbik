@@ -23,22 +23,22 @@ export const Open = styled(Button)(
 
 export const Container = styled(Dialog)(
   ({ theme }) => css`
-    max-width: 40ch;
-    max-height: 80%;
     position: fixed;
     top: 50%;
     left: 50%;
     z-index: 50;
     display: flex;
-    width: 100%;
     flex-direction: column;
     gap: 1rem;
-    overflow: auto;
+    width: calc(100% - 32px);
+    max-width: 40ch;
+    max-height: 80%;
     padding: 16px;
     border: 1px solid hsl(204, 20%, 88%);
     border-radius: 8px;
     background-color: hsl(204, 20%, 100%);
     color: hsl(204, 10%, 10%);
+    overflow: auto;
     font-size: ${theme.sizes.label};
     filter: drop-shadow(0 16px 24px rgba(0, 0, 0, 15%));
     transform: translate(-50%, -60%);

@@ -1,27 +1,27 @@
 export const colors = {
   neutral: {
-    text: `#595959`,
-    border: `#CCCCCC`,
-    bg: `#F9F9F9`
+    text: `#696F8C`,
+    border: `#D8DAE5`,
+    bg: `#FAFBFF`
   },
   info: {
-    text: `#275076`,
-    border: `#9DBEF0`,
-    bg: `#F4F8FF`
+    text: `#2952CC`,
+    border: `#3366FF`,
+    bg: `#F3F6FF`
   },
   warning: {
-    text: `#60542B`,
-    border: `#F0DE9D`,
-    bg: `#FFFEF4`
+    text: `#996A13`,
+    border: `#FFB020`,
+    bg: `#FFFAF1`
   },
   error: {
-    text: `#5F3232`,
-    border: `#F09D9D`,
-    bg: `#FFF4F4`
+    text: `#A73636`,
+    border: `#D14343`,
+    bg: `#FDF4F4`
   },
   success: {
-    text: `#3E5F32`,
-    border: `#A9F09D`,
-    bg: `#F6FFF4`
+    text: `#317159`,
+    border: `#52BD94`,
+    bg: `#F5FBF8`
   }
 } as const;

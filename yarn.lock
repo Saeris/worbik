@@ -1761,19 +1761,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@floating-ui/core@npm:^0.6.2":
-  version: 0.6.2
-  resolution: "@floating-ui/core@npm:0.6.2"
-  checksum: b3e1844da852fe141cfa4163026a7c5ffb4399a96105340dffdd5b76dcafea72c6221a06b4674c2b500bc776adc9d9e4ed39dba55e7d844d9507d994c0af743a
+"@floating-ui/core@npm:^0.7.2":
+  version: 0.7.2
+  resolution: "@floating-ui/core@npm:0.7.2"
+  checksum: 3c25d52b8944d38ba0045580d03f6b7bf03b95aab3dfa90f18f147a43f6d1dbac6ef6f5056bdd0bb7e70f9e39fd3f8b401bae1cab3862f60be8aa0e4190ecb23
   languageName: node
   linkType: hard
 
-"@floating-ui/dom@npm:0.4.5":
-  version: 0.4.5
-  resolution: "@floating-ui/dom@npm:0.4.5"
+"@floating-ui/dom@npm:0.5.2":
+  version: 0.5.2
+  resolution: "@floating-ui/dom@npm:0.5.2"
   dependencies:
-    "@floating-ui/core": ^0.6.2
-  checksum: 3024aba55fe7ee78b429a6a5d61f5719a6bb2acc79c8a33304b9d30c443efba3a5288acaf9003402e31ee97a533eda97c30a0f2c97e9e54c697df9b80a23dad8
+    "@floating-ui/core": ^0.7.2
+  checksum: ff0897abed2e97a8d134b4dd8fa5309553eda3c25dbc2dbe8f7564b3eeac93d21d9334ae7c1ba1f1e5442ed119d82d2ce6935cd4ff607da1c0c6a913c493f5fc
+  languageName: node
+  linkType: hard
+
+"@fontsource/noto-sans@npm:^4.5.10":
+  version: 4.5.10
+  resolution: "@fontsource/noto-sans@npm:4.5.10"
+  checksum: 6b41d9b5634086114e8d8dbd2fc8dd4e5fb5defe8673831b9f86e7d718b63778087e0c3a0fd0d98dd68bf1c67b3546a2134897f497419306e4dd5c38e870b1be
   languageName: node
   linkType: hard
 
@@ -4130,6 +4137,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/natural@npm:^5.1.1":
+  version: 5.1.1
+  resolution: "@types/natural@npm:5.1.1"
+  dependencies:
+    "@types/node": "*"
+  checksum: 19f2293be4a763165481cb4d3e9652a7b539f1bc21f95cec9117ba196a475e96d1d388e6b4b1b598b5f3ed2906bbe62ac3e0efd97904485e344f80c18350afc2
+  languageName: node
+  linkType: hard
+
 "@types/node-fetch@npm:^2.5.7":
   version: 2.6.1
   resolution: "@types/node-fetch@npm:2.6.1"
@@ -4488,6 +4504,24 @@ __metadata:
     "@typescript-eslint/types": 5.21.0
     eslint-visitor-keys: ^3.0.0
   checksum: 328b18faa61872160f3e5faacb5b68022bdabd04b5414f115133245a4a1ecfb5762c67fd645ab3253005480bd25a38598f57fdc2ff2b01d830ac68b37d3d06a5
+  languageName: node
+  linkType: hard
+
+"@use-gesture/core@npm:10.2.15":
+  version: 10.2.15
+  resolution: "@use-gesture/core@npm:10.2.15"
+  checksum: 858ee368e653447c3c5b6d623066477649eaa63cee787556332e81652635b6772c9fee4b51f052975fee7b80e643b71d986963fcc2cbce2476a443a4071507f9
+  languageName: node
+  linkType: hard
+
+"@use-gesture/react@npm:^10.2.15":
+  version: 10.2.15
+  resolution: "@use-gesture/react@npm:10.2.15"
+  dependencies:
+    "@use-gesture/core": 10.2.15
+  peerDependencies:
+    react: ">= 16.8.0"
+  checksum: dbf302a128ac920d2fb0ecbdaa46cfec724775d5b3dd6e33b0c5985bce1e08d0584ca4231154b753351bfe270257196d049cc4c09dc73005a31ddbb2c183e1fa
   languageName: node
   linkType: hard
 
@@ -5016,25 +5050,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ariakit-utils@npm:0.17.0-next.17":
-  version: 0.17.0-next.17
-  resolution: "ariakit-utils@npm:0.17.0-next.17"
+"ariakit-utils@npm:0.17.0-next.20":
+  version: 0.17.0-next.20
+  resolution: "ariakit-utils@npm:0.17.0-next.20"
   peerDependencies:
     react: ^17.0.0 || ^18.0.0
-  checksum: e92f2fbc9885c56fcfb3436c536e7d323d9f825cff03e5ce8f91aeb296d4c304f778d2b339125b09af26f2ff3d75a3354a74f35d299d675c9f48b42f75cb6fb0
+  checksum: df53d6826a8cec8dd872e557a25afdc1c863e174bbb024319e1f3b9403220191a2d8926f6d3d6e7dd5d630dac2b790984574abd3b7c93ca0ac12ff1b76b368e1
   languageName: node
   linkType: hard
 
-"ariakit@npm:^2.0.0-next.24":
-  version: 2.0.0-next.24
-  resolution: "ariakit@npm:2.0.0-next.24"
+"ariakit@npm:^2.0.0-next.29":
+  version: 2.0.0-next.29
+  resolution: "ariakit@npm:2.0.0-next.29"
   dependencies:
-    "@floating-ui/dom": 0.4.5
-    ariakit-utils: 0.17.0-next.17
+    "@floating-ui/dom": 0.5.2
+    ariakit-utils: 0.17.0-next.20
   peerDependencies:
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-  checksum: 6de1906bf317a7a58cbed1884950ae88c91ce266a27c22182699a0cc489b9f25e015add160ab341641bb972bb45a6ad61fd2dbe7fae6a7ea90d5a9e42e94e28d
+  checksum: 01ad877bc94ea6678498c129a26156aca759896a8e2839209ec6d21a0a61d4444c9200ad24dded38ed2531b34eff555e70d3f3fb5fe20a254f16f39d433e5c59
   languageName: node
   linkType: hard
 
@@ -13098,6 +13132,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-icons@npm:^4.4.0":
+  version: 4.4.0
+  resolution: "react-icons@npm:4.4.0"
+  peerDependencies:
+    react: "*"
+  checksum: dd93a1dcc8ac8a3cf46a2b33e80b586fa967331fa5fcb90d061abf276155a8363a331643e203d67cb9bab4261d00a757da854bcce1fce2c6e4258bf3e33f711b
+  languageName: node
+  linkType: hard
+
 "react-inspector@npm:^5.1.0":
   version: 5.1.1
   resolution: "react-inspector@npm:5.1.1"
@@ -15818,6 +15861,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "worbik@workspace:."
   dependencies:
+    "@fontsource/noto-sans": ^4.5.10
     "@prisma/client": 3.13.0
     "@saeris/eslint-config": ^2.1.0
     "@storybook/addon-actions": ^6.4.22
@@ -15830,17 +15874,20 @@ __metadata:
     "@supabase/supabase-js": ^1.35.2
     "@types/eslint": ^8.4.1
     "@types/jest": ^27.4.1
+    "@types/natural": ^5.1.1
     "@types/node": 17.0.29
     "@types/react": 18.0.8
     "@types/react-dom": 18.0.2
     "@types/styled-components": 5.1.25
-    ariakit: ^2.0.0-next.24
+    "@use-gesture/react": ^10.2.15
+    ariakit: ^2.0.0-next.29
     eslint: ^8.14.0
     jest: ^28.0.2
     next: 12.1.5
     prettier: ^2.6.2
     react: 18.1.0
     react-dom: 18.1.0
+    react-icons: ^4.4.0
     styled-components: ^5.3.5
     typescript: 4.6.3
   languageName: unknown

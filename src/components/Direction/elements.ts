@@ -8,8 +8,8 @@ export const Button = styled(Base)<{ $orientation: boolean }>(
     align-items: center;
     border: none;
     padding: 0;
-    width: ${$orientation ? `44` : `22`}px;
-    height: ${$orientation ? `22` : `44`}px;
+    width: ${$orientation ? `48` : `24`}px;
+    height: ${$orientation ? `24` : `48`}px;
     background: ${theme.colors.neutral.bg};
     border: 0.5px solid ${theme.colors.neutral.border};
     border-radius: 2px;

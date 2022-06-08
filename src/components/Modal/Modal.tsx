@@ -16,7 +16,9 @@ export const Modal: React.FC<ModalProps> = ({
   const dialog = useDialogState(props);
   return (
     <>
-      <Open onClick={dialog.toggle}>{label}</Open>
+      <Open onClick={dialog.toggle} aria-label={props[`aria-label`]}>
+        {label}
+      </Open>
       <Container state={dialog}>{children}</Container>
     </>
   );

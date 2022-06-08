@@ -34,7 +34,7 @@ export const Game: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
     <Main>
       <Title>
         Worbik
-        <Modal label={<MdOutlineInfo />}>
+        <Modal label={<MdOutlineInfo />} aria-label={`How to Play`}>
           <ModalHeader>
             <DialogHeading>How To Play:</DialogHeading>
             <DialogDismiss />

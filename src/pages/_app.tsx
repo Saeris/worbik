@@ -9,7 +9,8 @@ const meta = {
   description: `Word Puzzle Mini-Game`,
   locale: `en_US`,
   twitter: `@saeris`,
-  image: `/share-card.png`
+  image: `/share-card.png`,
+  color: `#ffffff`
 };
 
 const _app: React.FC<AppProps> = ({ Component, pageProps }) => (
@@ -17,6 +18,8 @@ const _app: React.FC<AppProps> = ({ Component, pageProps }) => (
     <Head>
       <title>{meta.title}</title>
       <link rel="shortcut icon" href="/favicon.ico" />
+      <link rel="manifest" href="/manifest.json" />
+      <meta name="theme-color" content={meta.color} />
       <meta name="description" content={meta.description} />
       <meta name="image" content={meta.image} />
       {/* OpenGraph */}
@@ -39,6 +42,7 @@ const _app: React.FC<AppProps> = ({ Component, pageProps }) => (
         sizes="192x192"
         href="/logo192.png"
       />
+      <meta name="apple-mobile-web-app-status-bar" content={meta.color} />
       <meta name="apple-mobile-web-app-capable" content="yes" />
       <meta
         name="apple-mobile-web-app-status-bar-style"
@@ -46,7 +50,7 @@ const _app: React.FC<AppProps> = ({ Component, pageProps }) => (
       />
       <meta
         name="viewport"
-        content="viewport-fit=cover, user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"
+        content="viewport-fit=cover, width=device-width, initial-scale=1"
       />
     </Head>
     <Global />

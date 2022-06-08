@@ -44,8 +44,8 @@ export const Character = styled(CompositeItem)<{
     align-items: center;
     border: none;
     padding: 0;
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     background: ${theme.colors.neutral.bg};
     border: 0.5px solid ${theme.colors.neutral.border};
     border-radius: 2px;

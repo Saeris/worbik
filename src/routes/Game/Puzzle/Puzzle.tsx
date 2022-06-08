@@ -93,6 +93,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({
               key={`up-${i}`}
               direction="up"
               onClick={handleClick(i, true)}
+              aria-label={`Rotate column ${i + 1} up`}
             />
           ))}
         </Row>
@@ -104,6 +105,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({
                 key={`left-${x}`}
                 direction="left"
                 onClick={handleClick(x, false, true)}
+                aria-label={`Rotate row ${x + 1} left`}
               />
               {row.map((char, y) => (
                 <Character
@@ -111,6 +113,9 @@ export const Puzzle: React.FC<PuzzleProps> = ({
                   $hint={/^[A-Z]*$/.test(char)}
                   $correct={/^[A-Z]*$/.test(word)}
                   onKeyDown={handleKeypress(x, y)}
+                  aria-label={`Grid square ${x + 1}, ${
+                    y + 1
+                  }. Current character is ${char}`}
                 >
                   {char.toUpperCase()}
                 </Character>
@@ -119,6 +124,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({
                 key={`right-${x}`}
                 direction="right"
                 onClick={handleClick(x, true, true)}
+                aria-label={`Rotate row ${x + 1} right`}
               />
             </Row>
           );
@@ -129,6 +135,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({
               key={`down-${i}`}
               direction="down"
               onClick={handleClick(i)}
+              aria-label={`Rotate column ${i + 1} down`}
             />
           ))}
         </Row>

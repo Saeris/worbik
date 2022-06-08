@@ -9,12 +9,13 @@ export const Global = createGlobalStyle(
     ${extractCSSProps(theme)};
 
     body {
+      background-color: #fefefe;
       font-family: ${theme.fonts.body};
       font-size: 1.4rem;
     }
 
     [data-backdrop] {
-      background-color: rgb(0 0 0 / 10%);
+      background-color: rgb(0 0 0 / 15%);
     }
 
     #__next {

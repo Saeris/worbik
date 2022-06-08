@@ -11,10 +11,6 @@ export const Main = styled.main(
     height: 100%;
     font-size: 24px;
     font-family: ${theme.fonts.body};
-
-    @media (orientation: landscape) {
-      flex-direction: row;
-    }
   `
 );
 

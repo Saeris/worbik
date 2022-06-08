@@ -23,8 +23,8 @@ export const Open = styled(Button)(
 
 export const Container = styled(Dialog)(
   ({ theme }) => css`
-    max-width: calc(80% - 32px);
-    max-height: calc(80% - 32px);
+    max-width: 40ch;
+    max-height: 80%;
     position: fixed;
     top: 50%;
     left: 50%;

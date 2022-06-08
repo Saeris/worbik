@@ -1,7 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 import React, { useState, useCallback } from "react";
 import { useCompositeState } from "ariakit";
-import { useDrag } from "@use-gesture/react";
 import { Direction } from "../../../components/Direction";
 import { deserialize, range, getNextState } from "../../../utils";
 import type { Matrix2D } from "../../../utils/types";
@@ -55,27 +54,6 @@ export const Puzzle: React.FC<PuzzleProps> = ({
       }
     },
     [winner, matrix, onMove, onWin]
-  );
-
-  const bind = useDrag(
-    ({ args: [x, y], intentional, last, swipe: [sx, sy] }) => {
-      // sx = -1: right, sy = 1: up
-      const dir = sx < 0 || sy > 0;
-      // sx !== 0: horizontal
-      const axis = sy !== 0;
-      if (intentional && last) {
-        rotate(axis ? y : x, dir, axis);
-      }
-    },
-    {
-      preventDefault: false,
-      filterTaps: true,
-      threshold: 50,
-      swipe: {
-        distance: 25
-      },
-      axis: `lock`
-    }
   );
 
   const handleClick = useCallback(
@@ -132,7 +110,6 @@ export const Puzzle: React.FC<PuzzleProps> = ({
                   key={`char-${x}${y}`}
                   $hint={/^[A-Z]*$/.test(char)}
                   $correct={/^[A-Z]*$/.test(word)}
-                  {...bind(x, y)}
                   onKeyDown={handleKeypress(x, y)}
                 >
                   {char.toUpperCase()}

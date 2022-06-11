@@ -1,13 +1,13 @@
 import type { NextMiddleware } from "next/server";
+import { NextResponse } from "next/server";
 import { generate } from "../../../utils";
 
 const valid = (n: number): boolean => n > 4 && n < 9;
 
 export const middleware: NextMiddleware = async (req) => {
   if (req.method !== `GET`) {
-    return new Response(null, {
-      status: 400,
-      statusText: `Only GET requests are accepted!`
+    return new Response(`Only GET requests are accepted!`, {
+      status: 400
     });
   }
 
@@ -18,9 +18,8 @@ export const middleware: NextMiddleware = async (req) => {
   const invalid = !valid(length) && !valid(count);
 
   if (missing || invalid) {
-    return new Response(null, {
-      status: 400,
-      statusText: `Must provide a valid "length" or "count" parameter!`
+    return new Response(`Must provide a valid "length" or "count" parameter!`, {
+      status: 400
     });
   }
 
@@ -31,11 +30,7 @@ export const middleware: NextMiddleware = async (req) => {
     body: JSON.stringify(puzzle)
   });
 
-  return new Response(JSON.stringify(puzzle), {
-    status: 200,
-    headers: new Headers({
-      "content-type": `application/json;charset=UTF-8`,
-      "Cache-Control": `max-age=0, s-maxage=${60 * 60 * 24}`
-    })
-  });
+  const res = NextResponse.json(puzzle);
+  res.headers.set(`Cache-Control`, `max-age=0, s-maxage=86400`);
+  return res;
 };

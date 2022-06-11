@@ -8,12 +8,12 @@ export const getStaticProps: GetStaticProps<{
   const { challenge, solution } = generate();
 
   const redis = Redis.fromEnv();
-  await redis.set(challenge, solution);
+  await redis.set(challenge, solution, { ex: 86400, nx: true });
 
   return {
     props: {
       challenge
     },
-    revalidate: 60 * 60 * 24 // Revalidate every 24hrs
+    revalidate: 86400 // Revalidate every 24hrs
   };
 };

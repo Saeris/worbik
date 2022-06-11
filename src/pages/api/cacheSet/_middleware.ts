@@ -1,5 +1,5 @@
 import type { NextMiddleware } from "next/server";
-import { redis } from "../../../clients/redis";
+import { Redis } from "@upstash/redis";
 import type { generate } from "../../../utils";
 
 export const middleware: NextMiddleware = async (req) => {
@@ -21,6 +21,7 @@ export const middleware: NextMiddleware = async (req) => {
     });
   }
 
+  const redis = Redis.fromEnv();
   await redis.set(challenge, solution);
 
   return new Response(null, {

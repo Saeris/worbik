@@ -1,5 +1,5 @@
 import type { GetStaticProps } from "next";
-import { redis } from "../../clients/redis";
+import { Redis } from "@upstash/redis";
 import { generate } from "../../utils";
 
 export const getStaticProps: GetStaticProps<{
@@ -7,6 +7,7 @@ export const getStaticProps: GetStaticProps<{
 }> = async () => {
   const { challenge, solution } = generate();
 
+  const redis = Redis.fromEnv();
   await redis.set(challenge, solution);
 
   return {

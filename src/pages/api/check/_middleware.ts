@@ -24,8 +24,7 @@ export const middleware: NextMiddleware = async (req) => {
       statusText: `Received invalid value for "challenge" parameter`
     });
   }
-
-  const url = new URL(`http://localhost:3001/api/cacheGet`);
+  const url = new URL(`${req.nextUrl.origin}/api/cacheGet`);
   url.searchParams.set(`key`, challenge);
   const solution: string = await (await fetch(url.href)).json();
 

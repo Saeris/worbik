@@ -26,7 +26,7 @@ export const middleware: NextMiddleware = async (req) => {
 
   const puzzle = generate(length, count);
 
-  await fetch(`http://localhost:3001/api/cacheSet`, {
+  await fetch(`${req.nextUrl.origin}/api/cacheSet`, {
     method: `POST`,
     body: JSON.stringify(puzzle)
   });

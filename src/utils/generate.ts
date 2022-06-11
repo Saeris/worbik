@@ -12,11 +12,9 @@ export const generate = (
   const solution = `${length}${drawNRandom(
     Object.assign(new Array<string>(), wordlist[length]),
     count
-  ).join(``)}`; //?
+  ).join(``)}`;
   return {
     challenge: randomize(solution),
     solution
   };
 };
-
-generate(); //?

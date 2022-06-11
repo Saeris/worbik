@@ -1,12 +1,13 @@
 import type { GetStaticProps } from "next";
-import type { generate } from "../../utils";
+import { redis } from "../../clients/redis";
+import { generate } from "../../utils";
 
 export const getStaticProps: GetStaticProps<{
   challenge: string;
 }> = async () => {
-  const { challenge } = (await (
-    await fetch(`http://localhost:3001/api/generate?length=5&count=5`)
-  ).json()) as ReturnType<typeof generate>;
+  const { challenge, solution } = generate();
+
+  await redis.set(challenge, solution);
 
   return {
     props: {

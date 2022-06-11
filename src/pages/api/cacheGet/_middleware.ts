@@ -18,7 +18,10 @@ export const middleware: NextMiddleware = async (req) => {
     });
   }
 
-  const redis = Redis.fromEnv();
+  const redis = new Redis({
+    url: process.env.REDIS_URL ?? ``,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN ?? ``
+  });
   const solution = await redis.get(key);
 
   return new Response(JSON.stringify(solution), {

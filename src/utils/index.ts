@@ -1,7 +1,6 @@
-export { deserialize } from "./deserialize";
+export { generate } from "./generate";
 export { getNextState } from "./getNextState";
 export { group } from "./group";
-export { isRenderFunction } from "./isRenderFunction";
 export { randomize } from "./randomize";
 export { range } from "./range";
 export { rotate2DCCW } from "./rotate2DCCW";

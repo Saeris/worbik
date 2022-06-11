@@ -2,12 +2,13 @@
 import React, { useState, useCallback } from "react";
 import { useCompositeState } from "ariakit";
 import { Direction } from "../../../components/Direction";
-import { deserialize, range, getNextState } from "../../../utils";
-import type { Matrix2D } from "../../../utils/types";
+import { range, getNextState } from "../../../utils";
 import { Container, Grid, Row, Character } from "./elements";
+import { parseChallenge } from "../../../utils/parseChallenge";
+import { parseSolution } from "../../../utils/parseSolution";
 
 export interface PuzzleProps {
-  initial: Matrix2D<string>;
+  initial: string;
   onMove?: () => void;
   onWin?: () => void;
   winner?: boolean;
@@ -20,8 +21,9 @@ export const Puzzle: React.FC<PuzzleProps> = ({
   winner = false
 }) => {
   const state = useCompositeState();
-  const [matrix, setMatrix] = useState(initial);
-  const repeat = range(matrix.length);
+  const [guess, setGuess] = useState(initial);
+  const { challenge, length, moves } = parseChallenge(guess);
+  const repeat = range(length);
 
   const rotate = useCallback(
     (
@@ -36,15 +38,18 @@ export const Puzzle: React.FC<PuzzleProps> = ({
         const check = async (): Promise<void> => {
           const url = new URL(`/api/check`, window.location.origin);
           url.searchParams.set(
-            `solution`,
-            getNextState(matrix, pos, dir, axis).flat().join(``)
+            `guess`,
+            `${length}${getNextState(challenge, pos, dir, axis)
+              .flat()
+              .join(``)}`
           );
-          const res = await (await fetch(url.toString())).json();
+          url.searchParams.set(`challenge`, initial);
+          const res = await (await fetch(url.toString())).text();
           // We'll update the game state with the response we got
           // from our server
-          const nextState = deserialize(res);
-          const stateStr = nextState.flat().join(``);
-          setMatrix(nextState);
+          const { solution } = parseSolution(res);
+          const stateStr = solution.flat().join(``);
+          setGuess(`${length}${stateStr}${moves}`);
           onMove();
           if (stateStr === stateStr.toUpperCase()) {
             onWin();
@@ -53,7 +58,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({
         void check();
       }
     },
-    [winner, matrix, onMove, onWin]
+    [initial, winner, challenge, length, moves, onMove, onWin]
   );
 
   const handleClick = useCallback(
@@ -97,7 +102,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({
             />
           ))}
         </Row>
-        {matrix.map((row, x) => {
+        {challenge.map((row, x) => {
           const word = row.join(``);
           return (
             <Row key={`row-${x}`}>

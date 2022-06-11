@@ -19,6 +19,7 @@ const nextConfig = {
 module.exports = withPWA({
   pwa: {
     dest: "public",
+    disable: process.env.NODE_ENV !== "production",
     runtimeCaching
   },
   ...nextConfig

@@ -5352,6 +5352,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@upstash/redis@npm:^1.6.1":
+  version: 1.6.1
+  resolution: "@upstash/redis@npm:1.6.1"
+  dependencies:
+    isomorphic-fetch: ^3.0.0
+  checksum: 4c6434bc8c830778ae9591cc18d0114defc06922248ff6502bdb47808b6d19bdf50787a29bc357bf1fe7433438b26785141cc01a5e2e87c9c257814ea7aeb3fa
+  languageName: node
+  linkType: hard
+
 "@use-gesture/core@npm:10.2.15":
   version: 10.2.15
   resolution: "@use-gesture/core@npm:10.2.15"
@@ -11049,6 +11058,16 @@ __metadata:
   version: 4.0.0
   resolution: "isobject@npm:4.0.0"
   checksum: bbcb522e46d54fb22418ba49fb9a82057ffa201c8401fb6e018c042e2c98cf7d9c7b185aff88e035ec8adea0814506dc2aeff2d08891bbc158e1671a49e99c06
+  languageName: node
+  linkType: hard
+
+"isomorphic-fetch@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "isomorphic-fetch@npm:3.0.0"
+  dependencies:
+    node-fetch: ^2.6.1
+    whatwg-fetch: ^3.4.1
+  checksum: e5ab79a56ce5af6ddd21265f59312ad9a4bc5a72cebc98b54797b42cb30441d5c5f8d17c5cd84a99e18101c8af6f90c081ecb8d12fd79e332be1778d58486d75
   languageName: node
   linkType: hard
 
@@ -17102,6 +17121,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"whatwg-fetch@npm:^3.4.1":
+  version: 3.6.2
+  resolution: "whatwg-fetch@npm:3.6.2"
+  checksum: ee976b7249e7791edb0d0a62cd806b29006ad7ec3a3d89145921ad8c00a3a67e4be8f3fb3ec6bc7b58498724fd568d11aeeeea1f7827e7e1e5eae6c8a275afed
+  languageName: node
+  linkType: hard
+
 "whatwg-url@npm:^5.0.0":
   version: 5.0.0
   resolution: "whatwg-url@npm:5.0.0"
@@ -17198,6 +17224,7 @@ __metadata:
     "@types/react": 18.0.8
     "@types/react-dom": 18.0.2
     "@types/styled-components": 5.1.25
+    "@upstash/redis": ^1.6.1
     "@use-gesture/react": ^10.2.15
     ariakit: ^2.0.0-next.29
     eslint: ^8.14.0

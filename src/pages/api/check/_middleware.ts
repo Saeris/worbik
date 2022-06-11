@@ -1,7 +1,6 @@
 import type { NextMiddleware } from "next/server";
-import { solution } from "../../../solution";
 
-export const middleware: NextMiddleware = (req) => {
+export const middleware: NextMiddleware = async (req) => {
   if (req.method !== `GET`) {
     return new Response(null, {
       status: 400,
@@ -9,30 +8,33 @@ export const middleware: NextMiddleware = (req) => {
     });
   }
 
-  const query = new URL(req.url).searchParams.get(`solution`);
+  const guess = new URL(req.url).searchParams.get(`guess`);
+  const challenge = new URL(req.url).searchParams.get(`challenge`);
 
-  if (typeof query !== `string`) {
+  if (typeof guess !== `string`) {
     return new Response(null, {
       status: 400,
-      statusText: `Received invalid value for "url" parameter`
+      statusText: `Received invalid value for "guess" parameter`
     });
   }
 
-  const answer = solution.flat().join(``);
+  if (typeof challenge !== `string`) {
+    return new Response(null, {
+      status: 400,
+      statusText: `Received invalid value for "challenge" parameter`
+    });
+  }
+
+  const url = new URL(`http://localhost:3001/api/cacheGet`);
+  url.searchParams.set(`key`, challenge);
+  const solution: string = await (await fetch(url.href)).json();
 
   return new Response(
-    JSON.stringify(
-      {
-        s: query
-          .toLowerCase()
-          .split(``)
-          .map((c, i) => (answer.charAt(i) === c ? c.toUpperCase() : c))
-          .join(``),
-        c: solution[0].length
-      },
-      null,
-      2
-    ),
+    guess
+      .toLowerCase()
+      .split(``)
+      .map((c, i) => (solution.charAt(i) === c ? c.toUpperCase() : c))
+      .join(``),
     {
       status: 200,
       headers: new Headers({

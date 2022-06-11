@@ -73,3 +73,4 @@ schema.json
 cypress/e2e/build
 
 .DS_Store
+.vercel

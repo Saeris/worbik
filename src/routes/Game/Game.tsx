@@ -7,6 +7,7 @@ import type { getStaticProps } from "./getStaticProps";
 import { Puzzle } from "./Puzzle/Puzzle";
 import { Main, ModalHeader, Title } from "./elements";
 import { Modal } from "../../components/Modal";
+import { parseChallenge } from "../../utils/parseChallenge";
 
 const numbers = {
   5: `five`,
@@ -16,11 +17,11 @@ const numbers = {
 };
 
 export const Game: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
-  initial,
-  target
+  challenge
 }) => {
   const [moves, setMoves] = useState(0);
   const [winner, setWinner] = useState(false);
+  const { moves: target, length, words } = parseChallenge(challenge);
 
   const handleMove = useCallback((): void => {
     setMoves((x) => x + 1);
@@ -40,12 +41,8 @@ export const Game: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
             <DialogDismiss />
           </ModalHeader>
           <p>
-            {`Hidden in this puzzle are ${
-              numbers[initial[0].length]
-            } words that are each
-        ${
-          numbers[initial[1].length]
-        } letters long. Use the buttons around the edges to
+            {`Hidden in this puzzle are ${numbers[words]} words that are each
+        ${numbers[length]} letters long. Use the buttons around the edges to
         rotate the columns and rows in order to find the correct position of
         each letter. Get all of the letters in the correct position to win!`}
           </p>
@@ -53,7 +50,7 @@ export const Game: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
       </Title>
 
       <Puzzle
-        initial={initial}
+        initial={challenge}
         onMove={handleMove}
         onWin={handleWin}
         winner={winner}

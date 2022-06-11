@@ -27,6 +27,7 @@ export const middleware: NextMiddleware = async (req) => {
   const url = new URL(`${req.nextUrl.origin}/api/cacheGet`);
   url.searchParams.set(`key`, challenge);
   const res = await fetch(url.href);
+  // eslint-disable-next-line no-console
   console.log(res.headers.get(`x-vercel-cache`));
   const solution: string = await res.json();
 

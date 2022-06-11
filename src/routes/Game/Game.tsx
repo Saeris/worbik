@@ -57,7 +57,7 @@ export const Game: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
       />
       {winner
         ? `${
-            moves === target
+            moves <= target
               ? ` Wow! You won in only ${moves} moves! You're a wizard at this!`
               : `Congratulations, you won in ${moves} moves! Can you do better?`
           }`

@@ -26,7 +26,9 @@ export const middleware: NextMiddleware = async (req) => {
   }
   const url = new URL(`${req.nextUrl.origin}/api/cacheGet`);
   url.searchParams.set(`key`, challenge);
-  const solution: string = await (await fetch(url.href)).json();
+  const res = await fetch(url.href);
+  console.log(res.headers.get(`x-vercel-cache`));
+  const solution: string = await res.json();
 
   return new Response(
     guess

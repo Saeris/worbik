@@ -22,7 +22,15 @@ export const middleware: NextMiddleware = async (req) => {
     token: process.env.UPSTASH_REDIS_REST_TOKEN ?? ``
   });
 
-  const res = NextResponse.json(await redis.get(key));
+  const solution = await redis.get<string>(key);
+
+  if (typeof solution !== `string`) {
+    return new Response(`Could not retrieve value for ${key}.`, {
+      status: 500
+    });
+  }
+
+  const res = NextResponse.json(solution);
   res.headers.set(`Cache-Control`, `max-age=0, s-maxage=86400`);
   return res;
 };

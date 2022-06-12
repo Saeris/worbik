@@ -22,12 +22,13 @@ export const middleware: NextMiddleware = async (req) => {
       status: 400
     });
   }
+
   const url = new URL(`${req.nextUrl.origin}/api/cacheGet`);
   url.searchParams.set(`key`, challenge);
   const cacheRes = await fetch(url.href);
-  // eslint-disable-next-line no-console
-  console.log(cacheRes.headers.get(`x-vercel-cache`));
   const solution: string = await cacheRes.json();
+  // eslint-disable-next-line no-console
+  console.log({ cache: cacheRes.headers.get(`x-vercel-cache`), solution });
 
   const res = NextResponse.json(
     guess

@@ -11,6 +11,9 @@ export const middleware: NextMiddleware = async (req) => {
 
   const key = new URL(req.url).searchParams.get(`key`);
 
+  // eslint-disable-next-line no-console
+  console.log({ source: req.nextUrl.href });
+
   if (typeof key !== `string`) {
     return new Response(`Received invalid value for "key" parameter`, {
       status: 400

@@ -9,3 +9,4 @@ export { rotateCCW } from "./rotateCCW";
 export { rotateCW } from "./rotateCW";
 export { shuffle } from "./shuffle";
 export { shuffle2D } from "./shuffle2D";
+export { toInt } from "./toInt";

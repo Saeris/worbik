@@ -22,7 +22,7 @@ const handler: NextApiHandler = async (req, res) => {
   const puzzle = generate(length, count);
 
   const origin = process.env.VERCEL_URL?.length
-    ? process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
     : `http://localhost:3000`;
 
   await fetch(`${origin}/api/cacheSet`, {

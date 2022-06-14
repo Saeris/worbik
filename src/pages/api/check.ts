@@ -20,7 +20,7 @@ const handler: NextApiHandler = async (req, res) => {
   }
 
   const origin = process.env.VERCEL_URL?.length
-    ? process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
     : `http://localhost:3000`;
   const url = new URL(`${origin}/api/cacheGet`);
   url.searchParams.set(`key`, challenge);

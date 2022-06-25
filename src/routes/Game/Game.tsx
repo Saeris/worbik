@@ -2,7 +2,7 @@
 import React, { useState, useCallback } from "react";
 import type { InferGetStaticPropsType, NextPage } from "next";
 import { MdOutlineInfo } from "react-icons/md";
-import { DialogDismiss, DialogHeading } from "ariakit";
+import { DialogDismiss, DialogHeading } from "ariakit/dialog";
 import type { getStaticProps } from "./getStaticProps";
 import { Puzzle } from "./Puzzle/Puzzle";
 import { Main, ModalHeader, Title } from "./elements";

@@ -1,4 +1,5 @@
-import { Button, Dialog } from "ariakit";
+import { Button } from "ariakit/button";
+import { Dialog } from "ariakit/dialog";
 import styled, { css } from "styled-components";
 
 export const Open = styled(Button)(

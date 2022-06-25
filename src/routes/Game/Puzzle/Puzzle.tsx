@@ -1,6 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 import React, { useState, useCallback } from "react";
-import { useCompositeState } from "ariakit";
+import { useCompositeState } from "ariakit/composite/composite-state";
 import { Direction } from "../../../components/Direction";
 import { range, getNextState } from "../../../utils";
 import { Container, Grid, Row, Character } from "./elements";

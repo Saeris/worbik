@@ -1,5 +1,5 @@
-import type { DialogState } from "ariakit/dialog";
-import { useDialogState } from "ariakit/dialog";
+import type { DialogState } from "ariakit/dialog/dialog-state";
+import { useDialogState } from "ariakit/dialog/dialog-state";
 import React from "react";
 import { Open, Container } from "./elements";
 

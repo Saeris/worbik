@@ -4,7 +4,7 @@ import {
   CompositeGroup,
   CompositeRow,
   CompositeItem
-} from "ariakit";
+} from "ariakit/composite";
 
 export const Container = styled(Composite)(
   () => css`

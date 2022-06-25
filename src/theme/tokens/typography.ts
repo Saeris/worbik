@@ -1,4 +1,5 @@
-import "@fontsource/noto-sans";
+import "@fontsource/noto-sans/latin-400.css";
+import "@fontsource/noto-sans/latin-700.css";
 
 export const fonts = {
   body: [`Noto Sans`, `-apple-system`, `Helvetica`, `Arial`, `sans-serif`].join(

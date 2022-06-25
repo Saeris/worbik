@@ -6,9 +6,12 @@ export const Global = createGlobalStyle(
   () => css`
     ${reset}
 
+    html {
+      font-family: ${theme.fonts.body};
+    }
+
     body {
       background-color: #fefefe;
-      font-family: ${theme.fonts.body};
       font-size: 1.4rem;
     }
 

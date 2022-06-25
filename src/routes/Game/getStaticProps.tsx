@@ -1,5 +1,4 @@
 import type { GetStaticProps } from "next";
-import { Redis } from "@upstash/redis";
 import { generate } from "../../utils";
 
 export const getStaticProps: GetStaticProps<{
@@ -7,7 +6,8 @@ export const getStaticProps: GetStaticProps<{
 }> = async () => {
   const { challenge, solution } = generate();
 
-  const redis = Redis.fromEnv();
+  // For some reason, Nextjs doesn't tree-shake out Redis
+  const redis = (await import(`@upstash/redis`)).Redis.fromEnv();
   await redis.set(challenge, solution, { ex: 86400, nx: true });
 
   return {

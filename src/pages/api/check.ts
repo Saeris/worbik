@@ -1,4 +1,5 @@
 import type { NextApiHandler } from "next";
+import { checkSolution } from "../../utils";
 
 const handler: NextApiHandler = async (req, res) => {
   if (req.method !== `GET`) {
@@ -32,13 +33,7 @@ const handler: NextApiHandler = async (req, res) => {
   res
     .status(200)
     .setHeader(`Cache-Control`, `max-age=0, s-maxage=86400`)
-    .json(
-      guess
-        .toLowerCase()
-        .split(``)
-        .map((c, i) => (solution.charAt(i) === c ? c.toUpperCase() : c))
-        .join(``)
-    );
+    .json(checkSolution(guess, solution));
 };
 
 export default handler;

@@ -1,3 +1,4 @@
+export { checkSolution } from "./checkSolution";
 export { generate } from "./generate";
 export { getNextState } from "./getNextState";
 export { group } from "./group";

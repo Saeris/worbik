@@ -26,7 +26,6 @@ export default class NextjsDocument extends Document {
       const initialProps = await Document.getInitialProps(ctx);
       return {
         ...initialProps,
-        // @ts-expect-error
         styles: (
           <>
             {initialProps.styles}

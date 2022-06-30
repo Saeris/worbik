@@ -30,6 +30,8 @@ const handler: NextMiddleware = async (req) => {
   const origin = process.env.VERCEL_URL?.length
     ? `https://${process.env.VERCEL_URL}`
     : `http://localhost:3000`;
+  // eslint-disable-next-line no-console
+  console.log({ origin });
   const url = new URL(`${origin}/api/cacheGet`);
   url.searchParams.set(`key`, challenge);
   const cacheRes = await fetch(url.href);

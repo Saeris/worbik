@@ -1,23 +1,30 @@
-import type { NextApiHandler } from "next";
+import type { NextMiddleware } from "next/server";
 import { checkSolution } from "../../utils";
 
-const handler: NextApiHandler = async (req, res) => {
+const handler: NextMiddleware = async (req) => {
   if (req.method !== `GET`) {
-    res.status(400).send(`Only GET requests are accepted!`);
-    return;
+    return new Response(null, {
+      status: 400,
+      statusText: `Only GET requests are accepted!`
+    });
   }
 
-  const guess = req.query.guess;
-  const challenge = req.query.challenge;
+  const { searchParams } = new URL(req.url);
+  const guess = searchParams.get(`guess`);
+  const challenge = searchParams.get(`challenge`);
 
   if (typeof guess !== `string`) {
-    res.status(400).send(`Received invalid value for "guess" parameter`);
-    return;
+    return new Response(null, {
+      status: 400,
+      statusText: `Received invalid value for "guess" parameter`
+    });
   }
 
   if (typeof challenge !== `string`) {
-    res.status(400).send(`Received invalid value for "challenge" parameter`);
-    return;
+    return new Response(null, {
+      status: 400,
+      statusText: `Received invalid value for "challenge" parameter`
+    });
   }
 
   const origin = process.env.VERCEL_URL?.length
@@ -30,10 +37,17 @@ const handler: NextApiHandler = async (req, res) => {
   // eslint-disable-next-line no-console
   console.log({ cache: cacheRes.headers.get(`x-vercel-cache`), solution });
 
-  res
-    .status(200)
-    .setHeader(`Cache-Control`, `max-age=0, s-maxage=86400`)
-    .json(checkSolution(guess, solution));
+  return new Response(JSON.stringify(checkSolution(guess, solution)), {
+    status: 200,
+    headers: {
+      "content-type": `application/json`,
+      "Cache-Control": `max-age=0, s-maxage=86400`
+    }
+  });
+};
+
+export const config = {
+  runtime: `experimental-edge`
 };
 
 export default handler;

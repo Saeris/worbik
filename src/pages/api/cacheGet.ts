@@ -1,15 +1,22 @@
-import type { NextApiHandler } from "next";
+import type { NextMiddleware } from "next/server";
 import { Redis } from "@upstash/redis";
 
-const handler: NextApiHandler = async (req, res) => {
+const handler: NextMiddleware = async (req) => {
   if (req.method !== `GET`) {
-    res.status(400).send(`Only GET requests are accepted!`);
-    return;
+    return new Response(null, {
+      status: 400,
+      statusText: `Only GET requests are accepted!`
+    });
   }
 
-  if (typeof req.query.key !== `string`) {
-    res.status(400).send(`Received invalid value for "key" parameter`);
-    return;
+  const { searchParams } = new URL(req.url);
+  const key = searchParams.get(`key`);
+
+  if (typeof key !== `string`) {
+    return new Response(null, {
+      status: 400,
+      statusText: `Received invalid value for "key" parameter`
+    });
   }
 
   const redis = new Redis({
@@ -17,17 +24,26 @@ const handler: NextApiHandler = async (req, res) => {
     token: process.env.UPSTASH_REDIS_REST_TOKEN ?? ``
   });
 
-  const solution = await redis.get<string>(req.query.key);
+  const solution = await redis.get<string>(key);
 
   if (typeof solution !== `string`) {
-    res.status(500).send(`Could not retrieve value for ${req.query.key}.`);
-    return;
+    return new Response(null, {
+      status: 500,
+      statusText: `Could not retrieve value for ${key}.`
+    });
   }
 
-  res
-    .status(200)
-    .setHeader(`Cache-Control`, `max-age=0, s-maxage=86400`)
-    .json(solution);
+  return new Response(JSON.stringify(solution), {
+    status: 200,
+    headers: {
+      "content-type": `application/json`,
+      "Cache-Control": `max-age=0, s-maxage=86400`
+    }
+  });
+};
+
+export const config = {
+  runtime: `experimental-edge`
 };
 
 export default handler;

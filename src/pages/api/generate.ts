@@ -1,22 +1,27 @@
-import type { NextApiHandler } from "next";
+import type { NextMiddleware } from "next/server";
 import { generate, toInt } from "../../utils";
 
 const valid = (n: number): boolean => n > 4 && n < 9;
 
-const handler: NextApiHandler = async (req, res) => {
+const handler: NextMiddleware = async (req) => {
   if (req.method !== `GET`) {
-    res.status(400).send(`Only GET requests are accepted!`);
-    return;
+    return new Response(null, {
+      status: 400,
+      statusText: `Only GET requests are accepted!`
+    });
   }
 
-  const length = toInt(req.query.length);
-  const count = toInt(req.query.count);
+  const { searchParams } = new URL(req.url);
+  const length = toInt(searchParams.get(`length`));
+  const count = toInt(searchParams.get(`count`));
   const missing = !length && !count;
   const invalid = !valid(length) && !valid(count);
 
   if (missing || invalid) {
-    res.status(400).send(`Must provide a valid "length" or "count" parameter!`);
-    return;
+    return new Response(null, {
+      status: 400,
+      statusText: `Must provide a valid "length" or "count" parameter!`
+    });
   }
 
   const puzzle = generate(length, count);
@@ -30,10 +35,17 @@ const handler: NextApiHandler = async (req, res) => {
     body: JSON.stringify(puzzle)
   });
 
-  res
-    .status(200)
-    .setHeader(`Cache-Control`, `max-age=0, s-maxage=86400`)
-    .send(puzzle);
+  return new Response(JSON.stringify(puzzle), {
+    status: 200,
+    headers: {
+      "content-type": `application/json`,
+      "Cache-Control": `max-age=0, s-maxage=86400`
+    }
+  });
+};
+
+export const config = {
+  runtime: `experimental-edge`
 };
 
 export default handler;

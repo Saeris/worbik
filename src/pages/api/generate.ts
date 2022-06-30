@@ -11,7 +11,7 @@ const handler: NextMiddleware = async (req) => {
     });
   }
 
-  const { searchParams } = new URL(req.url);
+  const { searchParams, origin } = new URL(req.url);
   const length = toInt(searchParams.get(`length`));
   const count = toInt(searchParams.get(`count`));
   const missing = !length && !count;
@@ -25,10 +25,6 @@ const handler: NextMiddleware = async (req) => {
   }
 
   const puzzle = generate(length, count);
-
-  const origin = process.env.VERCEL_URL?.length
-    ? `https://${process.env.VERCEL_URL}`
-    : `http://localhost:3000`;
 
   await fetch(`${origin}/api/cacheSet`, {
     method: `POST`,

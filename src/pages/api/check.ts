@@ -9,7 +9,7 @@ const handler: NextMiddleware = async (req) => {
     });
   }
 
-  const { searchParams } = new URL(req.url);
+  const { searchParams, origin } = new URL(req.url);
   const guess = searchParams.get(`guess`);
   const challenge = searchParams.get(`challenge`);
 
@@ -27,11 +27,8 @@ const handler: NextMiddleware = async (req) => {
     });
   }
 
-  const origin = process.env.VERCEL_URL?.length
-    ? `https://${process.env.VERCEL_URL}`
-    : `http://localhost:3000`;
-  // eslint-disable-next-line no-console
-  console.log({ origin });
+  // Our incoming request will need to retrieve a solution from the
+  // cache from the same origin
   const url = new URL(`${origin}/api/cacheGet`);
   url.searchParams.set(`key`, challenge);
   const cacheRes = await fetch(url.href);

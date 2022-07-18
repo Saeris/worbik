@@ -13,7 +13,9 @@ const nextConfig = {
     locales: ["en"],
     defaultLocale: "en"
   },
-  productionBrowserSourceMaps: true
+  experimental: {
+    images: { allowFutureImage: true }
+  }
 };
 
 module.exports = withPWA({

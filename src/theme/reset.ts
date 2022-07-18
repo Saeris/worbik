@@ -10,6 +10,8 @@ export const reset = css`
   html,
   body {
     height: 100%;
+    height: -webkit-fill-available;
+    height: 100dvh;
   }
 
   /* Constrain viewport horizontally */

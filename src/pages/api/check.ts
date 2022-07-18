@@ -1,9 +1,15 @@
 import type { NextMiddleware } from "next/server";
+import { NextResponse } from "next/server";
 import { checkSolution } from "../../utils";
 
-const handler: NextMiddleware = async (req) => {
+export const config = {
+  // eslint-disable-next-line @typescript-eslint/quotes
+  runtime: "experimental-edge"
+};
+
+const handler: NextMiddleware = async (req, event) => {
   if (req.method !== `GET`) {
-    return new Response(null, {
+    return NextResponse.json(null, {
       status: 400,
       statusText: `Only GET requests are accepted!`
     });
@@ -14,14 +20,14 @@ const handler: NextMiddleware = async (req) => {
   const challenge = searchParams.get(`challenge`);
 
   if (typeof guess !== `string`) {
-    return new Response(null, {
+    return NextResponse.json(null, {
       status: 400,
       statusText: `Received invalid value for "guess" parameter`
     });
   }
 
   if (typeof challenge !== `string`) {
-    return new Response(null, {
+    return NextResponse.json(null, {
       status: 400,
       statusText: `Received invalid value for "challenge" parameter`
     });
@@ -29,24 +35,19 @@ const handler: NextMiddleware = async (req) => {
 
   // Our incoming request will need to retrieve a solution from the
   // cache from the same origin
-  const url = new URL(`${origin}/api/cacheGet`);
+  const url = new URL(`/api/cacheGet`, origin);
   url.searchParams.set(`key`, challenge);
-  const cacheRes = await fetch(url.href);
-  const solution: string = await cacheRes.text();
-  // eslint-disable-next-line no-console
-  console.log({ cache: cacheRes.headers.get(`x-vercel-cache`), solution });
 
-  return new Response(JSON.stringify(checkSolution(guess, solution)), {
-    status: 200,
-    headers: {
-      "content-type": `application/json`,
-      "Cache-Control": `max-age=0, s-maxage=86400`
+  return NextResponse.json(
+    checkSolution(guess, await (await fetch(url.href)).text()),
+    {
+      status: 200,
+      headers: {
+        "content-type": `application/json`,
+        "Cache-Control": `max-age=0, s-maxage=86400`
+      }
     }
-  });
-};
-
-export const config = {
-  runtime: `experimental-edge`
+  );
 };
 
 export default handler;

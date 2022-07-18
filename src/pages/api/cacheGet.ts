@@ -1,9 +1,15 @@
 import type { NextMiddleware } from "next/server";
+import { NextResponse } from "next/server";
 import { Redis } from "@upstash/redis";
+
+export const config = {
+  // eslint-disable-next-line @typescript-eslint/quotes
+  runtime: "experimental-edge"
+};
 
 const handler: NextMiddleware = async (req) => {
   if (req.method !== `GET`) {
-    return new Response(null, {
+    return NextResponse.json(null, {
       status: 400,
       statusText: `Only GET requests are accepted!`
     });
@@ -13,7 +19,7 @@ const handler: NextMiddleware = async (req) => {
   const key = searchParams.get(`key`);
 
   if (typeof key !== `string`) {
-    return new Response(null, {
+    return NextResponse.json(null, {
       status: 400,
       statusText: `Received invalid value for "key" parameter`
     });
@@ -27,23 +33,19 @@ const handler: NextMiddleware = async (req) => {
   const solution = await redis.get<string>(key);
 
   if (typeof solution !== `string`) {
-    return new Response(null, {
+    return NextResponse.json(null, {
       status: 500,
       statusText: `Could not retrieve value for ${key}.`
     });
   }
 
-  return new Response(JSON.stringify(solution), {
+  return NextResponse.json(solution, {
     status: 200,
     headers: {
       "content-type": `application/json`,
       "Cache-Control": `max-age=0, s-maxage=86400`
     }
   });
-};
-
-export const config = {
-  runtime: `experimental-edge`
 };
 
 export default handler;

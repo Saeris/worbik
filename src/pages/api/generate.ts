@@ -1,11 +1,17 @@
 import type { NextMiddleware } from "next/server";
+import { NextResponse } from "next/server";
 import { generate, toInt } from "../../utils";
 
 const valid = (n: number): boolean => n > 4 && n < 9;
 
+export const config = {
+  // eslint-disable-next-line @typescript-eslint/quotes
+  runtime: "experimental-edge"
+};
+
 const handler: NextMiddleware = async (req) => {
   if (req.method !== `GET`) {
-    return new Response(null, {
+    return NextResponse.json(null, {
       status: 400,
       statusText: `Only GET requests are accepted!`
     });
@@ -18,7 +24,7 @@ const handler: NextMiddleware = async (req) => {
   const invalid = !valid(length) && !valid(count);
 
   if (missing || invalid) {
-    return new Response(null, {
+    return NextResponse.json(null, {
       status: 400,
       statusText: `Must provide a valid "length" or "count" parameter!`
     });
@@ -31,17 +37,13 @@ const handler: NextMiddleware = async (req) => {
     body: JSON.stringify(puzzle)
   });
 
-  return new Response(JSON.stringify(puzzle), {
+  return NextResponse.json(puzzle, {
     status: 200,
     headers: {
       "content-type": `application/json`,
       "Cache-Control": `max-age=0, s-maxage=86400`
     }
   });
-};
-
-export const config = {
-  runtime: `experimental-edge`
 };
 
 export default handler;

@@ -44,7 +44,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({
               .join(``)}`
           );
           url.searchParams.set(`challenge`, initial);
-          const res: string = await (await fetch(url.href)).text();
+          const res: string = await (await fetch(url.href)).json();
           // We'll update the game state with the response we got
           // from our server
           const { solution } = parseSolution(res);

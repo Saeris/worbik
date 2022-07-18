@@ -1,10 +1,16 @@
 import type { NextMiddleware } from "next/server";
+import { NextResponse } from "next/server";
 import { Redis } from "@upstash/redis";
 import type { generate } from "../../utils";
 
+export const config = {
+  // eslint-disable-next-line @typescript-eslint/quotes
+  runtime: "experimental-edge"
+};
+
 const handler: NextMiddleware = async (req) => {
   if (req.method !== `POST`) {
-    return new Response(null, {
+    return NextResponse.json(null, {
       status: 400,
       statusText: `Only POST requests are accepted!`
     });
@@ -15,7 +21,7 @@ const handler: NextMiddleware = async (req) => {
   >;
 
   if (typeof challenge !== `string` || typeof solution !== `string`) {
-    return new Response(null, {
+    return NextResponse.json(null, {
       status: 400,
       statusText: `Received invalid request body!`
     });
@@ -26,10 +32,8 @@ const handler: NextMiddleware = async (req) => {
     token: process.env.UPSTASH_REDIS_REST_TOKEN ?? ``
   });
 
-  return new Response(
-    JSON.stringify(
-      await redis.set(challenge, solution, { ex: 86400 * 2, nx: true })
-    ),
+  return NextResponse.json(
+    await redis.set(challenge, solution, { ex: 86400 * 2, nx: true }),
     {
       status: 200,
       headers: {
@@ -38,10 +42,6 @@ const handler: NextMiddleware = async (req) => {
       }
     }
   );
-};
-
-export const config = {
-  runtime: `experimental-edge`
 };
 
 export default handler;

@@ -9,7 +9,7 @@ const meta = {
   description: `Word Puzzle Mini-Game`,
   locale: `en_US`,
   twitter: `@saeris`,
-  image: `/share-card.png`,
+  image: `/share-card.webp`,
   color: `#ffffff`
 };
 
@@ -42,11 +42,14 @@ const _app: React.FC<AppProps> = ({ Component, pageProps }) => (
         sizes="192x192"
         href="/logo192.png"
       />
-      <meta name="apple-mobile-web-app-status-bar" content={meta.color} />
+      <meta
+        name="apple-mobile-web-app-status-bar"
+        content="black-translucent"
+      />
       <meta name="apple-mobile-web-app-capable" content="yes" />
       <meta
         name="apple-mobile-web-app-status-bar-style"
-        content="white-translucent"
+        content="black-translucent"
       />
       <meta
         name="viewport"

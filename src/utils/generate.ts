@@ -1,4 +1,4 @@
-import { default as wordlist } from "../../words.json";
+import { default as wordlist } from "../words.json";
 import { randomize } from "./randomize";
 import { drawNRandom } from "./draw";
 import { parseChallenge } from "./parseChallenge";

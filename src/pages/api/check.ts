@@ -1,39 +1,53 @@
-import type { NextApiHandler } from "next";
+import type { NextMiddleware } from "next/server";
+import { NextResponse } from "next/server";
 import { checkSolution } from "../../utils";
 
-const handler: NextApiHandler = async (req, res) => {
+export const config = {
+  // eslint-disable-next-line @typescript-eslint/quotes
+  runtime: "experimental-edge"
+};
+
+const handler: NextMiddleware = async (req) => {
   if (req.method !== `GET`) {
-    res.status(400).send(`Only GET requests are accepted!`);
-    return;
+    return NextResponse.json(null, {
+      status: 400,
+      statusText: `Only GET requests are accepted!`
+    });
   }
 
-  const guess = req.query.guess;
-  const challenge = req.query.challenge;
+  const { searchParams, origin } = new URL(req.url);
+  const guess = searchParams.get(`guess`);
+  const challenge = searchParams.get(`challenge`);
 
   if (typeof guess !== `string`) {
-    res.status(400).send(`Received invalid value for "guess" parameter`);
-    return;
+    return NextResponse.json(null, {
+      status: 400,
+      statusText: `Received invalid value for "guess" parameter`
+    });
   }
 
   if (typeof challenge !== `string`) {
-    res.status(400).send(`Received invalid value for "challenge" parameter`);
-    return;
+    return NextResponse.json(null, {
+      status: 400,
+      statusText: `Received invalid value for "challenge" parameter`
+    });
   }
 
-  const origin = process.env.VERCEL_URL?.length
-    ? `https://${process.env.VERCEL_URL}`
-    : `http://localhost:3000`;
-  const url = new URL(`${origin}/api/cacheGet`);
+  // Our incoming request will need to retrieve a solution from the
+  // cache from the same origin
+  const url = new URL(`/api/cacheGet`, origin);
   url.searchParams.set(`key`, challenge);
-  const cacheRes = await fetch(url.href);
-  const solution: string = await cacheRes.text();
-  // eslint-disable-next-line no-console
-  console.log({ cache: cacheRes.headers.get(`x-vercel-cache`), solution });
 
-  res
-    .status(200)
-    .setHeader(`Cache-Control`, `max-age=0, s-maxage=86400`)
-    .json(checkSolution(guess, solution));
+  return NextResponse.json(
+    checkSolution(guess, await (await fetch(url.href)).text()),
+    {
+      status: 200,
+      headers: {
+        "content-type": `application/json`,
+        "Cache-Control": `max-age=0, s-maxage=86400`
+      }
+    }
+  );
 };
 
 export default handler;

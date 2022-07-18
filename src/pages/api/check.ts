@@ -7,7 +7,7 @@ export const config = {
   runtime: "experimental-edge"
 };
 
-const handler: NextMiddleware = async (req, event) => {
+const handler: NextMiddleware = async (req) => {
   if (req.method !== `GET`) {
     return NextResponse.json(null, {
       status: 400,

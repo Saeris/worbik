@@ -37,7 +37,6 @@ const handler: NextMiddleware = async (req) => {
     {
       status: 200,
       headers: {
-        "content-type": `application/json`,
         "Cache-Control": `max-age=0, s-maxage=86400`
       }
     }

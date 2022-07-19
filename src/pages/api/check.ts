@@ -39,11 +39,10 @@ const handler: NextMiddleware = async (req) => {
   url.searchParams.set(`key`, challenge);
 
   return NextResponse.json(
-    checkSolution(guess, await (await fetch(url.href)).text()),
+    checkSolution(guess, await (await fetch(url.href)).json()),
     {
       status: 200,
       headers: {
-        "content-type": `application/json`,
         "Cache-Control": `max-age=0, s-maxage=86400`
       }
     }

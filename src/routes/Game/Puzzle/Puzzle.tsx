@@ -124,20 +124,27 @@ export const Puzzle: React.FC<PuzzleProps> = ({
                 onClick={handleClick(x, false, true)}
                 aria-label={`Rotate row ${x + 1} left`}
               />
-              {row.map((char, y) => (
-                <Character
-                  key={`char-${x}${y}`}
-                  $hint={/^[A-Z]*$/.test(char)}
-                  $correct={/^[A-Z]*$/.test(word)}
-                  onKeyDown={handleKeypress(x, y)}
-                  aria-label={`Grid square ${x + 1}, ${
-                    y + 1
-                  }. Current character is ${char}`}
-                >
-                  {char.toUpperCase()}
-                  <Hint>{hints[x][y].toUpperCase()}</Hint>
-                </Character>
-              ))}
+              {row.map((char, y) => {
+                const hint = hints[x][y].toUpperCase();
+                return (
+                  <Character
+                    key={`char-${x}${y}`}
+                    $hint={hint !== ` `}
+                    $correct={/^[A-Z]*$/.test(word)}
+                    onKeyDown={handleKeypress(x, y)}
+                    aria-label={`Grid tile ${x + 1}, ${
+                      y + 1
+                    }. Current character is ${char}.${
+                      hint === ` `
+                        ? ``
+                        : ` Correct character for this tile is ${hint}.`
+                    }`}
+                  >
+                    {char.toUpperCase()}
+                    <Hint>{hint}</Hint>
+                  </Character>
+                );
+              })}
               <Direction
                 key={`right-${x}`}
                 direction="right"

@@ -87,4 +87,6 @@ export const Hint = styled.span`
   right: 0.4rem;
   font-size: 1.2rem;
   font-weight: 300;
+  user-select: none;
+  speak: never;
 `;

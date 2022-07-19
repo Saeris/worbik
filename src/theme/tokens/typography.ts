@@ -1,3 +1,4 @@
+import "@fontsource/noto-sans/latin-300.css";
 import "@fontsource/noto-sans/latin-400.css";
 import "@fontsource/noto-sans/latin-700.css";
 

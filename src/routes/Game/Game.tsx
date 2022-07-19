@@ -17,7 +17,8 @@ const numbers = {
 };
 
 export const Game: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
-  challenge
+  challenge,
+  hints
 }) => {
   const [moves, setMoves] = useState(0);
   const [winner, setWinner] = useState(false);
@@ -50,7 +51,8 @@ export const Game: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
       </Title>
 
       <Puzzle
-        initial={challenge}
+        initialChallenge={challenge}
+        initialHints={hints}
         onMove={handleMove}
         onWin={handleWin}
         winner={winner}

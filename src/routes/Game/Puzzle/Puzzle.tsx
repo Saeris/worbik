@@ -2,26 +2,35 @@
 import React, { useState, useCallback } from "react";
 import { useCompositeState } from "ariakit/composite/composite-state";
 import { Direction } from "../../../components/Direction";
-import { range, getNextState } from "../../../utils";
-import { Container, Grid, Row, Character } from "./elements";
-import { parseChallenge } from "../../../utils/parseChallenge";
-import { parseSolution } from "../../../utils/parseSolution";
+import type { Matrix2D } from "../../../utils";
+import {
+  range,
+  getNextState,
+  group,
+  cacheHints,
+  parseChallenge,
+  parseSolution
+} from "../../../utils";
+import { Container, Grid, Row, Character, Hint } from "./elements";
 
 export interface PuzzleProps {
-  initial: string;
+  initialChallenge: string;
+  initialHints: Matrix2D<string>;
   onMove?: () => void;
   onWin?: () => void;
   winner?: boolean;
 }
 
 export const Puzzle: React.FC<PuzzleProps> = ({
-  initial,
+  initialChallenge,
+  initialHints,
   onMove = (): void => {},
   onWin = (): void => {},
   winner = false
 }) => {
   const state = useCompositeState();
-  const [guess, setGuess] = useState(initial);
+  const [guess, setGuess] = useState(initialChallenge);
+  const [hints, setHints] = useState(initialHints);
   const { challenge, length, moves } = parseChallenge(guess);
   const repeat = range(length);
 
@@ -43,22 +52,25 @@ export const Puzzle: React.FC<PuzzleProps> = ({
               .flat()
               .join(``)}`
           );
-          url.searchParams.set(`challenge`, initial);
+          url.searchParams.set(`challenge`, initialChallenge);
           const res: string = await (await fetch(url.href)).json();
           // We'll update the game state with the response we got
           // from our server
           const { solution } = parseSolution(res);
-          const stateStr = solution.flat().join(``);
-          setGuess(`${length}${stateStr}${moves}`);
+          const next = solution.flat().join(``);
+          setGuess(`${length}${next}${moves}`);
+          setHints((prev) =>
+            group(cacheHints(prev.flat().join(``), next), length)
+          );
           onMove();
-          if (stateStr === stateStr.toUpperCase()) {
+          if (next === next.toUpperCase()) {
             onWin();
           }
         };
         void check();
       }
     },
-    [initial, winner, challenge, length, moves, onMove, onWin]
+    [initialChallenge, winner, challenge, length, moves, onMove, onWin]
   );
 
   const handleClick = useCallback(
@@ -123,6 +135,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({
                   }. Current character is ${char}`}
                 >
                   {char.toUpperCase()}
+                  <Hint>{hints[x][y].toUpperCase()}</Hint>
                 </Character>
               ))}
               <Direction

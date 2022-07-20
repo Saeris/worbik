@@ -111,6 +111,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({
               direction="up"
               onClick={handleClick(i, true)}
               aria-label={`Rotate column ${i + 1} up`}
+              disabled={winner}
             />
           ))}
         </Row>
@@ -123,6 +124,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({
                 direction="left"
                 onClick={handleClick(x, false, true)}
                 aria-label={`Rotate row ${x + 1} left`}
+                disabled={winner}
               />
               {row.map((char, y) => {
                 const hint = hints[x][y].toUpperCase();
@@ -139,6 +141,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({
                         ? ``
                         : ` Correct character for this tile is ${hint}.`
                     }`}
+                    disabled={winner}
                   >
                     {char.toUpperCase()}
                     <Hint>{hint}</Hint>
@@ -150,6 +153,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({
                 direction="right"
                 onClick={handleClick(x, true, true)}
                 aria-label={`Rotate row ${x + 1} right`}
+                disabled={winner}
               />
             </Row>
           );
@@ -161,6 +165,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({
               direction="down"
               onClick={handleClick(i)}
               aria-label={`Rotate column ${i + 1} down`}
+              disabled={winner}
             />
           ))}
         </Row>

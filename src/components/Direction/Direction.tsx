@@ -16,6 +16,7 @@ const directions = {
 
 interface DirectionProps extends React.HTMLAttributes<HTMLButtonElement> {
   direction: "up" | "down" | "left" | "right";
+  disabled?: boolean;
 }
 
 export const Direction: React.FC<DirectionProps> = ({

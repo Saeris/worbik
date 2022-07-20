@@ -16,6 +16,7 @@ export const Main = styled.main(
     p {
       max-width: 30ch;
       font-weight: 300;
+      text-align: center;
     }
   `
 );

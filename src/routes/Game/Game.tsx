@@ -33,6 +33,11 @@ export const Game: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
     setWinner(true);
   }, []);
 
+  const winMessage = (): string =>
+    moves <= target
+      ? ` Wow! You won in only ${moves} moves! You're a wizard at this!`
+      : `Congratulations, you won in ${moves} moves! Can you do better?`;
+
   return (
     <Main>
       <Title>
@@ -92,17 +97,7 @@ export const Game: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
         onWin={handleWin}
         winner={winner}
       />
-      {winner ? (
-        <p>
-          `$
-          {moves <= target
-            ? ` Wow! You won in only ${moves} moves! You're a wizard at this!`
-            : `Congratulations, you won in ${moves} moves! Can you do better?`}
-          `
-        </p>
-      ) : (
-        <p>{`Moves: ${moves}`}</p>
-      )}
+      {winner ? <p>{winMessage()}</p> : <p>{`Moves: ${moves}`}</p>}
     </Main>
   );
 };

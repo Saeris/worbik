@@ -128,8 +128,8 @@ export const Puzzle: React.FC<PuzzleProps> = ({
                 const hint = hints[x][y].toUpperCase();
                 return (
                   <Character
-                    key={`char-${x}${y}`}
-                    $hint={hint !== ` `}
+                    key={`char-${x}${y}-${char}`}
+                    $hint={/^[A-Z]*$/.test(char)}
                     $correct={/^[A-Z]*$/.test(word)}
                     onKeyDown={handleKeypress(x, y)}
                     aria-label={`Grid tile ${x + 1}, ${

@@ -35,8 +35,8 @@ export const Row = styled(CompositeRow)(
 );
 
 export const Character = styled(CompositeItem)<{
-  $hint: boolean;
-  $correct: boolean;
+  $hint?: boolean;
+  $correct?: boolean;
 }>(
   ({ theme, $hint = false, $correct = false }) => css`
     position: relative;

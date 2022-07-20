@@ -35,10 +35,11 @@ export const Row = styled(CompositeRow)(
 );
 
 export const Character = styled(CompositeItem)<{
-  $hint: boolean;
-  $correct: boolean;
+  $hint?: boolean;
+  $correct?: boolean;
 }>(
   ({ theme, $hint = false, $correct = false }) => css`
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -50,7 +51,7 @@ export const Character = styled(CompositeItem)<{
     border: 0.5px solid ${theme.colors.neutral.border};
     border-radius: 2px;
     color: ${theme.colors.neutral.text};
-    font-size: 24px;
+    font-size: 2.4rem;
     box-sizing: border-box;
     user-select: none;
     touch-action: manipulation;
@@ -79,3 +80,13 @@ export const Character = styled(CompositeItem)<{
       : ``}
   `
 );
+
+export const Hint = styled.span`
+  position: absolute;
+  bottom: 0;
+  right: 0.4rem;
+  font-size: 1.2rem;
+  font-weight: 300;
+  user-select: none;
+  speak: never;
+`;

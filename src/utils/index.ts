@@ -1,7 +1,10 @@
+export { cacheHints } from "./cacheHints";
 export { checkSolution } from "./checkSolution";
 export { generate } from "./generate";
 export { getNextState } from "./getNextState";
 export { group } from "./group";
+export { parseChallenge } from "./parseChallenge";
+export { parseSolution } from "./parseSolution";
 export { randomize } from "./randomize";
 export { range } from "./range";
 export { rotate2DCCW } from "./rotate2DCCW";
@@ -11,3 +14,4 @@ export { rotateCW } from "./rotateCW";
 export { shuffle } from "./shuffle";
 export { shuffle2D } from "./shuffle2D";
 export { toInt } from "./toInt";
+export type { Matrix2D } from "./types";

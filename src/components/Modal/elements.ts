@@ -30,7 +30,7 @@ export const Container = styled(Dialog)(
     z-index: 50;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.75em;
     width: calc(100% - 32px);
     max-width: 40ch;
     max-height: 80%;
@@ -41,6 +41,7 @@ export const Container = styled(Dialog)(
     color: hsl(204, 10%, 10%);
     overflow: auto;
     font-size: ${theme.sizes.label};
+    font-weight: 300;
     filter: drop-shadow(0 16px 24px rgba(0, 0, 0, 15%));
     transform: translate(-50%, -60%);
   `

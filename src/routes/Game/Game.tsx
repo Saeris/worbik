@@ -8,6 +8,7 @@ import { Puzzle } from "./Puzzle/Puzzle";
 import { Main, ModalHeader, Title } from "./elements";
 import { Modal } from "../../components/Modal";
 import { parseChallenge } from "../../utils/parseChallenge";
+import { Character, Hint, Row } from "./Puzzle/elements";
 
 const numbers = {
   5: `five`,
@@ -17,7 +18,8 @@ const numbers = {
 };
 
 export const Game: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
-  challenge
+  challenge,
+  hints
 }) => {
   const [moves, setMoves] = useState(0);
   const [winner, setWinner] = useState(false);
@@ -44,24 +46,63 @@ export const Game: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
             {`Hidden in this puzzle are ${numbers[words]} words that are each
         ${numbers[length]} letters long. Use the buttons around the edges to
         rotate the columns and rows in order to find the correct position of
-        each letter. Get all of the letters in the correct position to win!`}
+        each letter.`}
           </p>
+          <Row>
+            <Character $hint disabled>
+              {`W`}
+              <Hint>{`W`}</Hint>
+            </Character>
+          </Row>
+          <p>{`As you play, letters in the correct position will turn their tile yellow and will permanently display a reminder in the bottom right corner.`}</p>
+          <Row>
+            <Character $correct disabled>
+              {`W`}
+              <Hint>{`W`}</Hint>
+            </Character>
+            <Character $correct disabled>
+              {`O`}
+              <Hint>{`O`}</Hint>
+            </Character>
+            <Character $correct disabled>
+              {`R`}
+              <Hint>{`R`}</Hint>
+            </Character>
+            <Character $correct disabled>
+              {`B`}
+              <Hint>{`B`}</Hint>
+            </Character>
+            <Character $correct disabled>
+              {`I`}
+              <Hint>{`I`}</Hint>
+            </Character>
+            <Character $correct disabled>
+              {`K`}
+              <Hint>{`K`}</Hint>
+            </Character>
+          </Row>
+          <p>{`When you complete a row, all of the tiles will turn green. Get all of the letters in the correct position to win!`}</p>
         </Modal>
       </Title>
 
       <Puzzle
-        initial={challenge}
+        initialChallenge={challenge}
+        initialHints={hints}
         onMove={handleMove}
         onWin={handleWin}
         winner={winner}
       />
-      {winner
-        ? `${
-            moves <= target
-              ? ` Wow! You won in only ${moves} moves! You're a wizard at this!`
-              : `Congratulations, you won in ${moves} moves! Can you do better?`
-          }`
-        : `Moves: ${moves}`}
+      {winner ? (
+        <p>
+          `$
+          {moves <= target
+            ? ` Wow! You won in only ${moves} moves! You're a wizard at this!`
+            : `Congratulations, you won in ${moves} moves! Can you do better?`}
+          `
+        </p>
+      ) : (
+        <p>{`Moves: ${moves}`}</p>
+      )}
     </Main>
   );
 };

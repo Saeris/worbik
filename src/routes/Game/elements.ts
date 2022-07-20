@@ -9,8 +9,14 @@ export const Main = styled.main(
     gap: 4ch;
     padding: 16px;
     height: 100%;
+    color: ${theme.colors.neutral.text};
     font-size: 24px;
     font-family: ${theme.fonts.body};
+
+    p {
+      max-width: 30ch;
+      font-weight: 300;
+    }
   `
 );
 

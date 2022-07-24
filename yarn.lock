@@ -7869,6 +7869,7 @@ __metadata:
     react-icons: ^4.4.0
     styled-components: ^5.3.5
     typescript: 4.7.4
+    zod: ^3.17.9
   languageName: unknown
   linkType: soft
 
@@ -8159,5 +8160,12 @@ __metadata:
   version: 0.1.0
   resolution: "yocto-queue@npm:0.1.0"
   checksum: f77b3d8d00310def622123df93d4ee654fc6a0096182af8bd60679ddcdfb3474c56c6c7190817c84a2785648cdee9d721c0154eb45698c62176c322fb46fc700
+  languageName: node
+  linkType: hard
+
+"zod@npm:^3.17.9":
+  version: 3.17.9
+  resolution: "zod@npm:3.17.9"
+  checksum: 0622a5ae4c668e571869723fec5229c1c8148e6c683db7480cc7a3fdbee77db01ddcf47e286d278678e9e2c0dda14c8018656a4c43455541b0d0182cfc606ee9
   languageName: node
   linkType: hard

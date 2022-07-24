@@ -5,15 +5,15 @@ import { parseChallenge } from "./parseChallenge";
 import { checkSolution } from "./checkSolution";
 
 export const generate = (
-  length: number = 5,
-  count: number = 5
+  size: number = 5,
+  words: number = 5
 ): {
   challenge: string;
   solution: string;
 } => {
-  const solution = `${length}${drawNRandom(
-    Object.assign(new Array<string>(), wordlist[length]),
-    count
+  const solution = `${size}${drawNRandom(
+    Object.assign(new Array<string>(wordlist[size].length), wordlist[size]),
+    words
   ).join(``)}`;
   const challenge = randomize(solution);
   const { moves } = parseChallenge(challenge);

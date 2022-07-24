@@ -15,7 +15,7 @@ const handler: NextMiddleware = async (req) => {
     });
   }
 
-  const { searchParams } = new URL(req.url);
+  const searchParams = new URLSearchParams(req.url);
   const key = searchParams.get(`key`);
 
   if (typeof key !== `string`) {

@@ -14,6 +14,7 @@ const nextConfig = {
     defaultLocale: "en"
   },
   experimental: {
+    runtime: "experimental-edge",
     images: { allowFutureImage: true }
   }
 };

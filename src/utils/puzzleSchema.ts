@@ -30,3 +30,7 @@ export const puzzleSchema = z.object({
   words: numeric,
   size: numeric
 });
+
+export type RawPuzzleSchema = z.input<typeof puzzleSchema>;
+
+export type PuzzleSchema = z.infer<typeof puzzleSchema>;

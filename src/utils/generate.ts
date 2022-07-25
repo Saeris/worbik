@@ -3,11 +3,9 @@ import { randomize } from "./randomize";
 import { drawNRandom } from "./draw";
 import { parseChallenge } from "./parseChallenge";
 import { checkSolution } from "./checkSolution";
+import type { PuzzleSchema } from "./puzzleSchema";
 
-export const generate = (
-  size: number = 5,
-  words: number = 5
-): {
+export const generate = ({ size = 5, words = 5 }: PuzzleSchema = {}): {
   challenge: string;
   solution: string;
 } => {

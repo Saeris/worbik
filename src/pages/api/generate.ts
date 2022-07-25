@@ -18,10 +18,10 @@ const handler: NextMiddleware = async (req) => {
   }
 
   const { searchParams, origin } = new URL(req.url);
-  const length = toInt(searchParams.get(`length`));
-  const count = toInt(searchParams.get(`count`));
-  const missing = !length && !count;
-  const invalid = !valid(length) && !valid(count);
+  const size = toInt(searchParams.get(`length`));
+  const words = toInt(searchParams.get(`count`));
+  const missing = !size && !words;
+  const invalid = !valid(size) && !valid(words);
 
   if (missing || invalid) {
     return NextResponse.json(null, {
@@ -30,7 +30,7 @@ const handler: NextMiddleware = async (req) => {
     });
   }
 
-  const puzzle = generate(length, count);
+  const puzzle = generate({ size, words });
 
   await fetch(`${origin}/api/cacheSet`, {
     method: `POST`,

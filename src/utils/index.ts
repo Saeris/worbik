@@ -5,6 +5,8 @@ export { getNextState } from "./getNextState";
 export { group } from "./group";
 export { parseChallenge } from "./parseChallenge";
 export { parseSolution } from "./parseSolution";
+export { puzzleSchema } from "./puzzleSchema";
+export type { RawPuzzleSchema, PuzzleSchema } from "./puzzleSchema";
 export { randomize } from "./randomize";
 export { range } from "./range";
 export { rotate2DCCW } from "./rotate2DCCW";

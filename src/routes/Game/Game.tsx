@@ -1,14 +1,14 @@
 /* eslint-disable react/no-array-index-key */
 import React, { useState, useCallback } from "react";
-import type { InferGetStaticPropsType, NextPage } from "next";
+import type { NextPage } from "next";
 import { MdOutlineInfo } from "react-icons/md";
 import { DialogDismiss, DialogHeading } from "ariakit/dialog";
-import type { getStaticProps } from "./getStaticProps";
 import { Puzzle } from "./Puzzle/Puzzle";
 import { Main, ModalHeader, Title } from "./elements";
 import { Modal } from "../../components/Modal";
 import { parseChallenge } from "../../utils/parseChallenge";
 import { Character, Hint, Row } from "./Puzzle/elements";
+import type { Matrix2D } from "../../utils";
 
 const numbers = {
   5: `five`,
@@ -17,10 +17,12 @@ const numbers = {
   8: `eight`
 };
 
-export const Game: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
-  challenge,
-  hints
-}) => {
+export interface GameProps {
+  challenge: string;
+  hints: Matrix2D<string>;
+}
+
+export const Game: NextPage<GameProps> = ({ challenge, hints }) => {
   const [moves, setMoves] = useState(0);
   const [winner, setWinner] = useState(false);
   const { moves: target, length, words } = parseChallenge(challenge);

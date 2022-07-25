@@ -13,7 +13,5 @@ export { rotate2DCCW } from "./rotate2DCCW";
 export { rotate2DCW } from "./rotate2DCW";
 export { rotateCCW } from "./rotateCCW";
 export { rotateCW } from "./rotateCW";
-export { shuffle } from "./shuffle";
-export { shuffle2D } from "./shuffle2D";
 export { toInt } from "./toInt";
 export type { Matrix2D } from "./types";

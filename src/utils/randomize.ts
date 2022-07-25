@@ -1,12 +1,9 @@
 import { getNextState } from "./getNextState";
 import { parseSolution } from "./parseSolution";
+import { randomBool } from "./randomBool";
+import { randomInt } from "./randomInt";
 import { range } from "./range";
 import type { Matrix2D } from "./types";
-
-const randomInt = (min: number, max: number): number =>
-  // eslint-disable-next-line no-bitwise
-  (Math.random() * max + min) | 0;
-const randomBool = (): boolean => Boolean(Math.random() < 0.5);
 
 export const randomize = (init: string): string => {
   // Generate a random number of moves between our bounds

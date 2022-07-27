@@ -139,7 +139,7 @@ export class PuzzleState {
       const axis = [`left`, `right`].includes(dir);
       const pos = randomInt(
         0,
-        (axis ? this.#grid.width : this.#grid.height) - 1
+        (axis ? this.#grid.height : this.#grid.width) - 1
       );
       this.getNextState(pos, dir);
     });

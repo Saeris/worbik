@@ -1,32 +1,32 @@
-import { useCallback, useMemo, useSyncExternalStore } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import { Grid, PuzzleState } from "../../utils";
 
 const useMatrix = (state: PuzzleState): string =>
   useSyncExternalStore(
     state.subscribe,
-    useCallback(() => state.current.toString(), [state]),
-    useCallback(() => state.current.toString(), [state])
+    () => state.current.toString(),
+    () => state.current.toString()
   );
 
 const useHints = (state: PuzzleState): PuzzleState["hints"] =>
   useSyncExternalStore(
     state.subscribe,
-    useCallback(() => state.hints, [state]),
-    useCallback(() => state.hints, [state])
+    () => state.hints,
+    () => state.hints
   );
 
 const useHistory = (state: PuzzleState): PuzzleState["history"] =>
   useSyncExternalStore(
     state.subscribe,
-    useCallback(() => state.history, [state]),
-    useCallback(() => state.history, [state])
+    () => state.history,
+    () => state.history
   );
 
 const useMoves = (state: PuzzleState): PuzzleState["moves"] =>
   useSyncExternalStore(
     state.subscribe,
-    useCallback(() => state.moves, [state]),
-    useCallback(() => state.moves, [state])
+    () => state.moves,
+    () => state.moves
   );
 
 export const usePuzzle = (

@@ -45,10 +45,10 @@ export const Game: NextPage<GameProps> = ({ challenge }) => {
           </ModalHeader>
           <p>
             {`Hidden in this puzzle are ${
-              numbers[state.height]
+              numbers[state.initial.height]
             } words that are each
         ${
-          numbers[state.width]
+          numbers[state.initial.width]
         } letters long. Use the buttons around the edges to
         rotate the columns and rows in order to find the correct position of
         each letter.`}

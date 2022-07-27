@@ -38,8 +38,6 @@ export const usePuzzle = (
   history: ReturnType<typeof useHistory>;
   moves: ReturnType<typeof useMoves>;
   target: PuzzleState["target"];
-  width: Grid["width"];
-  height: Grid["height"];
   getNextState: PuzzleState["getNextState"];
   cacheHints: PuzzleState["cacheHints"];
   toString: PuzzleState["toString"];
@@ -56,8 +54,6 @@ export const usePuzzle = (
     hints,
     history,
     moves,
-    width: state.current.width,
-    height: state.current.height,
     target: state.target,
     getNextState: state.getNextState,
     cacheHints: state.cacheHints,

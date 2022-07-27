@@ -18,7 +18,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({
   winner = false
 }) => {
   const grid = useCompositeState();
-  const repeat = range(state.width);
+  const repeat = range(state.initial.width);
 
   const rotate = useCallback(
     (rowOrCol: number, dir: `up` | `down` | `left` | `right`) => {
@@ -83,12 +83,12 @@ export const Puzzle: React.FC<PuzzleProps> = ({
     <Container state={grid}>
       <Grid>
         <Row>
-          {repeat.map((i) => (
+          {repeat.map((y) => (
             <Direction
-              key={`up-${i}`}
+              key={`up-${y}`}
               direction="up"
-              onClick={handleClick(i, `up`)}
-              aria-label={`Rotate column ${i + 1} up`}
+              onClick={handleClick(y, `up`)}
+              aria-label={`Rotate column ${y + 1} up`}
               disabled={winner}
             />
           ))}
@@ -138,12 +138,12 @@ export const Puzzle: React.FC<PuzzleProps> = ({
           );
         })}
         <Row>
-          {repeat.map((i) => (
+          {repeat.map((y) => (
             <Direction
-              key={`down-${i}`}
+              key={`down-${y}`}
               direction="down"
-              onClick={handleClick(i, `down`)}
-              aria-label={`Rotate column ${i + 1} down`}
+              onClick={handleClick(y, `down`)}
+              aria-label={`Rotate column ${y + 1} down`}
               disabled={winner}
             />
           ))}

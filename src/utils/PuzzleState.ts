@@ -82,7 +82,7 @@ export class PuzzleState {
     const axis = [`left`, `right`].includes(dir);
     if (
       rowOrCol < 0 ||
-      rowOrCol > (axis ? this.#grid.width : this.#grid.height) - 1
+      rowOrCol > (axis ? this.#grid.height : this.#grid.width) - 1
     ) {
       throw new Error(
         `${axis ? `Row` : `Column`} value ${rowOrCol} is invalid!`
@@ -139,7 +139,7 @@ export class PuzzleState {
       const axis = [`left`, `right`].includes(dir);
       const pos = randomInt(
         0,
-        (axis ? this.#grid.height : this.#grid.width) - 1
+        (axis ? this.#grid.width : this.#grid.height) - 1
       );
       this.getNextState(pos, dir);
     });

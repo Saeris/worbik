@@ -67,6 +67,7 @@ types/
 
 .next/
 .cache/
+coverage/
 **/public/workbox-*.js*
 **/public/sw.js*
 **/public/worker-*.js*

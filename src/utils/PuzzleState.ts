@@ -1,11 +1,17 @@
 import { Grid } from "./Grid";
+import { group } from "./group";
+import { puzzleRegex } from "./puzzleRegex";
 import { randomInt } from "./randomInt";
 import { repeat } from "./repeat";
+import { toInt } from "./toInt";
 
 export class PuzzleState {
+  #initialized = false;
   #grid: Grid;
   #history: string[];
   #hints: string[][];
+  #target: number;
+  #listeners = new Set<() => void>();
 
   get initial(): Grid {
     return Grid.fromString(this.#history[0]);
@@ -13,6 +19,10 @@ export class PuzzleState {
 
   get current(): Grid {
     return this.#grid;
+  }
+
+  get history(): string[] {
+    return this.#history;
   }
 
   get moves(): number {
@@ -24,49 +34,44 @@ export class PuzzleState {
     return this.#hints;
   }
 
-  constructor(init: string) {
-    this.#grid = Grid.fromString(init);
-    this.#history = [this.#grid.toString()];
-    this.#hints = Array.from({ length: this.#grid.height }, () =>
-      new Array(this.#grid.width).fill(` `)
-    );
-    this.cacheHints(this.#grid.toString());
+  get target(): number {
+    return this.#target;
   }
 
-  static parse = (
-    state: string
-  ): {
-    grid: Grid;
-    moves: number;
-  } => {
-    const parsed = /^(?<length>\d+)(?<challenge>[a-z]+)(?<moves>\d+)$/i.exec(
-      state
-    );
-    if (
-      !parsed?.groups ||
-      !parsed.groups.challenge ||
-      !parsed.groups.length ||
-      !parsed.groups.moves
-    ) {
-      throw new Error(`Could not parse state string!`);
+  constructor(init: string) {
+    const parsed = puzzleRegex.exec(init);
+
+    if (!parsed?.groups || !parsed.groups.chars || !parsed.groups.perRow) {
+      throw new Error(`Could not parse init string!`);
     }
 
-    const puzzle = new this(
-      `${parsed.groups.length}${parsed.groups.challenge}`
-    );
+    this.#grid = Grid.fromString(init);
+    this.#history = [this.#grid.toString()];
+    this.#hints = group(new Array(this.#grid.size).fill(` `), this.#grid.width);
+    this.#target = toInt(parsed.groups.target);
+    this.cacheHints(this.#grid.toString());
+    this.#initialized = true;
+  }
 
-    return {
-      grid: puzzle.current,
-      moves: parseInt(parsed.groups.moves, 10)
-    };
-  };
-
-  static compare = (guess: Grid, solution: string): string =>
-    String(guess)
+  static compare = (guess: string, solution: string): string =>
+    guess
       .toLowerCase()
       .split(``)
       .map((c, i) => (solution.charAt(i) === c ? c.toUpperCase() : c))
       .join(``);
+
+  #update = (): PuzzleState => {
+    if (this.#initialized) this.#listeners.forEach((l) => l());
+    return this;
+  };
+
+  subscribe = (listener: () => void): (() => void) => {
+    this.#listeners.add(listener);
+    return () => {
+      // unsubscribe
+      this.#listeners.delete(listener);
+    };
+  };
 
   getNextState = (
     rowOrCol: number,
@@ -98,20 +103,29 @@ export class PuzzleState {
     }
     const next = this.#grid.toString();
     this.#history.push(next);
-    return this;
+
+    return this.#update();
   };
 
-  cacheHints = (prev: string, next: string = prev): PuzzleState => {
+  cacheHints = (next: string): PuzzleState => {
+    const parsed = puzzleRegex.exec(next);
+    if (!parsed?.groups && !parsed?.groups?.chars) {
+      throw new Error(`Could not parse state string ${next}`);
+    }
+    const chars = parsed.groups.chars;
     const isUppercase = (str: string): boolean => /^[A-Z]*$/.test(str);
-    const hints = prev
-      .split(``)
+    const hints = this.#hints
+      .flat()
       .map((c, i) =>
-        isUppercase(c) ? c : isUppercase(next.charAt(i)) ? next.charAt(i) : ` `
+        isUppercase(c)
+          ? c
+          : isUppercase(chars.charAt(i))
+          ? chars.charAt(i)
+          : ` `
       );
-    this.#hints = Array.from({ length: this.#hints.length }, () =>
-      hints.splice(0, this.#hints[0].length)
-    );
-    return this;
+    this.#hints = group(hints, this.#grid.width);
+
+    return this.#update();
   };
 
   randomize = (min = 25, max = 250): PuzzleState => {
@@ -130,28 +144,39 @@ export class PuzzleState {
       this.getNextState(pos, dir);
     });
 
-    return this;
+    return this.#update();
   };
 
   toString = (): string => `${String(this.current)}${this.moves}`;
 
-  toJSON = (): [initial: string, current: string] => [
-    String(this.initial),
-    this.toString()
-  ];
+  toJSON = (): {
+    current: ReturnType<Grid["toJSON"]>;
+    hints: string[][];
+    history: string[];
+    initial: ReturnType<Grid["toJSON"]>;
+    moves: number;
+    target: number;
+  } => ({
+    current: this.current.toJSON(),
+    hints: this.#hints,
+    history: this.#history,
+    initial: this.initial.toJSON(),
+    moves: this.moves,
+    target: this.#target
+  });
 }
 
-const puzzle = new PuzzleState(
-  `7nAeerilzrGtauaiznujntdngwuyzzEpeflleiAeucEkhaabrE`
-).randomize();
-PuzzleState.compare(
-  PuzzleState.parse(puzzle.toString()).grid,
-  String(puzzle.initial)
-); //?
+/**
+const solution = `7expulsevacancyflattenvirtualforsakevariousgoddess`;
+const puzzle = new PuzzleState(solution).randomize();
+const hints = PuzzleState.compare(puzzle.toString(), solution); //?
+puzzle.cacheHints(hints);
 puzzle.hints; //?
+puzzle.history; //?
 puzzle
   .getNextState(3, `up`)
   .getNextState(4, `left`)
   .getNextState(3, `right`)
   .getNextState(2, `down`)
   .toString(); //?
+ */

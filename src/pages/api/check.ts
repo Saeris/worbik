@@ -1,6 +1,6 @@
 import type { NextMiddleware } from "next/server";
 import { NextResponse } from "next/server";
-import { checkSolution } from "../../utils";
+import { PuzzleState } from "../../utils";
 
 export const config = {
   // eslint-disable-next-line @typescript-eslint/quotes
@@ -39,7 +39,7 @@ const handler: NextMiddleware = async (req) => {
   url.searchParams.set(`key`, challenge);
 
   return NextResponse.json(
-    checkSolution(guess, await (await fetch(url.href)).json()),
+    PuzzleState.compare(guess, await (await fetch(url.href)).json()),
     {
       status: 200,
       headers: {

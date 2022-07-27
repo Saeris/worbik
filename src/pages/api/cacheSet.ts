@@ -1,7 +1,6 @@
 import type { NextMiddleware } from "next/server";
 import { NextResponse } from "next/server";
 import { Redis } from "@upstash/redis";
-import type { generate } from "../../utils";
 
 export const config = {
   // eslint-disable-next-line @typescript-eslint/quotes
@@ -16,9 +15,10 @@ const handler: NextMiddleware = async (req) => {
     });
   }
 
-  const { challenge, solution } = (await req.json()) as ReturnType<
-    typeof generate
-  >;
+  const { challenge, solution } = (await req.json()) as {
+    challenge: string;
+    solution: string;
+  };
 
   if (typeof challenge !== `string` || typeof solution !== `string`) {
     return NextResponse.json(null, {

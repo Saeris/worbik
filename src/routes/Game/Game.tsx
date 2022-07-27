@@ -6,9 +6,8 @@ import { DialogDismiss, DialogHeading } from "ariakit/dialog";
 import { Puzzle } from "./Puzzle/Puzzle";
 import { Main, ModalHeader, Title } from "./elements";
 import { Modal } from "../../components/Modal";
-import { parseChallenge } from "../../utils/parseChallenge";
 import { Character, Hint, Row } from "./Puzzle/elements";
-import type { Matrix2D } from "../../utils";
+import { usePuzzle } from "./usePuzzleState";
 
 const numbers = {
   5: `five`,
@@ -19,24 +18,19 @@ const numbers = {
 
 export interface GameProps {
   challenge: string;
-  hints: Matrix2D<string>;
 }
 
-export const Game: NextPage<GameProps> = ({ challenge, hints }) => {
-  const [moves, setMoves] = useState(0);
+export const Game: NextPage<GameProps> = ({ challenge }) => {
   const [winner, setWinner] = useState(false);
-  const { moves: target, length, words } = parseChallenge(challenge);
-
-  const handleMove = useCallback((): void => {
-    setMoves((x) => x + 1);
-  }, []);
+  const state = usePuzzle(challenge);
+  const moves = state.moves;
 
   const handleWin = useCallback((): void => {
     setWinner(true);
   }, []);
 
   const winMessage = (): string =>
-    moves <= target
+    moves <= state.target
       ? ` Wow! You won in only ${moves} moves! You're a wizard at this!`
       : `Congratulations, you won in ${moves} moves! Can you do better?`;
 
@@ -50,8 +44,12 @@ export const Game: NextPage<GameProps> = ({ challenge, hints }) => {
             <DialogDismiss />
           </ModalHeader>
           <p>
-            {`Hidden in this puzzle are ${numbers[words]} words that are each
-        ${numbers[length]} letters long. Use the buttons around the edges to
+            {`Hidden in this puzzle are ${
+              numbers[state.height]
+            } words that are each
+        ${
+          numbers[state.width]
+        } letters long. Use the buttons around the edges to
         rotate the columns and rows in order to find the correct position of
         each letter.`}
           </p>
@@ -92,13 +90,7 @@ export const Game: NextPage<GameProps> = ({ challenge, hints }) => {
         </Modal>
       </Title>
 
-      <Puzzle
-        initialChallenge={challenge}
-        initialHints={hints}
-        onMove={handleMove}
-        onWin={handleWin}
-        winner={winner}
-      />
+      <Puzzle state={state} onWin={handleWin} winner={winner} />
       {winner ? <p>{winMessage()}</p> : <p>{`Moves: ${moves}`}</p>}
     </Main>
   );

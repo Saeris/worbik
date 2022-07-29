@@ -1,4 +1,5 @@
 import z from "zod";
+import { between } from "./between";
 
 const numeric = z
   .preprocess(
@@ -18,7 +19,7 @@ const numeric = z
       )
       .transform(Number)
       .refine(
-        (v) => v >= 5 && v <= 8,
+        (v) => between(v, 5, 8),
         (v) => ({
           message: `Value must be between 5 and 8 (inclusive), received ${v}`
         })

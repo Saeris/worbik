@@ -1,3 +1,4 @@
+import { randomInt } from "./randomInt";
 import { repeat } from "./repeat";
 
 export const drawFrom = <T extends unknown[], I extends number>(
@@ -7,7 +8,7 @@ export const drawFrom = <T extends unknown[], I extends number>(
 
 export const drawRandom = <T extends unknown[]>(arr: T): T[keyof T] =>
   // eslint-disable-next-line no-bitwise
-  drawFrom(arr, (Math.random() * arr.length) | 0);
+  drawFrom(arr, randomInt(0, arr.length - 1));
 
 export const drawN = <T extends unknown[]>(
   arr: T,

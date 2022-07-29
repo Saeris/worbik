@@ -1,3 +1,4 @@
+import { between } from "./between";
 import { Grid } from "./Grid";
 import { group } from "./group";
 import { puzzleRegex } from "./puzzleRegex";
@@ -81,8 +82,7 @@ export class PuzzleState {
     // true = horizontal, false = vertical
     const axis = [`left`, `right`].includes(dir);
     if (
-      rowOrCol < 0 ||
-      rowOrCol > (axis ? this.#grid.height : this.#grid.width) - 1
+      !between(rowOrCol, 0, (axis ? this.#grid.height : this.#grid.width) - 1)
     ) {
       throw new Error(
         `${axis ? `Row` : `Column`} value ${rowOrCol} is invalid!`
@@ -130,21 +130,19 @@ export class PuzzleState {
 
   randomize = (min = 25, max = 250): PuzzleState => {
     // Generate a random number of moves between our bounds
-    const moves = randomInt(min, max); //?
     // Then simulate user inputs to take our initial solved
     // state to randomize it into an unsolved state
-    repeat(moves)(() => {
+    repeat(randomInt(min, max))(() => {
       // true = horizontal / word size, false = vertical / num of words
-      const dir = ([`up`, `down`, `left`, `right`] as const)[randomInt(0, 4)];
+      const dir = ([`up`, `down`, `left`, `right`] as const)[randomInt(0, 3)];
       const axis = [`left`, `right`].includes(dir);
-      const pos = randomInt(
-        0,
-        (axis ? this.#grid.width : this.#grid.height) - 1
-      );
+      const limit = (axis ? this.#grid.height : this.#grid.width) - 1;
+      const pos = randomInt(0, limit);
+      //const pair = [pos, dir, limit, axis]; //?
       this.getNextState(pos, dir);
     });
 
-    return this.#update();
+    return this;
   };
 
   toString = (): string => `${String(this.current)}${this.moves}`;
@@ -165,18 +163,3 @@ export class PuzzleState {
     target: this.#target
   });
 }
-
-/**
-const solution = `7expulsevacancyflattenvirtualforsakevariousgoddess`;
-const puzzle = new PuzzleState(solution).randomize();
-const hints = PuzzleState.compare(puzzle.toString(), solution); //?
-puzzle.cacheHints(hints);
-puzzle.hints; //?
-puzzle.history; //?
-puzzle
-  .getNextState(3, `up`)
-  .getNextState(4, `left`)
-  .getNextState(3, `right`)
-  .getNextState(2, `down`)
-  .toString(); //?
- */

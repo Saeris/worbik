@@ -1,3 +1,4 @@
+export { between } from "./between";
 export { generate } from "./generate";
 export { Grid } from "./Grid";
 export { puzzleSchema } from "./puzzleSchema";

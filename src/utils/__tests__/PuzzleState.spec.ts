@@ -1,3 +1,4 @@
+import { between } from "../between";
 import { PuzzleState } from "../PuzzleState";
 
 describe(`PuzzleState`, () => {
@@ -106,5 +107,31 @@ describe(`PuzzleState`, () => {
     unsubscribe();
     state.getNextState(1, `down`);
     expect(listener).toHaveBeenCalledTimes(4);
+  });
+
+  it(`can randomize it's state`, () => {
+    const cases = [
+      `5react`,
+      `5reactgoose`,
+      `5reactgooseteach`,
+      `5reactgooseteachdrink`,
+      `5reactgooseteachdrinkclear`,
+      `7emotion`,
+      `7emotionfreedom`,
+      `7emotionfreedomhelpful`,
+      `7emotionfreedomhelpfulmagical`,
+      `7emotionfreedomhelpfulmagicalalright`,
+      `7emotionfreedomhelpfulmagicalalrightfighter`,
+      `7emotionfreedomhelpfulmagicalalrightfightermonster`
+    ];
+
+    for (const val of cases) {
+      const listener = jest.fn();
+      const state = new PuzzleState(val);
+      state.subscribe(listener);
+      const result = state.randomize().toString();
+      expect(result).not.toStrictEqual(val);
+      expect(between(listener.mock.calls.length, 25, 250)).toStrictEqual(true);
+    }
   });
 });

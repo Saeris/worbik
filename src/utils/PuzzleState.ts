@@ -12,6 +12,7 @@ export class PuzzleState {
   #history: string[];
   #hints: string[][];
   #target: number;
+  #win = false;
   #listeners = new Set<() => void>();
 
   get initial(): Grid {
@@ -40,12 +41,7 @@ export class PuzzleState {
   }
 
   get win(): boolean {
-    return this.#hints
-      .flat()
-      .every(
-        (char, idx) =>
-          char !== ` ` && char.toLowerCase() === this.current.flat()[idx]
-      );
+    return this.#win;
   }
 
   constructor(init: string) {
@@ -133,7 +129,10 @@ export class PuzzleState {
           : ` `
       );
     this.#hints = group(hints, this.#grid.width);
-
+    if (this.#hints.flat().every((char, i) => char === chars.charAt(i))) {
+      this.#win = true;
+      this.#grid = Grid.fromString(next);
+    }
     return this.#update();
   };
 

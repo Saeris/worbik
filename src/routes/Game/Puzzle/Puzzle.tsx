@@ -8,21 +8,16 @@ import type { usePuzzle } from "../usePuzzleState";
 
 export interface PuzzleProps {
   state: ReturnType<typeof usePuzzle>;
-  onWin?: () => void;
-  winner?: boolean;
 }
 
-export const Puzzle: React.FC<PuzzleProps> = ({
-  state,
-  onWin = (): void => {},
-  winner = false
-}) => {
+export const Puzzle: React.FC<PuzzleProps> = ({ state }) => {
   const grid = useCompositeState();
+  const winner = state.win;
   const repeat = range(state.initial.width);
 
   const rotate = useCallback(
     (rowOrCol: number, dir: `up` | `down` | `left` | `right`) => {
-      if (!winner) {
+      if (!state.win) {
         const check = async (): Promise<void> => {
           const url = new URL(`/api/check`, window.location.origin);
           url.searchParams.set(
@@ -37,14 +32,11 @@ export const Puzzle: React.FC<PuzzleProps> = ({
           // from our server
           const next = await (await fetch(url.href)).json();
           state.cacheHints(next);
-          if (next === next.toUpperCase()) {
-            onWin();
-          }
         };
         void check();
       }
     },
-    [state, winner, onWin]
+    [state]
   );
 
   const handleClick = useCallback(
@@ -109,7 +101,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({
                 const correct = word.toUpperCase() === state.hints[x].join(``);
                 return (
                   <Character
-                    key={`char-${x}${y}-${char}`}
+                    key={`char-${x}${y}`}
                     $hint={char.toUpperCase() === hint}
                     $correct={correct}
                     onKeyDown={handleKeypress(x, y)}

@@ -29,14 +29,22 @@ const useMoves = (state: PuzzleState): PuzzleState["moves"] =>
     () => state.moves
   );
 
+const useWin = (state: PuzzleState): PuzzleState["win"] =>
+  useSyncExternalStore(
+    state.subscribe,
+    () => state.win,
+    () => state.win
+  );
+
 export const usePuzzle = (
   init: string
 ): {
   initial: Grid;
   current: Grid;
-  hints: ReturnType<typeof useHints>;
-  history: ReturnType<typeof useHistory>;
-  moves: ReturnType<typeof useMoves>;
+  hints: PuzzleState["hints"];
+  history: PuzzleState["history"];
+  moves: PuzzleState["moves"];
+  win: PuzzleState["win"];
   target: PuzzleState["target"];
   getNextState: PuzzleState["getNextState"];
   cacheHints: PuzzleState["cacheHints"];
@@ -47,6 +55,7 @@ export const usePuzzle = (
   const hints = useHints(state);
   const history = useHistory(state);
   const moves = useMoves(state);
+  const win = useWin(state);
 
   return {
     initial: state.initial,
@@ -54,6 +63,7 @@ export const usePuzzle = (
     hints,
     history,
     moves,
+    win,
     target: state.target,
     getNextState: state.getNextState,
     cacheHints: state.cacheHints,

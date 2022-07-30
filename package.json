@@ -28,7 +28,7 @@
     "@upstash/redis": "^1.10.2",
     "@use-gesture/react": "^10.2.17",
     "ariakit": "^2.0.0-next.36",
-    "next": "12.2.3",
+    "next": "12.2.2",
     "next-pwa": "5.5.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",

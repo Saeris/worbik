@@ -39,6 +39,15 @@ export class PuzzleState {
     return this.#target;
   }
 
+  get win(): boolean {
+    return this.#hints
+      .flat()
+      .every(
+        (char, idx) =>
+          char !== ` ` && char.toLowerCase() === this.current.flat()[idx]
+      );
+  }
+
   constructor(init: string) {
     const parsed = puzzleRegex.exec(init);
 

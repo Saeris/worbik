@@ -134,4 +134,11 @@ describe(`PuzzleState`, () => {
       expect(between(listener.mock.calls.length, 25, 250)).toStrictEqual(true);
     }
   });
+
+  it(`can validate a winning state`, () => {
+    const solution = `6worbik`;
+    const state = new PuzzleState(solution);
+    state.cacheHints(PuzzleState.compare(state.toString(), solution));
+    expect(state.win).toStrictEqual(true);
+  });
 });

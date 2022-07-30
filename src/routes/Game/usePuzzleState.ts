@@ -32,7 +32,7 @@ const useMoves = (state: PuzzleState): PuzzleState["moves"] =>
 export const usePuzzle = (
   init: string
 ): {
-  initial: PuzzleState["initial"];
+  initial: Grid;
   current: Grid;
   hints: ReturnType<typeof useHints>;
   history: ReturnType<typeof useHistory>;

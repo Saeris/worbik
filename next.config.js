@@ -3,7 +3,7 @@ const withPWA = require("next-pwa");
 const runtimeCaching = require("next-pwa/cache");
 
 /**
- * @type {import('next').NextConfig}
+ * @type {import('next/types').NextConfig}
  */
 const nextConfig = {
   compiler: {

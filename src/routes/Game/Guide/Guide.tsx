@@ -24,10 +24,17 @@ export const Guide: React.FC<GuideProps> = ({ width, height }) => (
       <DialogDismiss />
     </ModalHeader>
     <p>
-      {`Hidden in this puzzle are ${numbers[height]} words that are each
-        ${numbers[width]} letters long. Use the buttons around the edges to
+      {`Hidden in this puzzle are `}
+      <strong>{`${String(numbers[height])} words`}</strong>
+      {` that are each `}
+      <strong>{`${String(numbers[width])} letters`}</strong>
+      {` long.`}
+    </p>
+    <p>{`There is one word per row.`}</p>
+    <p>
+      {`Use the buttons around the edges to
         rotate the columns and rows in order to find the correct position of
-        each letter.`}
+        each letter and decode all ${String(numbers[height])} words.`}
     </p>
     <Row>
       <Character $hint disabled>

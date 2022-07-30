@@ -1,4 +1,3 @@
-/* eslint-disable react/no-array-index-key */
 import React from "react";
 import type { NextPage } from "next";
 import { Puzzle } from "./Puzzle/Puzzle";

@@ -33,7 +33,7 @@ export class Grid {
   static fromString(str: string): Grid {
     const parsed = puzzleRegex.exec(str);
     if (!parsed?.groups || !parsed.groups.chars || !parsed.groups.perRow) {
-      throw new Error(`Could not parse string into a Grid!`);
+      throw new Error(`Could not parse string into a Grid! Received: ${str}`);
     }
 
     const perRow = parseInt(parsed.groups.perRow, 10);

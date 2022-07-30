@@ -28,10 +28,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({ state }) => {
             `challenge`,
             `${state.initial.toString()}${state.target}`
           );
-          // We'll update the game state with the response we got
-          // from our server
-          const next = await (await fetch(url.href)).json();
-          state.cacheHints(next);
+          state.validate(await (await fetch(url.href)).json());
         };
         void check();
       }

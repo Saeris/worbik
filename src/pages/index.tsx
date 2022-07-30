@@ -1,4 +1,5 @@
 import type { GetServerSideProps } from "next";
+import { Redis } from "@upstash/redis";
 import { Game } from "../routes/Game";
 import type { RawPuzzleSchema } from "../utils";
 import { generate, puzzleSchema, PuzzleState } from "../utils";
@@ -8,14 +9,20 @@ export const getServerSideProps: GetServerSideProps<
   GameProps,
   RawPuzzleSchema
 > = async (ctx) => {
-  const puzzle = generate(puzzleSchema.parse(ctx.query));
+  const debug = Boolean(ctx.query.debug);
+  const config = puzzleSchema.parse(ctx.query);
+  const puzzle = debug
+    ? new PuzzleState(`6worbikworbikworbik`).getNextState(0, `left`)
+    : generate(config);
   const solution = puzzle.initial.toString();
   const challenge = PuzzleState.compare(puzzle.toString(), solution);
   // For some reason, Nextjs doesn't tree-shake out Redis
   // eslint-disable-next-line no-console
   console.log({ challenge, solution });
-  const redis = (await import(`@upstash/redis`)).Redis.fromEnv();
-  await redis.set(challenge, solution, { ex: 86400, nx: true });
+  await Redis.fromEnv().set(challenge.toLowerCase(), solution, {
+    ex: 86400,
+    nx: true
+  });
   ctx.res.setHeader(`Cache-Control`, `max-age=0, s-maxage=86400`);
   return {
     props: {

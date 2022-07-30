@@ -90,7 +90,7 @@ describe(`PuzzleState`, () => {
     const init = `5rcaet`;
     const state = new PuzzleState(init);
     const solution = PuzzleState.compare(init, `5react`);
-    state.cacheHints(solution);
+    state.validate(solution);
     const expected = [[`R`, ` `, `A`, ` `, `T`]];
     expect(state.hints).toStrictEqual(expected);
   });
@@ -136,9 +136,25 @@ describe(`PuzzleState`, () => {
   });
 
   it(`can validate a winning state`, () => {
+    const listener = jest.fn();
     const solution = `6worbik`;
-    const state = new PuzzleState(solution);
-    state.cacheHints(PuzzleState.compare(state.toString(), solution));
+    const history = [`6kworbi`, `6worbik`, `6kworbi`, `6worbik`];
+    const truncated = [`6kworbi`, `6worbik`];
+    const state = new PuzzleState(`6kworbi`);
+    state.subscribe(listener);
+    state.getNextState(0, `left`); // win state 1
+    state.getNextState(0, `right`);
+    state.getNextState(0, `left`); // win state 2
+    expect(state.moves).toStrictEqual(3);
+    expect(state.history).toStrictEqual(history);
+    state.validate(PuzzleState.compare(state.toString(), solution));
     expect(state.win).toStrictEqual(true);
+    // Don't trigger another update if a winning state has been reached
+    state.getNextState(0, `left`);
+    state.validate(solution);
+    expect(state.toString()).toStrictEqual(`6worbik1`);
+    expect(state.moves).toStrictEqual(1);
+    expect(state.history).toStrictEqual(truncated);
+    expect(listener).toHaveBeenCalledTimes(4);
   });
 });

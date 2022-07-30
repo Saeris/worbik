@@ -48,14 +48,14 @@ export class PuzzleState {
     const parsed = puzzleRegex.exec(init);
 
     if (!parsed?.groups || !parsed.groups.chars || !parsed.groups.perRow) {
-      throw new Error(`Could not parse init string!`);
+      throw new Error(`Could not parse init string! Received: ${init}`);
     }
 
     this.#grid = Grid.fromString(init);
-    this.#history = [this.#grid.toString()];
+    this.#history = [this.#grid.toString().toLowerCase()];
     this.#hints = group(new Array(this.#grid.size).fill(` `), this.#grid.width);
     this.#target = toInt(parsed.groups.target);
-    this.cacheHints(this.#grid.toString());
+    this.validate(this.#grid.toString());
     this.#initialized = true;
   }
 
@@ -84,56 +84,70 @@ export class PuzzleState {
     // true = left/down, false = right/up
     dir: `up` | `down` | `left` | `right`
   ): PuzzleState => {
-    // true = horizontal, false = vertical
-    const axis = [`left`, `right`].includes(dir);
-    if (
-      !between(rowOrCol, 0, (axis ? this.#grid.height : this.#grid.width) - 1)
-    ) {
-      throw new Error(
-        `${axis ? `Row` : `Column`} value ${rowOrCol} is invalid!`
-      );
-    }
-    switch (dir) {
-      case `left`:
-        this.#grid.rotateRowLeft(rowOrCol);
-        break;
-      case `right`:
-        this.#grid.rotateRowRight(rowOrCol);
-        break;
-      case `down`:
-        this.#grid.rotateColDown(rowOrCol);
-        break;
-      default:
-        this.#grid.rotateColUp(rowOrCol);
-    }
-    const next = this.#grid.toString();
-    this.#history.push(next);
+    // skip if we're already in a winning state
+    if (!this.#win) {
+      // true = horizontal, false = vertical
+      const axis = [`left`, `right`].includes(dir);
+      if (
+        !between(rowOrCol, 0, (axis ? this.#grid.height : this.#grid.width) - 1)
+      ) {
+        throw new Error(
+          `${axis ? `Row` : `Column`} value ${rowOrCol} is invalid!`
+        );
+      }
+      switch (dir) {
+        case `left`:
+          this.#grid.rotateRowLeft(rowOrCol);
+          break;
+        case `right`:
+          this.#grid.rotateRowRight(rowOrCol);
+          break;
+        case `down`:
+          this.#grid.rotateColDown(rowOrCol);
+          break;
+        default:
+          this.#grid.rotateColUp(rowOrCol);
+      }
+      const next = this.#grid.toString();
+      this.#history.push(next.toLowerCase());
 
-    return this.#update();
+      return this.#update();
+    }
+    return this;
   };
 
-  cacheHints = (next: string): PuzzleState => {
-    const parsed = puzzleRegex.exec(next);
-    if (!parsed?.groups && !parsed?.groups?.chars) {
-      throw new Error(`Could not parse state string ${next}`);
+  validate = (next: string): PuzzleState => {
+    // skip if we're already in a winning state
+    if (!this.#win) {
+      const parsed = puzzleRegex.exec(next);
+      if (!parsed?.groups && !parsed?.groups?.chars) {
+        throw new Error(`Could not parse state string ${next}`);
+      }
+      const chars = parsed.groups.chars;
+      const isUppercase = (str: string): boolean => /^[A-Z]*$/.test(str);
+      const hints = this.#hints
+        .flat()
+        .map((c, i) =>
+          isUppercase(c)
+            ? c
+            : isUppercase(chars.charAt(i))
+            ? chars.charAt(i)
+            : ` `
+        );
+      this.#hints = group(hints, this.#grid.width);
+      if (this.#hints.flat().every((char, i) => char === chars.charAt(i))) {
+        this.#win = true;
+        const winningState = `${this.#grid.width}${chars.toLowerCase()}`;
+        // Set #current to the winning grid state
+        this.#grid = Grid.fromString(winningState);
+        // Discard history after the first time a winning state was achieved
+        this.#history.length = this.#history.indexOf(winningState) + 1;
+      }
+
+      return this.#update();
     }
-    const chars = parsed.groups.chars;
-    const isUppercase = (str: string): boolean => /^[A-Z]*$/.test(str);
-    const hints = this.#hints
-      .flat()
-      .map((c, i) =>
-        isUppercase(c)
-          ? c
-          : isUppercase(chars.charAt(i))
-          ? chars.charAt(i)
-          : ` `
-      );
-    this.#hints = group(hints, this.#grid.width);
-    if (this.#hints.flat().every((char, i) => char === chars.charAt(i))) {
-      this.#win = true;
-      this.#grid = Grid.fromString(next);
-    }
-    return this.#update();
+
+    return this;
   };
 
   randomize = (min = 25, max = 250): PuzzleState => {

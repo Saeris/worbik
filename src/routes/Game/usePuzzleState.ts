@@ -47,7 +47,7 @@ export const usePuzzle = (
   win: PuzzleState["win"];
   target: PuzzleState["target"];
   getNextState: PuzzleState["getNextState"];
-  cacheHints: PuzzleState["cacheHints"];
+  validate: PuzzleState["validate"];
   toString: PuzzleState["toString"];
 } => {
   const state = useMemo(() => new PuzzleState(init), [init]);
@@ -66,7 +66,7 @@ export const usePuzzle = (
     win,
     target: state.target,
     getNextState: state.getNextState,
-    cacheHints: state.cacheHints,
+    validate: state.validate,
     toString: state.toString
   };
 };

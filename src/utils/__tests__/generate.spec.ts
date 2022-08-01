@@ -22,7 +22,7 @@ describe(`generate`, () => {
       });
     const cases = range(4, 5).flatMap((width, _, vals) =>
       vals.map((height) => [
-        generate({ size: width, words: height }),
+        generate({ width, height }),
         mockExpected(width, height)
       ])
     );

@@ -28,8 +28,8 @@ const numeric = z
   .optional();
 
 export const puzzleSchema = z.object({
-  words: numeric,
-  size: numeric
+  width: numeric,
+  height: numeric
 });
 
 export type RawPuzzleSchema = z.input<typeof puzzleSchema>;

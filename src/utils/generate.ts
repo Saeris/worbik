@@ -4,12 +4,12 @@ import type { PuzzleSchema } from "./puzzleSchema";
 import { PuzzleState } from "./PuzzleState";
 
 export const generate = ({
-  size = 5,
-  words = 5
+  width = 5,
+  height = 5
 }: PuzzleSchema = {}): PuzzleState =>
   new PuzzleState(
-    `${size}${drawNRandom(
-      Object.assign(new Array<string>(wordlist[size].length), wordlist[size]),
-      words
+    `${width}${drawNRandom(
+      Object.assign(new Array<string>(wordlist[width].length), wordlist[width]),
+      height
     ).join(``)}`
   ).randomize();

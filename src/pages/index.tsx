@@ -16,7 +16,6 @@ export const getServerSideProps: GetServerSideProps<
     : generate(config);
   const solution = puzzle.initial.toString();
   const challenge = PuzzleState.compare(puzzle.toString(), solution);
-  // For some reason, Nextjs doesn't tree-shake out Redis
   // eslint-disable-next-line no-console
   console.log({ challenge, solution });
   await Redis.fromEnv().set(challenge.toLowerCase(), solution, {

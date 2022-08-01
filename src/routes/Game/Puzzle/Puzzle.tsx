@@ -18,19 +18,17 @@ export const Puzzle: React.FC<PuzzleProps> = ({ state }) => {
   const rotate = useCallback(
     (rowOrCol: number, dir: `up` | `down` | `left` | `right`) => {
       if (!state.win) {
-        const check = async (): Promise<void> => {
+        const check = async (next: string): Promise<void> => {
           const url = new URL(`/api/check`, window.location.origin);
-          url.searchParams.set(
-            `guess`,
-            state.getNextState(rowOrCol, dir).toString()
-          );
+          url.searchParams.set(`guess`, next);
           url.searchParams.set(
             `challenge`,
             `${state.initial.toString()}${state.target}`
           );
           state.validate(await (await fetch(url.href)).json());
         };
-        void check();
+        const next = state.getNextState(rowOrCol, dir).toString();
+        void check(next);
       }
     },
     [state]

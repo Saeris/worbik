@@ -36,9 +36,10 @@ export class Grid {
       throw new Error(`Could not parse string into a Grid! Received: ${str}`);
     }
 
-    const perRow = parseInt(parsed.groups.perRow, 10);
-
-    return new Grid(parsed.groups.chars.split(``), perRow);
+    return new Grid(
+      parsed.groups.chars.split(``),
+      parseInt(parsed.groups.perRow, 10)
+    );
   }
 
   #rotateLeft = (arr: string[]): string[] => {

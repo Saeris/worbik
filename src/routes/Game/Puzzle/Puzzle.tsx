@@ -21,10 +21,6 @@ export const Puzzle: React.FC<PuzzleProps> = ({ state }) => {
         const check = async (next: string): Promise<void> => {
           const url = new URL(`/api/check`, window.location.origin);
           url.searchParams.set(`guess`, next);
-          url.searchParams.set(
-            `challenge`,
-            `${state.initial.toString()}${state.target}`
-          );
           state.validate(await (await fetch(url.href)).json());
         };
         const next = state.getNextState(rowOrCol, dir).toString();

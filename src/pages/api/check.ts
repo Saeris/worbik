@@ -1,6 +1,6 @@
 import type { NextMiddleware } from "next/server";
 import { NextResponse } from "next/server";
-import { PuzzleState } from "../../utils";
+import { getDateKey, Grid, PuzzleState } from "../../utils";
 
 export const config = {
   // eslint-disable-next-line @typescript-eslint/quotes
@@ -17,7 +17,6 @@ const handler: NextMiddleware = async (req) => {
 
   const { searchParams, origin } = new URL(req.url);
   const guess = searchParams.get(`guess`);
-  const challenge = searchParams.get(`challenge`);
 
   if (typeof guess !== `string`) {
     return NextResponse.json(null, {
@@ -26,17 +25,10 @@ const handler: NextMiddleware = async (req) => {
     });
   }
 
-  if (typeof challenge !== `string`) {
-    return NextResponse.json(null, {
-      status: 400,
-      statusText: `Received invalid value for "challenge" parameter`
-    });
-  }
-
   // Our incoming request will need to retrieve a solution from the
   // cache from the same origin
   const url = new URL(`/api/cacheGet`, origin);
-  url.searchParams.set(`key`, challenge);
+  url.searchParams.set(`key`, getDateKey(Grid.fromString(guess)));
 
   return NextResponse.json(
     PuzzleState.compare(guess, await (await fetch(url.href)).json()),

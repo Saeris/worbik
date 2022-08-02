@@ -10,6 +10,8 @@ export const getServerSideProps: GetServerSideProps<
   RawPuzzleSchema
 > = async (ctx) => {
   ctx.res.setHeader(`Cache-Control`, `max-age=0, s-maxage=86400`);
+  const config = puzzleSchema.parse(ctx.query);
+  const puzzleID = getDateKey(config);
   const debug = Boolean(ctx.query.debug);
   // use debug value
   if (debug) {
@@ -19,6 +21,7 @@ export const getServerSideProps: GetServerSideProps<
     );
     return {
       props: {
+        puzzleID,
         challenge: PuzzleState.compare(
           puzzle.toString(),
           puzzle.initial.toString()
@@ -28,9 +31,7 @@ export const getServerSideProps: GetServerSideProps<
   }
   // check if puzzle already exists
   const redis = Redis.fromEnv();
-  const config = puzzleSchema.parse(ctx.query);
-  const key = getDateKey(config);
-  const cachedPair = (await redis.get<string>(key))?.split(`|`);
+  const cachedPair = (await redis.get<string>(puzzleID))?.split(`|`);
   if (cachedPair) {
     const [puzzle, solution] = cachedPair;
     const challenge = PuzzleState.compare(puzzle, solution);
@@ -38,6 +39,7 @@ export const getServerSideProps: GetServerSideProps<
     console.log(`Returning cached puzzled:\n\n`, { challenge, solution });
     return {
       props: {
+        puzzleID,
         challenge
       }
     };
@@ -48,9 +50,13 @@ export const getServerSideProps: GetServerSideProps<
   const challenge = PuzzleState.compare(puzzle.toString(), solution);
   // eslint-disable-next-line no-console
   console.log(`Generated new puzzle:\n\n`, { challenge, solution });
-  await redis.set(key, `${challenge}|${solution}`, { ex: 86400, nx: true });
+  await redis.set(puzzleID, `${challenge}|${solution}`, {
+    ex: 86400,
+    nx: true
+  });
   return {
     props: {
+      puzzleID,
       challenge
     }
   };

@@ -1,9 +1,6 @@
-import type { Matrix2D } from "./types";
-
-export const group = <T>(arr: T[], len: number): Matrix2D<T> => {
-  const acc: T[][] = [];
-  while (arr.length) {
-    acc.push(arr.splice(0, len));
+export const group = <T>(arr: T[], width: number): T[][] => {
+  if (arr.length % width !== 0) {
+    throw new Error(`Array cannot be evenly divided into groups of ${width}`);
   }
-  return acc;
+  return Array.from({ length: arr.length / width }, () => arr.splice(0, width));
 };

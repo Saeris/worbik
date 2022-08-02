@@ -1,2 +1,2 @@
 export { Game } from "./Game";
-export { getStaticProps } from "./getStaticProps";
+export type { GameProps } from "./Game";

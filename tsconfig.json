@@ -3,7 +3,7 @@
   "ts-node": {
     "transpileOnly": true
   },
-  "include": ["./src/**/*", "server/**/*"],
+  "include": ["./src/**/*", "./scripts/**/*"],
   "exclude": [
     "node_modules",
     "**/__mocks__/**/*",

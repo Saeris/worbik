@@ -1,87 +1,47 @@
 /* eslint-disable react/no-array-index-key */
-import React, { useState, useCallback } from "react";
+import React, { useCallback } from "react";
 import { useCompositeState } from "ariakit/composite/composite-state";
 import { Direction } from "../../../components/Direction";
-import type { Matrix2D } from "../../../utils";
-import {
-  range,
-  getNextState,
-  group,
-  cacheHints,
-  parseChallenge,
-  parseSolution
-} from "../../../utils";
+import { range } from "../../../utils";
 import { Container, Grid, Row, Character, Hint } from "./elements";
+import type { usePuzzle } from "../usePuzzleState";
 
 export interface PuzzleProps {
-  initialChallenge: string;
-  initialHints: Matrix2D<string>;
-  onMove?: () => void;
-  onWin?: () => void;
-  winner?: boolean;
+  state: ReturnType<typeof usePuzzle>;
 }
 
-export const Puzzle: React.FC<PuzzleProps> = ({
-  initialChallenge,
-  initialHints,
-  onMove = (): void => {},
-  onWin = (): void => {},
-  winner = false
-}) => {
-  const state = useCompositeState();
-  const [guess, setGuess] = useState(initialChallenge);
-  const [hints, setHints] = useState(initialHints);
-  const { challenge, length, moves } = parseChallenge(guess);
-  const repeat = range(length);
+export const Puzzle: React.FC<PuzzleProps> = ({ state }) => {
+  const grid = useCompositeState();
+  const winner = state.win;
+  const repeat = range(state.initial.width);
 
   const rotate = useCallback(
-    (
-      // row or col number
-      pos: number,
-      // true = increment, false = decriment
-      dir: boolean = false,
-      // true = horizontal, false = vertical
-      axis: boolean = false
-    ) => {
-      if (!winner) {
-        const check = async (): Promise<void> => {
+    (rowOrCol: number, dir: `up` | `down` | `left` | `right`) => {
+      if (!state.win) {
+        const check = async (next: string): Promise<void> => {
           const url = new URL(`/api/check`, window.location.origin);
+          url.searchParams.set(`guess`, next);
           url.searchParams.set(
-            `guess`,
-            `${length}${getNextState(challenge, pos, dir, axis)
-              .flat()
-              .join(``)}`
+            `challenge`,
+            `${state.initial.toString()}${state.target}`
           );
-          url.searchParams.set(`challenge`, initialChallenge);
-          const res: string = await (await fetch(url.href)).json();
-          // We'll update the game state with the response we got
-          // from our server
-          const { solution } = parseSolution(res);
-          const next = solution.flat().join(``);
-          setGuess(`${length}${next}${moves}`);
-          setHints((prev) =>
-            group(cacheHints(prev.flat().join(``), next), length)
-          );
-          onMove();
-          if (next === next.toUpperCase()) {
-            onWin();
-          }
+          state.validate(await (await fetch(url.href)).json());
         };
-        void check();
+        const next = state.getNextState(rowOrCol, dir).toString();
+        void check(next);
       }
     },
-    [initialChallenge, winner, challenge, length, moves, onMove, onWin]
+    [state]
   );
 
   const handleClick = useCallback(
     (
-        pos: number,
-        dir: boolean = false,
-        axis: boolean = false
+        rowOrCol: number,
+        dir: `up` | `down` | `left` | `right`
       ): React.MouseEventHandler<HTMLButtonElement> =>
       (e) => {
         e.preventDefault();
-        rotate(pos, dir, axis);
+        rotate(rowOrCol, dir);
       },
     [rotate]
   );
@@ -92,47 +52,53 @@ export const Puzzle: React.FC<PuzzleProps> = ({
         const key = e.key;
         if ([`w`, `a`, `s`, `d`].includes(key)) {
           // w | d = increment, a | s = decriment
-          const dir = [`w`, `d`].includes(key);
+          const dir = {
+            w: `up`,
+            a: `left`,
+            s: `down`,
+            d: `right`
+          };
           // a | d = horizontal, w | s = veritcal
           const axis = [`a`, `d`].includes(key);
-          rotate(axis ? x : y, dir, axis);
+          rotate(axis ? x : y, dir[key]);
         }
       },
     [rotate]
   );
 
   return (
-    <Container state={state}>
+    <Container state={grid}>
       <Grid>
         <Row>
-          {repeat.map((i) => (
+          {repeat.map((y) => (
             <Direction
-              key={`up-${i}`}
+              key={`up-${y}`}
               direction="up"
-              onClick={handleClick(i, true)}
-              aria-label={`Rotate column ${i + 1} up`}
+              onClick={handleClick(y, `up`)}
+              aria-label={`Rotate column ${y + 1} up`}
               disabled={winner}
             />
           ))}
         </Row>
-        {challenge.map((row, x) => {
+        {state.current.matrix.map((row, x) => {
           const word = row.join(``);
           return (
             <Row key={`row-${x}`}>
               <Direction
                 key={`left-${x}`}
                 direction="left"
-                onClick={handleClick(x, false, true)}
+                onClick={handleClick(x, `left`)}
                 aria-label={`Rotate row ${x + 1} left`}
                 disabled={winner}
               />
               {row.map((char, y) => {
-                const hint = hints[x][y].toUpperCase();
+                const hint = state.hints[x][y];
+                const correct = word.toUpperCase() === state.hints[x].join(``);
                 return (
                   <Character
-                    key={`char-${x}${y}-${char}`}
-                    $hint={/^[A-Z]*$/.test(char)}
-                    $correct={/^[A-Z]*$/.test(word)}
+                    key={`char-${x}${y}`}
+                    $hint={char.toUpperCase() === hint}
+                    $correct={correct}
                     onKeyDown={handleKeypress(x, y)}
                     aria-label={`Grid tile ${x + 1}, ${
                       y + 1
@@ -151,7 +117,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({
               <Direction
                 key={`right-${x}`}
                 direction="right"
-                onClick={handleClick(x, true, true)}
+                onClick={handleClick(x, `right`)}
                 aria-label={`Rotate row ${x + 1} right`}
                 disabled={winner}
               />
@@ -159,12 +125,12 @@ export const Puzzle: React.FC<PuzzleProps> = ({
           );
         })}
         <Row>
-          {repeat.map((i) => (
+          {repeat.map((y) => (
             <Direction
-              key={`down-${i}`}
+              key={`down-${y}`}
               direction="down"
-              onClick={handleClick(i)}
-              aria-label={`Rotate column ${i + 1} down`}
+              onClick={handleClick(y, `down`)}
+              aria-label={`Rotate column ${y + 1} down`}
               disabled={winner}
             />
           ))}

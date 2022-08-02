@@ -37,16 +37,14 @@ const handler: NextMiddleware = async (req) => {
   // cache from the same origin
   const url = new URL(`/api/cacheGet`, origin);
   url.searchParams.set(`key`, puzzleID);
+  const pair = await (await fetch(url.href)).json();
 
-  return NextResponse.json(
-    PuzzleState.compare(guess, await (await fetch(url.href)).json()),
-    {
-      status: 200,
-      headers: {
-        "Cache-Control": `max-age=0, s-maxage=86400`
-      }
+  return NextResponse.json(PuzzleState.compare(guess, pair.split(`|`)[1]), {
+    status: 200,
+    headers: {
+      "Cache-Control": `max-age=0, s-maxage=86400`
     }
-  );
+  });
 };
 
 export default handler;

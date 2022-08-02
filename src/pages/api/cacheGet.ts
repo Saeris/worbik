@@ -39,7 +39,7 @@ const handler: NextMiddleware = async (req) => {
     });
   }
 
-  return NextResponse.json(pair.split(`|`)[1], {
+  return NextResponse.json(pair, {
     status: 200,
     headers: {
       "Cache-Control": `max-age=0, s-maxage=86400`

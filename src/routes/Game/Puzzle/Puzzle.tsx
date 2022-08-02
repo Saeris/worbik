@@ -7,10 +7,11 @@ import { Container, Grid, Row, Character, Hint } from "./elements";
 import type { usePuzzle } from "../usePuzzleState";
 
 export interface PuzzleProps {
+  puzzleID: string;
   state: ReturnType<typeof usePuzzle>;
 }
 
-export const Puzzle: React.FC<PuzzleProps> = ({ state }) => {
+export const Puzzle: React.FC<PuzzleProps> = ({ puzzleID, state }) => {
   const grid = useCompositeState();
   const winner = state.win;
   const repeat = range(state.initial.width);
@@ -20,18 +21,14 @@ export const Puzzle: React.FC<PuzzleProps> = ({ state }) => {
       if (!state.win) {
         const check = async (next: string): Promise<void> => {
           const url = new URL(`/api/check`, window.location.origin);
+          url.searchParams.set(`puzzle`, puzzleID);
           url.searchParams.set(`guess`, next);
-          url.searchParams.set(
-            `challenge`,
-            `${state.initial.toString()}${state.target}`
-          );
           state.validate(await (await fetch(url.href)).json());
         };
-        const next = state.getNextState(rowOrCol, dir).toString();
-        void check(next);
+        void check(state.getNextState(rowOrCol, dir).toString());
       }
     },
-    [state]
+    [puzzleID, state]
   );
 
   const handleClick = useCallback(

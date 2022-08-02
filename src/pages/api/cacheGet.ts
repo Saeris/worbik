@@ -30,16 +30,16 @@ const handler: NextMiddleware = async (req) => {
     token: process.env.UPSTASH_REDIS_REST_TOKEN ?? ``
   });
 
-  const solution = await redis.get<string>(key);
+  const pair = await redis.get<string>(key);
 
-  if (typeof solution !== `string`) {
+  if (typeof pair !== `string`) {
     return NextResponse.json(null, {
       status: 500,
       statusText: `Could not retrieve value for ${key}.`
     });
   }
 
-  return NextResponse.json(solution, {
+  return NextResponse.json(pair, {
     status: 200,
     headers: {
       "Cache-Control": `max-age=0, s-maxage=86400`

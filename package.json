@@ -7,7 +7,6 @@
   "keywords": [],
   "main": "src/pages/index.tsx",
   "scripts": {
-    "ci": "yarn install --ignore-scripts --frozen-lockfile --silent --non-interactive",
     "lint": "yarn test:lint",
     "format": "yarn test:lint --fix",
     "prepare": "is-ci || husky install",

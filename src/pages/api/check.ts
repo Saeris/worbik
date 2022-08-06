@@ -17,7 +17,7 @@ const handler: NextMiddleware = async (req) => {
 
   const { searchParams, origin } = new URL(req.url);
   const puzzleID = searchParams.get(`puzzle`);
-  const guess = searchParams.get(`guess`);
+  const guesses = searchParams.get(`guesses`);
 
   if (typeof puzzleID !== `string`) {
     return NextResponse.json(null, {
@@ -26,10 +26,10 @@ const handler: NextMiddleware = async (req) => {
     });
   }
 
-  if (typeof guess !== `string`) {
+  if (typeof guesses !== `string`) {
     return NextResponse.json(null, {
       status: 400,
-      statusText: `Received invalid value for "guess" parameter`
+      statusText: `Received invalid value for "guesses" parameter`
     });
   }
 
@@ -38,13 +38,17 @@ const handler: NextMiddleware = async (req) => {
   const url = new URL(`/api/cacheGet`, origin);
   url.searchParams.set(`key`, puzzleID);
   const pair = await (await fetch(url.href)).json();
+  const solution = pair.split(`|`)[1];
 
-  return NextResponse.json(PuzzleState.compare(guess, pair.split(`|`)[1]), {
-    status: 200,
-    headers: {
-      "Cache-Control": `max-age=0, s-maxage=86400`
+  return NextResponse.json(
+    guesses.split(`,`).map((guess) => PuzzleState.compare(guess, solution)),
+    {
+      status: 200,
+      headers: {
+        "Cache-Control": `max-age=0, s-maxage=86400`
+      }
     }
-  });
+  );
 };
 
 export default handler;

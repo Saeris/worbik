@@ -5,6 +5,7 @@ import { Direction } from "../../../components/Direction";
 import { range } from "../../../utils";
 import { Container, Grid, Row, Character, Hint } from "./elements";
 import type { usePuzzle } from "../usePuzzleState";
+import { useQueuedAPICall } from "./useQueuedAPICall";
 
 export interface PuzzleProps {
   puzzleID: string;
@@ -13,22 +14,25 @@ export interface PuzzleProps {
 
 export const Puzzle: React.FC<PuzzleProps> = ({ puzzleID, state }) => {
   const grid = useCompositeState();
-  const winner = state.win;
-  const repeat = range(state.initial.width);
+  const check = useCallback(
+    async (vals: string[]): Promise<void> => {
+      const url = new URL(`/api/check`, window.location.origin);
+      url.searchParams.set(`puzzle`, puzzleID);
+      url.searchParams.set(`guesses`, vals.join(`,`));
+      localStorage.setItem(
+        puzzleID,
+        state.validate((await (await fetch(url.href)).json()) as string[])
+          .snapshot
+      );
+    },
+    [puzzleID, state]
+  );
+  const queue = useQueuedAPICall(check);
 
   const rotate = useCallback(
     (rowOrCol: number, dir: `up` | `down` | `left` | `right`) => {
       if (!state.win) {
-        const check = async (next: string): Promise<void> => {
-          const url = new URL(`/api/check`, window.location.origin);
-          url.searchParams.set(`puzzle`, puzzleID);
-          url.searchParams.set(`guess`, next);
-          const snapshot = state.validate(
-            await (await fetch(url.href)).json()
-          ).snapshot;
-          localStorage.setItem(puzzleID, snapshot);
-        };
-        void check(state.getNextState(rowOrCol, dir).toString());
+        queue(state.getNextState(rowOrCol, dir).toString());
       }
     },
     [puzzleID, state]
@@ -66,6 +70,8 @@ export const Puzzle: React.FC<PuzzleProps> = ({ puzzleID, state }) => {
     [rotate]
   );
 
+  const repeat = range(state.initial.width);
+
   return (
     <Container state={grid}>
       <Grid>
@@ -76,7 +82,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({ puzzleID, state }) => {
               direction="up"
               onClick={handleClick(y, `up`)}
               aria-label={`Rotate column ${y + 1} up`}
-              disabled={winner}
+              disabled={state.win}
             />
           ))}
         </Row>
@@ -89,7 +95,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({ puzzleID, state }) => {
                 direction="left"
                 onClick={handleClick(x, `left`)}
                 aria-label={`Rotate row ${x + 1} left`}
-                disabled={winner}
+                disabled={state.win}
               />
               {row.map((char, y) => {
                 const hint = state.hints[x][y];
@@ -107,7 +113,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({ puzzleID, state }) => {
                         ? ``
                         : ` Correct character for this tile is ${hint}.`
                     }`}
-                    disabled={winner}
+                    disabled={state.win}
                   >
                     {char.toUpperCase()}
                     <Hint>{hint}</Hint>
@@ -119,7 +125,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({ puzzleID, state }) => {
                 direction="right"
                 onClick={handleClick(x, `right`)}
                 aria-label={`Rotate row ${x + 1} right`}
-                disabled={winner}
+                disabled={state.win}
               />
             </Row>
           );
@@ -131,7 +137,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({ puzzleID, state }) => {
               direction="down"
               onClick={handleClick(y, `down`)}
               aria-label={`Rotate column ${y + 1} down`}
-              disabled={winner}
+              disabled={state.win}
             />
           ))}
         </Row>

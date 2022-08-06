@@ -11,7 +11,7 @@ export interface GameProps {
 }
 
 export const Game: NextPage<GameProps> = ({ puzzleID, challenge }) => {
-  const state = usePuzzle(challenge);
+  const state = usePuzzle(puzzleID, challenge);
 
   const winMessage = (): string =>
     state.moves <= state.target

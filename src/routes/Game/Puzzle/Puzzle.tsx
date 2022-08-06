@@ -23,7 +23,10 @@ export const Puzzle: React.FC<PuzzleProps> = ({ puzzleID, state }) => {
           const url = new URL(`/api/check`, window.location.origin);
           url.searchParams.set(`puzzle`, puzzleID);
           url.searchParams.set(`guess`, next);
-          state.validate(await (await fetch(url.href)).json());
+          const snapshot = state.validate(
+            await (await fetch(url.href)).json()
+          ).snapshot;
+          localStorage.setItem(puzzleID, snapshot);
         };
         void check(state.getNextState(rowOrCol, dir).toString());
       }

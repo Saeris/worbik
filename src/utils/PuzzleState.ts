@@ -1,6 +1,7 @@
 import { between } from "./between";
 import { Grid } from "./Grid";
 import { group } from "./group";
+import { isUppercase } from "./isUppercase";
 import { puzzleRegex } from "./puzzleRegex";
 import { randomInt } from "./randomInt";
 import { repeat } from "./repeat";
@@ -44,6 +45,10 @@ export class PuzzleState {
     return this.#win;
   }
 
+  get snapshot(): string {
+    return `${this.#history.join(`|`)}|${this.#hints.flat().join(``)}`;
+  }
+
   constructor(init: string) {
     const parsed = puzzleRegex.exec(init);
 
@@ -77,6 +82,36 @@ export class PuzzleState {
       // unsubscribe
       this.#listeners.delete(listener);
     };
+  };
+
+  #checkWin = (state: string): PuzzleState => {
+    if (
+      this.#hints
+        .flat()
+        .every((char, i) => char.toLowerCase() === state.charAt(i))
+    ) {
+      this.#win = true;
+      const winningState = `${this.#grid.width}${state}`;
+      // Set #current to the winning grid state
+      this.#grid = Grid.fromString(winningState);
+      // Discard history after the first time a winning state was achieved
+      this.#history.length = this.#history.indexOf(winningState) + 1;
+    }
+
+    return this;
+  };
+
+  restore = (snapshot: string): PuzzleState => {
+    const history = snapshot.split(`|`);
+    const hint = history.pop();
+    const current = history[history.length - 1];
+    if (!hint || !current) {
+      throw new Error(`Could not parse snapshot ${snapshot}`);
+    }
+    this.#grid = Grid.fromString(current);
+    this.#history = history;
+    this.#hints = group(hint.split(``), this.#grid.width);
+    return this.#checkWin(this.current.flat().join(``)).#update();
   };
 
   getNextState = (
@@ -124,27 +159,21 @@ export class PuzzleState {
         throw new Error(`Could not parse state string ${next}`);
       }
       const chars = parsed.groups.chars;
-      const isUppercase = (str: string): boolean => /^[A-Z]*$/.test(str);
-      const hints = this.#hints
-        .flat()
-        .map((c, i) =>
-          isUppercase(c)
-            ? c
-            : isUppercase(chars.charAt(i))
-            ? chars.charAt(i)
-            : ` `
-        );
-      this.#hints = group(hints, this.#grid.width);
-      if (this.#hints.flat().every((char, i) => char === chars.charAt(i))) {
-        this.#win = true;
-        const winningState = `${this.#grid.width}${chars.toLowerCase()}`;
-        // Set #current to the winning grid state
-        this.#grid = Grid.fromString(winningState);
-        // Discard history after the first time a winning state was achieved
-        this.#history.length = this.#history.indexOf(winningState) + 1;
-      }
 
-      return this.#update();
+      this.#hints = group(
+        this.#hints
+          .flat()
+          .map((c, i) =>
+            isUppercase(c)
+              ? c
+              : isUppercase(chars.charAt(i))
+              ? chars.charAt(i)
+              : ` `
+          ),
+        this.#grid.width
+      );
+
+      return this.#checkWin(chars.toLowerCase()).#update();
     }
 
     return this;

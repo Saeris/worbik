@@ -84,21 +84,26 @@ export class PuzzleState {
     };
   };
 
-  #checkWin = (state: string): PuzzleState => {
-    if (
-      this.#hints
-        .flat()
-        .every((char, i) => char.toLowerCase() === state.charAt(i))
-    ) {
-      this.#win = true;
-      const winningState = `${this.#grid.width}${state}`;
-      // Set #current to the winning grid state
-      this.#grid = Grid.fromString(winningState);
-      // Discard history after the first time a winning state was achieved
-      this.#history.length = this.#history.indexOf(winningState) + 1;
-    }
+  #checkWin = (state: string | string[]): PuzzleState => {
+    const check = (value: string): void => {
+      if (
+        !this.#win &&
+        this.#hints
+          .flat()
+          .every((char, i) => char.toLowerCase() === value.charAt(i))
+      ) {
+        this.#win = true;
+        const winningState = `${this.#grid.width}${value}`;
+        // Set #current to the winning grid state
+        this.#grid = Grid.fromString(winningState);
+        // Discard history after the first time a winning state was achieved
+        this.#history.length = this.#history.indexOf(winningState) + 1;
+      }
+    };
 
-    return this;
+    Array.isArray(state) ? state.forEach(check) : check(state);
+
+    return this.#update();
   };
 
   restore = (snapshot: string): PuzzleState => {
@@ -111,7 +116,7 @@ export class PuzzleState {
     this.#grid = Grid.fromString(current);
     this.#history = history;
     this.#hints = group(hint.split(``), this.#grid.width);
-    return this.#checkWin(this.current.flat().join(``)).#update();
+    return this.#checkWin(this.current.flat().join(``));
   };
 
   getNextState = (
@@ -146,34 +151,40 @@ export class PuzzleState {
       const next = this.#grid.toString();
       this.#history.push(next.toLowerCase());
 
-      return this.#update();
+      return this.#checkWin(next.toLowerCase());
     }
     return this;
   };
 
-  validate = (next: string): PuzzleState => {
+  validate = (next: string | string[]): PuzzleState => {
     // skip if we're already in a winning state
     if (!this.#win) {
-      const parsed = puzzleRegex.exec(next);
-      if (!parsed?.groups && !parsed?.groups?.chars) {
-        throw new Error(`Could not parse state string ${next}`);
-      }
-      const chars = parsed.groups.chars;
+      const updateHints = (value: string): string => {
+        const parsed = puzzleRegex.exec(value);
+        if (!parsed?.groups && !parsed?.groups?.chars) {
+          throw new Error(`Could not parse state string ${value}`);
+        }
+        const chars = parsed.groups.chars;
 
-      this.#hints = group(
-        this.#hints
-          .flat()
-          .map((c, i) =>
-            isUppercase(c)
-              ? c
-              : isUppercase(chars.charAt(i))
-              ? chars.charAt(i)
-              : ` `
-          ),
-        this.#grid.width
+        this.#hints = group(
+          this.#hints
+            .flat()
+            .map((c, i) =>
+              isUppercase(c)
+                ? c
+                : isUppercase(chars.charAt(i))
+                ? chars.charAt(i)
+                : ` `
+            ),
+          this.#grid.width
+        );
+
+        return chars.toLowerCase();
+      };
+
+      return this.#checkWin(
+        Array.isArray(next) ? next.map(updateHints) : updateHints(next)
       );
-
-      return this.#checkWin(chars.toLowerCase()).#update();
     }
 
     return this;

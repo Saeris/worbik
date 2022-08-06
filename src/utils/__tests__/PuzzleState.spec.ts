@@ -6,6 +6,29 @@ describe(`PuzzleState`, () => {
     expect(() => new PuzzleState(`2abcd`)).not.toThrow();
   });
 
+  it(`can restore state from a snapshot`, () => {
+    const solution = `2abcd`;
+    const expected = new PuzzleState(`2cabd`);
+    expected.validate(
+      PuzzleState.compare(expected.getNextState(0, `down`).toString(), solution)
+    );
+    expected.validate(
+      PuzzleState.compare(
+        expected.getNextState(0, `right`).toString(),
+        solution
+      )
+    );
+    const actual = new PuzzleState(`2cabd`).restore(`2cabd|2bacd|2abcd|ABCD`);
+
+    expect(actual.history).toStrictEqual(expected.history);
+    expect(actual.toString()).toStrictEqual(expected.toString());
+    expect(actual.moves).toStrictEqual(expected.moves);
+    expect(actual.hints.flat().join(``)).toStrictEqual(
+      expected.hints.flat().join(``)
+    );
+    expect(actual.win).toStrictEqual(expected.win);
+  });
+
   it(`throws when instantiaed with an invalid string`, () => {
     expect(() => new PuzzleState(`foo`)).toThrow(
       `Could not parse init string!`

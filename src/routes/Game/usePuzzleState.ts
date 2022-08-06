@@ -1,5 +1,6 @@
-import { useMemo, useSyncExternalStore } from "react";
-import { Grid, PuzzleState } from "../../utils";
+import { useEffect, useMemo, useSyncExternalStore } from "react";
+import { Grid, isExpired, PuzzleState } from "../../utils";
+import { dateKeyRegex } from "../../utils/getDateKey";
 
 const useMatrix = (state: PuzzleState): string =>
   useSyncExternalStore(
@@ -36,19 +37,30 @@ const useWin = (state: PuzzleState): PuzzleState["win"] =>
     () => state.win
   );
 
+const useSnapshot = (state: PuzzleState): PuzzleState["snapshot"] =>
+  useSyncExternalStore(
+    state.subscribe,
+    () => state.snapshot,
+    () => state.snapshot
+  );
+
 export const usePuzzle = (
+  puzzleID: string,
   init: string
-): {
+): Pick<
+  PuzzleState,
+  | "hints"
+  | "history"
+  | "moves"
+  | "win"
+  | "snapshot"
+  | "target"
+  | "getNextState"
+  | "validate"
+  | "toString"
+> & {
   initial: Grid;
   current: Grid;
-  hints: PuzzleState["hints"];
-  history: PuzzleState["history"];
-  moves: PuzzleState["moves"];
-  win: PuzzleState["win"];
-  target: PuzzleState["target"];
-  getNextState: PuzzleState["getNextState"];
-  validate: PuzzleState["validate"];
-  toString: PuzzleState["toString"];
 } => {
   const state = useMemo(() => new PuzzleState(init), [init]);
   const current = Grid.fromString(useMatrix(state));
@@ -56,6 +68,22 @@ export const usePuzzle = (
   const history = useHistory(state);
   const moves = useMoves(state);
   const win = useWin(state);
+  const snapshot = useSnapshot(state);
+
+  useEffect(() => {
+    if (typeof window !== `undefined`) {
+      const previousSession = localStorage.getItem(puzzleID);
+      if (previousSession) {
+        state.restore(previousSession);
+      }
+      // purge puzzles older than yesterday, utc-0 + 32hrs
+      Object.keys(localStorage).forEach((key) => {
+        if (dateKeyRegex.test(key) && isExpired(key)) {
+          localStorage.removeItem(key);
+        }
+      });
+    }
+  }, [puzzleID, state]);
 
   return {
     initial: state.initial,
@@ -64,6 +92,7 @@ export const usePuzzle = (
     history,
     moves,
     win,
+    snapshot,
     target: state.target,
     getNextState: state.getNextState,
     validate: state.validate,

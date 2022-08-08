@@ -35,7 +35,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({ puzzleID, state }) => {
         queue(state.getNextState(rowOrCol, dir).toString());
       }
     },
-    [puzzleID, state]
+    [queue, state]
   );
 
   const handleClick = useCallback(

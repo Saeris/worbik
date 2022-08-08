@@ -5,7 +5,7 @@ __metadata:
   version: 6
   cacheKey: 8
 
-"@adaptui/react@npm:^1.0.0-0":
+"@adaptui/react@npm:^1.0.0-alpha.9":
   version: 1.0.0-alpha.9
   resolution: "@adaptui/react@npm:1.0.0-alpha.9"
   dependencies:
@@ -1345,26 +1345,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@chakra-ui/react-utils@npm:^2.0.1":
-  version: 2.0.3
-  resolution: "@chakra-ui/react-utils@npm:2.0.3"
+"@chakra-ui/react-utils@npm:2.0.1":
+  version: 2.0.1
+  resolution: "@chakra-ui/react-utils@npm:2.0.1"
   dependencies:
-    "@chakra-ui/utils": 2.0.6
+    "@chakra-ui/utils": ^2.0.2
   peerDependencies:
     react: ">=18"
-  checksum: e28961a29cea73dc4206ab38ad0b85d308e779cbd961ec07f8d7c12d86853a21bc536e919026b2edff69d8b30fc315ce995b890777870b31243fd6f5ea294695
+  checksum: 63c1be6a332fe72be931c39d4b57eedde48a5cc315fd6c8048fc02fdd7bf8c2657848fcd1a75647c3bbc32d30427c44bd1942f3e4c6e0deb5f182a8077c83abd
   languageName: node
   linkType: hard
 
-"@chakra-ui/utils@npm:2.0.6, @chakra-ui/utils@npm:^2.0.4":
-  version: 2.0.6
-  resolution: "@chakra-ui/utils@npm:2.0.6"
+"@chakra-ui/utils@npm:2.0.4":
+  version: 2.0.4
+  resolution: "@chakra-ui/utils@npm:2.0.4"
   dependencies:
     "@types/lodash.mergewith": 4.6.6
     css-box-model: 1.2.1
     framesync: 5.3.0
     lodash.mergewith: 4.6.2
-  checksum: 4023c29dbf8303d83752c7be0a6bb2dcda39a922b10e5141ce4a37e1040a95eb1cd4c389cfe4f8e56a081226aa5057f8d9b3a90c4660266f0df03dfa8807b08d
+  checksum: 5e16c78695bef0a026fe0b7cc4158488609a0405bd7e7ab7151d692c38b6b6d238ef5c2639d7fe881e416385701777eac4b48851b25eeda14a87df9084151842
   languageName: node
   linkType: hard
 
@@ -1621,9 +1621,9 @@ __metadata:
   linkType: hard
 
 "@fontsource/noto-sans@npm:^4.5.10":
-  version: 4.5.10
-  resolution: "@fontsource/noto-sans@npm:4.5.10"
-  checksum: 6b41d9b5634086114e8d8dbd2fc8dd4e5fb5defe8673831b9f86e7d718b63778087e0c3a0fd0d98dd68bf1c67b3546a2134897f497419306e4dd5c38e870b1be
+  version: 4.5.11
+  resolution: "@fontsource/noto-sans@npm:4.5.11"
+  checksum: d11ec102ac9b22e3584ad77e9d0069ef8b18cf2f4dfc12f9968456be0f7da5aa95585e853988289c29746e7e04bbaaadf253646d1c9449130ac9f37211b8af15
   languageName: node
   linkType: hard
 
@@ -3204,7 +3204,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:18.0.15":
+"@types/react@npm:*":
+  version: 18.0.16
+  resolution: "@types/react@npm:18.0.16"
+  dependencies:
+    "@types/prop-types": "*"
+    "@types/scheduler": "*"
+    csstype: ^3.0.2
+  checksum: 47853419adbf7f35f302cd4ef804c5a50498a0917a34e696caa693fc60b9c52c644ca2ecf64cbba4a5efd963771167d241906f117d16d59e20e84b882215b6bd
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:18.0.15":
   version: 18.0.15
   resolution: "@types/react@npm:18.0.15"
   dependencies:
@@ -3670,15 +3681,15 @@ __metadata:
   linkType: hard
 
 "ariakit@npm:^2.0.0-next.37":
-  version: 2.0.0-next.37
-  resolution: "ariakit@npm:2.0.0-next.37"
+  version: 2.0.0-next.38
+  resolution: "ariakit@npm:2.0.0-next.38"
   dependencies:
     "@floating-ui/dom": ^1.0.0
     ariakit-utils: 0.17.0-next.24
   peerDependencies:
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-  checksum: 2458c9313658244902771348336d2f54857d113492d5e29de388adb22bf273ffac7b5dbd17992a2cc9d5ec9498b0602396ed1a4351a19ea8f534c76f0bc9ee69
+  checksum: 661ebda366144824db708860e56f6833991e0a03bf27213cf628494d47b51cdb051faac5c6bfc3b66b81641efc9ab070a803155798d079b1348a8ea944540c1b
   languageName: node
   linkType: hard
 
@@ -4958,8 +4969,8 @@ __metadata:
   linkType: hard
 
 "eslint-plugin-jest@npm:^26.5.3":
-  version: 26.7.0
-  resolution: "eslint-plugin-jest@npm:26.7.0"
+  version: 26.8.0
+  resolution: "eslint-plugin-jest@npm:26.8.0"
   dependencies:
     "@typescript-eslint/utils": ^5.10.0
   peerDependencies:
@@ -4970,7 +4981,7 @@ __metadata:
       optional: true
     jest:
       optional: true
-  checksum: 21dbeb3820a1640185e0bd3847f65feba98b479812bcaa3f353e725bd0538618b16544b4dfc74ac147b5150afed9cf28760d7aaad54158611403810776fe6353
+  checksum: 5dceef6c58422d912e29346be86940ad24602026517a92ce61ddb29814c2185609887a1ea0b6061080ca19d9ee6749549d3424102b28620088e53ec45aefa915
   languageName: node
   linkType: hard
 
@@ -9779,7 +9790,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "worbik@workspace:."
   dependencies:
-    "@adaptui/react": ^1.0.0-0
+    "@adaptui/react": ^1.0.0-alpha.9
     "@fontsource/noto-sans": ^4.5.10
     "@saeris/eslint-config": ^2.2.0
     "@supabase/supabase-auth-helpers": ^1.4.2

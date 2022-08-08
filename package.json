@@ -21,7 +21,7 @@
     "typecheck": "yarn test:typecheck"
   },
   "dependencies": {
-    "@adaptui/react": "^1.0.0-0",
+    "@adaptui/react": "^1.0.0-alpha.9",
     "@fontsource/noto-sans": "^4.5.10",
     "@supabase/supabase-auth-helpers": "^1.4.2",
     "@supabase/supabase-js": "^1.35.5",
@@ -37,6 +37,10 @@
     "react-icons": "^4.4.0",
     "styled-components": "^5.3.5",
     "zod": "^3.17.10"
+  },
+  "resolutions": {
+    "@chakra-ui/react-utils": "2.0.1",
+    "@chakra-ui/utils": "2.0.4"
   },
   "devDependencies": {
     "@saeris/eslint-config": "^2.2.0",

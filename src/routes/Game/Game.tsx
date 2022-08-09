@@ -25,7 +25,7 @@ export const Game: NextPage<GameProps> = ({ puzzleID, challenge }) => {
         Worbik
         <Guide width={state.initial.width} height={state.initial.height} />
       </Title>
-      <Settings />
+      <Settings initial={state.config} />
       <Puzzle puzzleID={puzzleID} state={state} />
       {state.win ? <p>{winMessage()}</p> : <p>{`Moves: ${state.moves}`}</p>}
     </Main>

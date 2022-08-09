@@ -1,81 +1,85 @@
 import styled, { css } from "styled-components";
 import { Slider, SliderThumb, SliderTrack } from "@adaptui/react";
 
-export const Container = styled(Slider)(
+export const Handle = styled(SliderThumb)(
   () => css`
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 8px;
+    height: 14px;
+    background: rgb(255, 255, 255);
+    border-radius: 25%;
+    box-shadow: rgb(0 0 0 / 50%) 0px 1px 3px 0px,
+      rgb(0 0 0 / 10%) 0px 1px 2px 0px;
+    transform: translate(-50%);
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    touch-action: none;
+    cursor: pointer;
+  `
+);
+
+export const Container = styled(Slider)(
+  ({ theme }) => css`
     position: relative;
-    display: inline-block;
+    display: flex;
+    align-items: center;
     width: 100%;
+    height: 14px;
+    margin-bottom: calc(1em + 4px);
     touch-action: none;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     -webkit-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    outline: 0px;
-  `
-);
 
-export const Track = styled(SliderTrack)(
-  () => css`
-    position: relative;
-    width: 100%;
-    padding: 7px 0 7px 0;
-    cursor: pointer;
-
-    &::before {
-      content: " ";
-      width: 100%;
-      height: 4px;
-      background: rgb(226, 232, 240);
-      border-radius: 0.125rem;
+    &:focus-within {
+      ${Handle} {
+        outline: 2px solid ${theme.colors.info.border};
+      }
     }
   `
 );
 
-export const Fill = styled.div(
-  () => css`
-    position: absolute;
+export const Track = styled(SliderTrack)<{ $fill: string }>(
+  ({ theme, $fill }) => css`
+    position: relative;
+    width: 100%;
     height: 4px;
-    background: rgb(49, 130, 206);
-    top: 50%;
-    -webkit-transform: translateY(-50%);
-    transform: translateY(-50%);
-    border-radius: 0.125rem;
+    background: ${theme.colors.info.bg};
+    border-radius: 2px;
+    cursor: pointer;
+
+    &:after {
+      content: " ";
+      position: absolute;
+      top: 50%;
+      width: ${$fill};
+      height: 4px;
+      background: ${theme.colors.info.text};
+      border-radius: 2px;
+      -webkit-transform: translateY(-50%);
+      transform: translateY(-50%);
+    }
   `
 );
 
-export const HandleGroup = styled.div(
+export const Label = styled.label(() => css``);
+
+export const Value = styled.label(
   () => css`
     position: absolute;
-    top: 2px;
+    top: 14px;
     z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-  `
-);
-
-export const Handle = styled(SliderThumb)(
-  () => css`
-    width: 14px;
-    height: 14px;
-    background: rgb(255, 255, 255);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 9999px;
-    box-shadow: rgb(0 0 0 / 50%) 0px 1px 3px 0px,
-      rgb(0 0 0 / 10%) 0px 1px 2px 0px;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    touch-action: none;
-    cursor: pointer;
-  `
-);
-
-export const Value = styled.div(
-  () => css`
-    margin: 8px 0 0 0;
+    width: 8px;
+    transform: translate(-50%);
+    font-size: 1.6rem;
   `
 );

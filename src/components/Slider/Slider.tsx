@@ -9,20 +9,31 @@ import {
   useSliderThumbState
 } from "@adaptui/react";
 import type { FormState } from "ariakit";
-import { Container, Fill, Handle, HandleGroup, Track, Value } from "./elements";
+import { Container, Handle, Track, Value } from "./elements";
 
 const Thumb: React.FC<SliderThumbStateProps> = ({ index, state, ...props }) => {
-  const sliderThumb = useSliderThumbState({ index, state, ...props });
+  const sliderThumb = useSliderThumbState({
+    index,
+    state,
+    ...props
+  });
 
   return (
-    <HandleGroup
-      style={{
-        left: `calc(${state.getThumbPercent(index) * 100}% - 7px)`
-      }}
-    >
-      <Handle state={sliderThumb} />
-      <Value>{state.getThumbValueLabel(index)}</Value>
-    </HandleGroup>
+    <>
+      <Handle
+        state={sliderThumb}
+        style={{
+          left: `calc(${state.getThumbPercent(index) * 100}%)`
+        }}
+      />
+      <Value
+        style={{
+          left: `calc(${state.getThumbPercent(index) * 100}%)`
+        }}
+      >
+        {state.getThumbValueLabel(index)}
+      </Value>
+    </>
   );
 };
 
@@ -33,15 +44,13 @@ export const Slider: React.FC<
   >
 > = ({ name, state, ...props }) => {
   const track = useRef<HTMLDivElement>(null);
-  const handleChange = useCallback(
-    (value) => {
-      state.setValue(name, value);
-    },
-    [state.setValue, name]
-  );
-
   const base = useSliderBaseState({
-    onChange: handleChange,
+    onChange: useCallback(
+      (value: number | number[]) => {
+        state.setValue(name, value);
+      },
+      [state.setValue, name]
+    ),
     value: state.values[name],
     ...props
   });
@@ -51,15 +60,12 @@ export const Slider: React.FC<
   });
 
   return (
-    <Container state={base}>
-      <Track state={slider} ref={track}>
-        <Fill
-          style={{
-            width: `${base.getValuePercent(base.values[0]) * 100}%`
-          }}
-        />
-      </Track>
-
+    <Container state={slider}>
+      <Track
+        state={slider}
+        ref={track}
+        $fill={`${base.getValuePercent(base.values[0]) * 100}%`}
+      />
       <Thumb
         index={0}
         state={base}

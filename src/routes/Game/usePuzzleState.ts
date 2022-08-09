@@ -50,6 +50,7 @@ export const usePuzzle = (
 ): Pick<
   PuzzleState,
   | "hints"
+  | "config"
   | "history"
   | "moves"
   | "win"
@@ -88,6 +89,7 @@ export const usePuzzle = (
   return {
     initial: state.initial,
     current,
+    config: state.config,
     hints,
     history,
     moves,

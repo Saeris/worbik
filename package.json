@@ -33,6 +33,7 @@
     "next": "12.2.2",
     "next-pwa": "5.5.4",
     "react": "18.2.0",
+    "react-aria": "^3.18.0",
     "react-dom": "18.2.0",
     "react-icons": "^4.4.0",
     "styled-components": "^5.3.5",

@@ -1,14 +1,18 @@
 import { Form, useFormState } from "ariakit";
 import React from "react";
 import { Slider } from "../../../components/Slider";
+import type { PuzzleSchema } from "../../../utils";
 import { Container } from "./elements";
 
-export const Settings: React.FC = () => {
+export interface SettingsProps {
+  initial?: PuzzleSchema;
+}
+
+export const Settings: React.FC<SettingsProps> = ({
+  initial = { width: 5, height: 5 }
+}) => {
   const state = useFormState({
-    defaultValues: {
-      width: 5,
-      height: 5
-    }
+    defaultValues: initial
   });
   return (
     <Container>
@@ -28,7 +32,6 @@ export const Settings: React.FC = () => {
           maxValue={8}
         />
       </Form>
-      <pre>{JSON.stringify(state.values, null, 2)}</pre>
     </Container>
   );
 };

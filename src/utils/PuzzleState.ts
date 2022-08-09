@@ -24,6 +24,13 @@ export class PuzzleState {
     return this.#grid;
   }
 
+  get config(): { width: number; height: number } {
+    return {
+      width: this.#grid.width,
+      height: this.#grid.height
+    };
+  }
+
   get history(): string[] {
     return this.#history;
   }

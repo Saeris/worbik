@@ -14,8 +14,7 @@ const nextConfig = {
     defaultLocale: "en"
   },
   experimental: {
-    runtime: "experimental-edge",
-    images: { allowFutureImage: true }
+    runtime: "experimental-edge"
   },
   webpack: (config) => {
     config.module.rules.push({
@@ -28,10 +27,7 @@ const nextConfig = {
 };
 
 module.exports = withPWA({
-  pwa: {
-    dest: "public",
-    disable: process.env.NODE_ENV !== "production",
-    runtimeCaching
-  },
-  ...nextConfig
-});
+  dest: "public",
+  disable: process.env.NODE_ENV !== "production",
+  runtimeCaching
+})(nextConfig);

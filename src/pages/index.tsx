@@ -1,14 +1,12 @@
 import type { GetServerSideProps } from "next";
 import { Redis } from "@upstash/redis";
 import { Game } from "../routes/Game";
-import type { RawPuzzleSchema } from "../utils";
 import { generate, getDateKey, puzzleSchema, PuzzleState } from "../utils";
 import type { GameProps } from "../routes/Game";
 
-export const getServerSideProps: GetServerSideProps<
-  GameProps,
-  RawPuzzleSchema
-> = async (ctx) => {
+export const getServerSideProps: GetServerSideProps<GameProps> = async (
+  ctx
+) => {
   ctx.res.setHeader(`Cache-Control`, `max-age=0, s-maxage=86400`);
   const config = puzzleSchema.parse(ctx.query);
   const puzzleID = getDateKey(config);

@@ -52,6 +52,13 @@ types/
 # Output of 'npm pack'
 *.tgz
 
+# Typescript
+*.tsbuildinfo
+
+# Jest
+/coverage
+packages/**/coverage
+
 # Yarn
 .pnp.*
 .yarn/*

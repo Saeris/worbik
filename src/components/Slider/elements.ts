@@ -1,7 +1,15 @@
 import styled, { css } from "styled-components";
-import { Slider, SliderThumb, SliderTrack } from "@adaptui/react";
+import {
+  Slider,
+  SliderThumb,
+  SliderTrack,
+  type SliderOptions,
+  type SliderThumbOptions,
+  type SliderTrackOptions
+} from "@adaptui/react";
+import type { Component } from "ariakit-utils";
 
-export const Handle = styled(SliderThumb)(
+export const Handle = styled<Component<SliderThumbOptions>>(SliderThumb)(
   () => css`
     position: absolute;
     z-index: 2;
@@ -23,7 +31,7 @@ export const Handle = styled(SliderThumb)(
   `
 );
 
-export const Container = styled(Slider)(
+export const Container = styled<Component<SliderOptions>>(Slider)(
   ({ theme }) => css`
     position: relative;
     display: flex;
@@ -45,7 +53,9 @@ export const Container = styled(Slider)(
   `
 );
 
-export const Track = styled(SliderTrack)<{ $fill: string }>(
+export const Track = styled<Component<SliderTrackOptions>>(SliderTrack)<{
+  $fill: string;
+}>(
   ({ theme, $fill }) => css`
     position: relative;
     width: 100%;

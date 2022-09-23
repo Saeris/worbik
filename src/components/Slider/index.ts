@@ -1,1 +1,1 @@
-export { Slider, FormSlider } from "./Slider";
+export { Slider } from "./Slider";

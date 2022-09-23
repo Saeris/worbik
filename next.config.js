@@ -16,6 +16,14 @@ const nextConfig = {
   experimental: {
     runtime: "experimental-edge",
     images: { allowFutureImage: true }
+  },
+  webpack: (config) => {
+    config.module.rules.push({
+      test: [/(components|utils)\/index.ts$/i],
+      sideEffects: false
+    });
+
+    return config;
   }
 };
 

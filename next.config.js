@@ -16,6 +16,7 @@ const nextConfig = {
   experimental: {
     runtime: "experimental-edge"
   },
+  productionBrowserSourceMaps: process.env.VERCEL_ENV !== `production`,
   webpack: (config) => {
     config.module.rules.push({
       test: [/(components|utils)\/index.ts$/i],

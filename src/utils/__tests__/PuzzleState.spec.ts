@@ -3,12 +3,12 @@ import { PuzzleState } from "../PuzzleState";
 
 describe(`PuzzleState`, () => {
   it(`can be instantiated from a string`, () => {
-    expect(() => new PuzzleState(`2abcd`)).not.toThrow();
+    expect(() => new PuzzleState(`2_abcd`)).not.toThrow();
   });
 
   it(`can restore state from a snapshot`, () => {
-    const solution = `2abcd`;
-    const expected = new PuzzleState(`2cabd`);
+    const solution = `2_abcd`;
+    const expected = new PuzzleState(`2_cabd`);
     expected.validate(
       PuzzleState.compare(expected.getNextState(0, `down`).toString(), solution)
     );
@@ -18,7 +18,9 @@ describe(`PuzzleState`, () => {
         solution
       )
     );
-    const actual = new PuzzleState(`2cabd`).restore(`2cabd|2bacd|2abcd|ABCD`);
+    const actual = new PuzzleState(`2_cabd`).restore(
+      `2_cabd,2_bacd,2_abcd,ABCD`
+    );
 
     expect(actual.history).toStrictEqual(expected.history);
     expect(actual.toString()).toStrictEqual(expected.toString());
@@ -36,7 +38,7 @@ describe(`PuzzleState`, () => {
   });
 
   it(`returns expected values for property getters`, () => {
-    const state = new PuzzleState(`2abcd`);
+    const state = new PuzzleState(`2_abcd`);
     const grid = {
       height: 2,
       matrix: [
@@ -46,7 +48,7 @@ describe(`PuzzleState`, () => {
       size: 4,
       width: 2
     };
-    const history = [`2abcd`];
+    const history = [`2_abcd`];
     const hints = [
       [` `, ` `],
       [` `, ` `]
@@ -65,12 +67,12 @@ describe(`PuzzleState`, () => {
     expect(state.hints).toStrictEqual(hints);
     expect(state.moves).toStrictEqual(0);
     expect(state.target).toStrictEqual(0);
-    expect(state.toString()).toStrictEqual(`2abcd0`);
+    expect(state.toString()).toStrictEqual(`2_abcd_0`);
     expect(state.toJSON()).toStrictEqual(obj);
   });
 
   it(`can generate new states`, () => {
-    const state = new PuzzleState(`2abcd`);
+    const state = new PuzzleState(`2_abcd`);
     const initial = {
       height: 2,
       matrix: [
@@ -89,7 +91,7 @@ describe(`PuzzleState`, () => {
       size: 4,
       width: 2
     };
-    const history = [`2abcd`, `2cbad`, `2cdab`, `2dcab`, `2dcba`];
+    const history = [`2_abcd`, `2_cbad`, `2_cdab`, `2_dcab`, `2_dcba`];
     state
       .getNextState(0, `up`)
       .getNextState(1, `down`)
@@ -102,24 +104,24 @@ describe(`PuzzleState`, () => {
   });
 
   it(`can compare two states`, () => {
-    const guess = `5rcaet69`;
-    const solution = `5react`;
+    const guess = `5_rcaet69`;
+    const solution = `5_react`;
     const actual = PuzzleState.compare(guess, solution);
-    const expected = `5RcAeT69`;
+    const expected = `5_RcAeT69`;
     expect(actual).toStrictEqual(expected);
   });
 
   it(`caches hints`, () => {
-    const init = `5rcaet`;
+    const init = `5_rcaet`;
     const state = new PuzzleState(init);
-    const solution = PuzzleState.compare(init, `5react`);
+    const solution = PuzzleState.compare(init, `5_react`);
     state.validate(solution);
     const expected = [[`R`, ` `, `A`, ` `, `T`]];
     expect(state.hints).toStrictEqual(expected);
   });
 
   it(`notifies subscribers of updates`, () => {
-    const state = new PuzzleState(`2abcd`);
+    const state = new PuzzleState(`2_abcd`);
     const listener = jest.fn();
     const unsubscribe = state.subscribe(listener);
     state.getNextState(0, `up`);
@@ -134,18 +136,18 @@ describe(`PuzzleState`, () => {
 
   it(`can randomize it's state`, () => {
     const cases = [
-      `5react`,
-      `5reactgoose`,
-      `5reactgooseteach`,
-      `5reactgooseteachdrink`,
-      `5reactgooseteachdrinkclear`,
-      `7emotion`,
-      `7emotionfreedom`,
-      `7emotionfreedomhelpful`,
-      `7emotionfreedomhelpfulmagical`,
-      `7emotionfreedomhelpfulmagicalalright`,
-      `7emotionfreedomhelpfulmagicalalrightfighter`,
-      `7emotionfreedomhelpfulmagicalalrightfightermonster`
+      `5_react`,
+      `5_reactgoose`,
+      `5_reactgooseteach`,
+      `5_reactgooseteachdrink`,
+      `5_reactgooseteachdrinkclear`,
+      `7_emotion`,
+      `7_emotionfreedom`,
+      `7_emotionfreedomhelpful`,
+      `7_emotionfreedomhelpfulmagical`,
+      `7_emotionfreedomhelpfulmagicalalright`,
+      `7_emotionfreedomhelpfulmagicalalrightfighter`,
+      `7_emotionfreedomhelpfulmagicalalrightfightermonster`
     ];
 
     for (const val of cases) {
@@ -160,10 +162,10 @@ describe(`PuzzleState`, () => {
 
   it(`can validate a winning state`, () => {
     const listener = jest.fn();
-    const solution = `6worbik`;
-    const history = [`6kworbi`, `6worbik`, `6kworbi`, `6worbik`];
-    const truncated = [`6kworbi`, `6worbik`];
-    const state = new PuzzleState(`6kworbi`);
+    const solution = `6_worbik`;
+    const history = [`6_kworbi`, `6_worbik`, `6_kworbi`, `6_worbik`];
+    const truncated = [`6_kworbi`, `6_worbik`];
+    const state = new PuzzleState(`6_kworbi`);
     state.subscribe(listener);
     state.getNextState(0, `left`); // win state 1
     state.getNextState(0, `right`);
@@ -175,7 +177,7 @@ describe(`PuzzleState`, () => {
     // Don't trigger another update if a winning state has been reached
     state.getNextState(0, `left`);
     state.validate(solution);
-    expect(state.toString()).toStrictEqual(`6worbik1`);
+    expect(state.toString()).toStrictEqual(`6_worbik_1`);
     expect(state.moves).toStrictEqual(1);
     expect(state.history).toStrictEqual(truncated);
     expect(listener).toHaveBeenCalledTimes(4);

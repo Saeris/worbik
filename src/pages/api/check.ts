@@ -4,7 +4,7 @@ import { PuzzleState } from "../../utils";
 
 export const config = {
   // eslint-disable-next-line @typescript-eslint/quotes
-  runtime: "experimental-edge"
+  runtime: "edge"
 };
 
 const handler: NextMiddleware = async (req) => {
@@ -37,8 +37,7 @@ const handler: NextMiddleware = async (req) => {
   // cache from the same origin
   const url = new URL(`/api/cacheGet`, origin);
   url.searchParams.set(`key`, puzzleID);
-  const pair = await (await fetch(url.href)).json();
-  const solution = pair.split(`|`)[1];
+  const { solution } = await (await fetch(url.href)).json();
 
   return NextResponse.json(
     guesses.split(`,`).map((guess) => PuzzleState.compare(guess, solution)),

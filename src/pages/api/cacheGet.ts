@@ -1,10 +1,10 @@
 import type { NextMiddleware } from "next/server";
 import { NextResponse } from "next/server";
-import { Redis } from "@upstash/redis";
+import { get } from "@vercel/edge-config";
 
 export const config = {
   // eslint-disable-next-line @typescript-eslint/quotes
-  runtime: "experimental-edge"
+  runtime: "edge"
 };
 
 const handler: NextMiddleware = async (req) => {
@@ -25,14 +25,15 @@ const handler: NextMiddleware = async (req) => {
     });
   }
 
-  const redis = new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL ?? ``,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN ?? ``
-  });
+  const pair = await get<{
+    challenge: string;
+    solution: string;
+  }>(key);
 
-  const pair = await redis.get<string>(key);
-
-  if (typeof pair !== `string`) {
+  if (
+    typeof pair?.challenge !== `string` ||
+    typeof pair.solution !== `string`
+  ) {
     return NextResponse.json(null, {
       status: 500,
       statusText: `Could not retrieve value for ${key}.`

@@ -88,7 +88,7 @@ export class Grid {
 
   flat = (): string[] => this.#matrix.flat();
 
-  toString = (): string => `${this.#width}${this.flat().join(``)}`;
+  toString = (): string => `${this.#width}_${this.flat().join(``)}`;
 
   toJSON = (): {
     matrix: string[][];

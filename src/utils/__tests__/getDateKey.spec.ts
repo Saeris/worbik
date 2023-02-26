@@ -1,4 +1,11 @@
-import { getDateKey, dateKeyRegex } from "../getDateKey";
+import {
+  getDateKey,
+  dateKeyRegex,
+  getExpiredDateKey,
+  isExpiredKey,
+  DateKey,
+  filterExpiredDates
+} from "../getDateKey";
 
 describe(`getDateKey`, () => {
   it(`generates a cache key based on the current date`, () => {
@@ -18,5 +25,40 @@ describe(`getDateKey`, () => {
         height
       );
     }
+  });
+});
+
+describe(`isExpiredKey`, () => {
+  it(`correctly validates date strings`, () => {
+    const invalid = isExpiredKey(getDateKey());
+    const valid = isExpiredKey(`${getExpiredDateKey()}_5x5`);
+
+    expect(invalid).toStrictEqual(false);
+    expect(valid).toStrictEqual(true);
+    expect(() => isExpiredKey(`foo_5x5`)).toThrow();
+  });
+});
+describe(`filterExpiredDates`, () => {
+  it(`can be used to filter edge config keys`, () => {
+    const actual = (
+      Object.keys({
+        foo: null,
+        bar: null,
+        [getDateKey()]: null,
+        [getDateKey({ width: 6, height: 6 })]: null,
+        [getDateKey({ width: 7, height: 7 })]: null,
+        [`${getExpiredDateKey()}_5x5`]: null,
+        [`${getExpiredDateKey()}_6x6`]: null,
+        [`${getExpiredDateKey()}_7x7`]: null
+      }) as DateKey[]
+    ).filter(filterExpiredDates);
+    const expected = [
+      `${getExpiredDateKey()}_5x5`,
+      `${getExpiredDateKey()}_6x6`,
+      `${getExpiredDateKey()}_7x7`
+    ];
+
+    expect(actual.length).toStrictEqual(3);
+    expect(actual).toStrictEqual(expected);
   });
 });

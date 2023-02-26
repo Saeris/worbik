@@ -1,5 +1,6 @@
 import type { NextMiddleware } from "next/server";
 import { NextResponse } from "next/server";
+import { get } from "@vercel/edge-config";
 import { PuzzleState } from "../../utils";
 
 export const config = {
@@ -15,7 +16,7 @@ const handler: NextMiddleware = async (req) => {
     });
   }
 
-  const { searchParams, origin } = new URL(req.url);
+  const { searchParams } = new URL(req.url);
   const puzzleID = searchParams.get(`puzzle`);
   const guesses = searchParams.get(`guesses`);
 
@@ -33,14 +34,22 @@ const handler: NextMiddleware = async (req) => {
     });
   }
 
-  // Our incoming request will need to retrieve a solution from the
-  // cache from the same origin
-  const url = new URL(`/api/cacheGet`, origin);
-  url.searchParams.set(`key`, puzzleID);
-  const { solution } = await (await fetch(url.href)).json();
+  const cachedPuzzle = await get<{
+    challenge: string;
+    solution: string;
+  }>(puzzleID);
+
+  if (typeof cachedPuzzle === `undefined`) {
+    return NextResponse.json(null, {
+      status: 500,
+      statusText: `Could not retrieve a puzzle for id: ${puzzleID}`
+    });
+  }
 
   return NextResponse.json(
-    guesses.split(`,`).map((guess) => PuzzleState.compare(guess, solution)),
+    guesses
+      .split(`,`)
+      .map((guess) => PuzzleState.compare(guess, cachedPuzzle.solution)),
     {
       status: 200,
       headers: {

@@ -6,7 +6,7 @@ import {
   type SliderOptions,
   type SliderThumbOptions,
   type SliderTrackOptions
-} from "@adaptui/react";
+} from "./temp";
 import type { Component } from "ariakit-utils";
 
 export const Handle = styled<Component<SliderThumbOptions>>(SliderThumb)(

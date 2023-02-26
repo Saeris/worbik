@@ -1,58 +1,62 @@
-import type { NextMiddleware } from "next/server";
+import { getAll } from "@vercel/edge-config";
+import { NextApiHandler } from "next";
 import { NextResponse } from "next/server";
-import { generate, getDateKey, PuzzleState } from "../../utils";
+import { generate, getDateKey, PuzzleState, sizes, wait } from "../../utils";
+import { filterExpiredDates } from "../../utils/getDateKey";
 
-export const config = {
-  // eslint-disable-next-line @typescript-eslint/quotes
-  runtime: "edge"
-};
-
-const handler: NextMiddleware = async (req) => {
+const handler: NextApiHandler = async (req, res) => {
   if (req.method !== `GET`) {
-    return NextResponse.json(null, {
-      status: 400,
-      statusText: `Only GET requests are accepted!`
-    });
+    res.statusMessage = `Only GET requests are accepted!`;
+    return res.status(400).send(null);
   }
 
-  const items = [5, 6, 7, 8].reduce(
-    (arr, width, _, sizes) => [
-      ...arr,
-      ...sizes.flatMap((height) => {
-        const puzzle = generate({ width, height });
-        const solution = puzzle.initial.toString();
-        const challenge = PuzzleState.compare(puzzle.toString(), solution);
-        return [
-          {
-            operation: `create`,
-            key: getDateKey({ width, height }),
-            value: {
-              challenge,
-              solution
-            }
-          }
-        ];
-      })
-    ],
-    []
-  );
-  const VERCEL_ACCESS_TOKEN = `h7xVJdZDSuq80z9eMWO5vCvj`;
-
-  const updateEdgeConfig = await fetch(
-    `https://api.vercel.com/edge-config/worbik/items`,
+  const updatePuzzles = await fetch(
+    `https://api.vercel.com/v1/edge-config/${process.env.EDGE_CONFIG_ID}/items`,
     {
       method: `PATCH`,
       headers: new Headers({
-        Authorization: `Bearer ${VERCEL_ACCESS_TOKEN}`,
+        Authorization: `Bearer ${process.env.VERCEL_ACCESS_TOKEN}`,
         "Content-Type": `application/json`
       }),
-      body: JSON.stringify({ items })
+      body: JSON.stringify({
+        items: [
+          ...sizes.map(([width, height]) => {
+            const puzzle = generate({ width, height });
+            const solution = puzzle.initial.toString();
+            const challenge = PuzzleState.compare(puzzle.toString(), solution);
+            return [
+              {
+                operation: `create`,
+                key: getDateKey({
+                  width,
+                  height
+                }),
+                value: {
+                  challenge,
+                  solution
+                }
+              } as const
+            ];
+          }),
+          // We also want to delete all keys older than 2 days
+          ...Object.keys((await getAll<Record<string, unknown>>()) ?? {})
+            .filter(filterExpiredDates)
+            .map((key) => ({ operation: `delete`, key }))
+        ]
+      })
     }
   );
 
+  await wait(10000); // Wait 10s for the changes to propagate
+
+  // Revalidate all of the puzzle pages
+  await Promise.all(
+    sizes.map(([width, height]) => res.revalidate(`/${width}x${height}`))
+  );
+
   return NextResponse.json(null, {
-    status: updateEdgeConfig.status,
-    statusText: updateEdgeConfig.statusText
+    status: updatePuzzles.status,
+    statusText: updatePuzzles.statusText
   });
 };
 

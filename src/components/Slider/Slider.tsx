@@ -1,13 +1,11 @@
 import React, { useCallback, useRef } from "react";
-import type {
-  SliderBaseStateProps,
-  SliderThumbStateProps
-} from "@adaptui/react";
 import {
+  type SliderBaseStateProps,
+  type SliderThumbStateProps,
   useSliderBaseState,
   useSliderState,
   useSliderThumbState
-} from "@adaptui/react";
+} from "./temp";
 import type { FormState } from "ariakit";
 import { Container, Handle, Track, Value } from "./elements";
 

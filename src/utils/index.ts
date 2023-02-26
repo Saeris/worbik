@@ -8,4 +8,6 @@ export type { RawPuzzleSchema, PuzzleSchema } from "./puzzleSchema";
 export { PuzzleState } from "./PuzzleState";
 export { range } from "./range";
 export { repeat } from "./repeat";
+export { sizes } from "./sizes";
 export { toInt } from "./toInt";
+export { wait } from "./wait";

@@ -21,12 +21,12 @@
     "typecheck": "yarn test:typecheck"
   },
   "dependencies": {
-    "@adaptui/react": "^1.0.0-0",
     "@fontsource/noto-sans": "^4.5.11",
     "@supabase/supabase-auth-helpers": "^1.4.2",
     "@supabase/supabase-js": "^1.35.7",
     "@upstash/redis": "^1.13.1",
     "@use-gesture/react": "^10.2.24",
+    "@vercel/analytics": "^0.1.10",
     "@vercel/edge-config": "^0.1.1",
     "ariakit": "^2.0.0-next.43",
     "date-fns": "^2.29.3",

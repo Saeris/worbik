@@ -3,6 +3,7 @@ import type { AppProps } from "next/app";
 import { SSRProvider } from "react-aria";
 import { ThemeProvider } from "styled-components";
 import Head from "next/head";
+import { Analytics } from "@vercel/analytics/react";
 import { Global, theme } from "../theme";
 
 const meta = {
@@ -60,6 +61,7 @@ const _app: React.FC<AppProps> = ({ Component, pageProps }) => (
       </Head>
       <Global />
       <Component {...pageProps} />
+      <Analytics />
     </ThemeProvider>
   </SSRProvider>
 );

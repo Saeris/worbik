@@ -1,8 +1,8 @@
 import * as React from "react";
-import { SliderThumbAria, useSliderThumb } from "@react-aria/slider";
-import { AriaSliderThumbProps } from "@react-types/slider";
-
-import { SliderBaseState } from "./useSliderBaseState";
+import type { SliderThumbAria } from "@react-aria/slider";
+import { useSliderThumb } from "@react-aria/slider";
+import type { AriaSliderThumbProps } from "@react-types/slider";
+import type { SliderBaseState } from "./useSliderBaseState";
 
 export type SliderThumbState = SliderThumbAria & {
   /** A ref to the thumb input element. */

@@ -1,6 +1,7 @@
 import { useNumberFormatter } from "@react-aria/i18n";
-import { SliderState, useSliderState } from "@react-stately/slider";
-import { SliderProps as SliderStateProps } from "@react-types/slider";
+import type { SliderState } from "@react-stately/slider";
+import { useSliderState } from "@react-stately/slider";
+import type { SliderProps as SliderStateProps } from "@react-types/slider";
 
 export type SliderBaseState = SliderState & {};
 

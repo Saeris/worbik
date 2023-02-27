@@ -1,4 +1,5 @@
 import React, { useCallback, useRef } from "react";
+import type { FormState } from "ariakit";
 import {
   type SliderBaseStateProps,
   type SliderThumbStateProps,
@@ -6,7 +7,6 @@ import {
   useSliderState,
   useSliderThumbState
 } from "./temp";
-import type { FormState } from "ariakit";
 import { Container, Handle, Track, Value } from "./elements";
 
 const Thumb: React.FC<SliderThumbStateProps> = ({ index, state, ...props }) => {
@@ -47,7 +47,7 @@ export const Slider: React.FC<
       (value: number | number[]) => {
         state.setValue(name, value);
       },
-      [state.setValue, name]
+      [state, name]
     ),
     value: state.values[name],
     ...props

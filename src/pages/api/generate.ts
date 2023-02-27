@@ -4,19 +4,19 @@ import { generate, getDateKey, PuzzleState, sizes, wait } from "../../utils";
 import { filterExpiredDates } from "../../utils/getDateKey";
 
 export const config = {
-  runtime: "nodejs"
+  runtime: `nodejs`
 };
 
 const handler: NextApiHandler = async (req, res) => {
   if (req.method !== `GET`) {
     res.statusMessage = `Only GET requests are accepted!`;
-    return res.status(400).send(null);
+    res.status(400).send(null);
+    return;
   }
 
   const existing = await getAll<Record<string, unknown>>();
 
   const items = [
-    ,
     // We want to delete all keys older than 2 days
     ...Object.keys(existing ?? {})
       .filter(filterExpiredDates)
@@ -57,10 +57,12 @@ const handler: NextApiHandler = async (req, res) => {
 
   // Revalidate all of the puzzle pages
   await Promise.all(
-    sizes.map(([width, height]) => res.revalidate(`/${width}x${height}`))
+    sizes.map(
+      async ([width, height]) => await res.revalidate(`/${width}x${height}`)
+    )
   );
 
-  return res.status(200).json({
+  res.status(200).json({
     status: updatePuzzles.status,
     statusText: updatePuzzles.statusText
   });

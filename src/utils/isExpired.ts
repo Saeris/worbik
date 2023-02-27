@@ -1,6 +1,6 @@
 import { differenceInHours, startOfToday } from "date-fns";
 import { utcToZonedTime } from "date-fns-tz";
-import { dateKeyRegex } from "./getDateKey";
+import { dateKeyRegex } from "./dateKeyRegex";
 
 export const DAYS_UNTIL_EXPIRED = 2 as const;
 

@@ -4,9 +4,9 @@ import {
   createHook
 } from "ariakit-utils/system";
 import { useForkRef, type HTMLProps } from "ariakit-utils";
-import { As, Options, Props } from "ariakit-utils/types";
+import type { As, Options, Props } from "ariakit-utils/types";
 import { mergeProps } from "@react-aria/utils";
-import { SliderState } from "./useSliderState";
+import type { SliderState } from "./useSliderState";
 
 export type SliderTrackOptions<T extends As = "div"> = Options<T> & {
   /**
@@ -28,5 +28,5 @@ export const useSliderTrack = createHook<SliderTrackOptions>(
 );
 
 export const SliderTrack = createComponent<SliderTrackOptions>((props) =>
-  createElement("div", useSliderTrack(props))
+  createElement(`div`, useSliderTrack(props))
 );

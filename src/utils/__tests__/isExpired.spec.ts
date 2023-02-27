@@ -8,6 +8,6 @@ describe(`isExpired`, () => {
 
     expect(invalid).toStrictEqual(false);
     expect(valid).toStrictEqual(true);
-    expect(() => isExpired(`foo_5x5`)).toThrow();
+    expect(() => isExpired(`foo_5x5`)).toThrow(`Could not parse puzzleID: `);
   });
 });

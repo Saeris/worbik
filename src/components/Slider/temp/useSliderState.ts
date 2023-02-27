@@ -1,9 +1,9 @@
 import * as React from "react";
 import { useSlider } from "@react-aria/slider";
-import { AriaSliderProps } from "@react-types/slider";
-import { SliderBaseState } from "./useSliderBaseState";
+import type { AriaSliderProps } from "@react-types/slider";
+import type { SliderBaseState } from "./useSliderBaseState";
 
-export type SliderState = {
+export interface SliderState {
   /**
    * Ref for the "track" element.  The width of this element provides the "length"
    * of the track -- the span of one dimensional space that the slider thumb can be.  It also
@@ -28,7 +28,7 @@ export type SliderState = {
    * Object returned by the `useSliderBaseState` hook.
    */
   baseState: SliderBaseState;
-};
+}
 
 export type SliderStateProps = AriaSliderProps & {
   /**

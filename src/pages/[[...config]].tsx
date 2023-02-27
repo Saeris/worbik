@@ -1,5 +1,5 @@
 import type { GetStaticPaths, GetStaticProps } from "next/types";
-import { get, getAll } from "@vercel/edge-config";
+import { get } from "@vercel/edge-config";
 import { Game } from "../routes/Game";
 import { getDateKey, puzzleSchema, sizes } from "../utils";
 import type { GameProps } from "../routes/Game";
@@ -27,11 +27,9 @@ export const getStaticProps: GetStaticProps<GameProps> = async (ctx) => {
   };
 };
 
-export const getStaticPaths: GetStaticPaths = () => {
-  return {
-    paths: sizes.map(([width, height]) => `/${width}x${height}` as const),
-    fallback: "blocking"
-  };
-};
+export const getStaticPaths: GetStaticPaths = () => ({
+  paths: sizes.map(([width, height]) => `/${width}x${height}` as const),
+  fallback: `blocking`
+});
 
 export default Game;

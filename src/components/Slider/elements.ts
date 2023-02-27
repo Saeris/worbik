@@ -1,4 +1,5 @@
-import styled, { css } from "styled-components";
+import { styled, css } from "styled-components";
+import type { Component } from "ariakit-utils";
 import {
   Slider,
   SliderThumb,
@@ -7,7 +8,6 @@ import {
   type SliderThumbOptions,
   type SliderTrackOptions
 } from "./temp";
-import type { Component } from "ariakit-utils";
 
 export const Handle = styled<Component<SliderThumbOptions>>(SliderThumb)(
   () => css`

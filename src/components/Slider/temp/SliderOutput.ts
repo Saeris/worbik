@@ -3,9 +3,9 @@ import {
   createElement,
   createHook
 } from "ariakit-utils/system";
-import { As, Options, Props } from "ariakit-utils/types";
+import type { As, Options, Props } from "ariakit-utils/types";
 import { mergeProps } from "@react-aria/utils";
-import { SliderState } from "./useSliderState";
+import type { SliderState } from "./useSliderState";
 
 export type SliderOutputOptions<T extends As = "output"> = Options<T> & {
   /**
@@ -23,5 +23,5 @@ export const useSliderOutput = createHook<SliderOutputOptions>(
 );
 
 export const SliderOutput = createComponent<SliderOutputOptions>((props) =>
-  createElement("output", useSliderOutput(props))
+  createElement(`output`, useSliderOutput(props))
 );

@@ -5,10 +5,10 @@ import {
   createHook
 } from "ariakit-utils/system";
 import { VisuallyHidden } from "ariakit";
-import { As, Options, Props, HTMLProps } from "ariakit-utils/types";
+import type { As, Options, Props, HTMLProps } from "ariakit-utils/types";
 import { mergeProps } from "@react-aria/utils";
 import { SliderInput } from "./SliderInput";
-import { SliderThumbState } from "./useSliderThumbState";
+import type { SliderThumbState } from "./useSliderThumbState";
 
 export type SliderThumbOptions<T extends As = "div"> = Options<T> & {
   /**
@@ -34,5 +34,5 @@ export const useSliderThumb = createHook<SliderThumbOptions>(
 );
 
 export const SliderThumb = createComponent<SliderThumbOptions>((props) =>
-  createElement("div", useSliderThumb(props))
+  createElement(`div`, useSliderThumb(props))
 );

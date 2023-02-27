@@ -4,9 +4,9 @@ import {
   createHook
 } from "ariakit-utils/system";
 import { useForkRef, type HTMLProps } from "ariakit-utils";
-import { As, Options, Props } from "ariakit-utils/types";
+import type { As, Options, Props } from "ariakit-utils/types";
 import { mergeProps } from "@react-aria/utils";
-import { SliderThumbState } from "./useSliderThumbState";
+import type { SliderThumbState } from "./useSliderThumbState";
 
 export type SliderInputOptions<T extends As = "input"> = Options<T> & {
   /**
@@ -28,5 +28,5 @@ export const useSliderInput = createHook<SliderInputOptions>(
 );
 
 export const SliderInput = createComponent<SliderInputOptions>((props) =>
-  createElement("input", useSliderInput(props))
+  createElement(`input`, useSliderInput(props))
 );

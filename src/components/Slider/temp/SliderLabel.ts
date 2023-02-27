@@ -3,9 +3,9 @@ import {
   createElement,
   createHook
 } from "ariakit-utils/system";
-import { As, Options, Props } from "ariakit-utils/types";
+import type { As, Options, Props } from "ariakit-utils/types";
 import { mergeProps } from "@react-aria/utils";
-import { SliderState } from "./useSliderState";
+import type { SliderState } from "./useSliderState";
 
 export type SliderLabelOptions<T extends As = "label"> = Options<T> & {
   /**
@@ -23,5 +23,5 @@ export const useSliderLabel = createHook<SliderLabelOptions>(
 );
 
 export const SliderLabel = createComponent<SliderLabelOptions>((props) =>
-  createElement("label", useSliderLabel(props))
+  createElement(`label`, useSliderLabel(props))
 );

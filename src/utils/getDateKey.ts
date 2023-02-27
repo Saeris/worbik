@@ -1,7 +1,6 @@
+import { dateKeyRegex } from "./dateKeyRegex";
 import { DAYS_UNTIL_EXPIRED, isExpired } from "./isExpired";
 import type { PuzzleSchema } from "./puzzleSchema";
-
-export const dateKeyRegex = /^(?<date>(?:\d+?-?)+)_(?<width>\d)x(?<height>\d)$/;
 
 const toDateString = (date: Date): string =>
   date
@@ -12,7 +11,7 @@ const toDateString = (date: Date): string =>
     })
     .replaceAll(`/`, `-`);
 
-export const getExpiredDateKey = () => {
+export const getExpiredDateKey = (): string => {
   const date = new Date();
   date.setDate(date.getDate() - DAYS_UNTIL_EXPIRED);
   return toDateString(date);

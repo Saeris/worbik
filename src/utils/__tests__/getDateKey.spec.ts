@@ -1,11 +1,10 @@
+import { dateKeyRegex } from "../dateKeyRegex";
+import type { DateKey } from "../getDateKey";
 import {
   getDateKey,
-  dateKeyRegex,
   getExpiredDateKey,
-  DateKey,
   filterExpiredDates
 } from "../getDateKey";
-import { isExpired } from "../isExpired";
 
 describe(`getDateKey`, () => {
   it(`generates a cache key based on the current date`, () => {
@@ -48,7 +47,7 @@ describe(`filterExpiredDates`, () => {
       `${getExpiredDateKey()}_7x7`
     ];
 
-    expect(actual.length).toStrictEqual(3);
+    expect(actual).toHaveLength(3);
     expect(actual).toStrictEqual(expected);
   });
 });

@@ -53,7 +53,7 @@ export class PuzzleState {
   }
 
   get snapshot(): string {
-    return `${this.#history.join(`,`)}_${this.#hints.flat().join(``)}`;
+    return `${this.#history.join(`,`)},${this.#hints.flat().join(``)}`;
   }
 
   constructor(init: string) {

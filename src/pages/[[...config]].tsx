@@ -1,4 +1,4 @@
-import type { GetStaticPaths, GetStaticProps } from "next";
+import type { GetStaticPaths, GetStaticProps } from "next/types";
 import { get, getAll } from "@vercel/edge-config";
 import { Game } from "../routes/Game";
 import { getDateKey, puzzleSchema, sizes } from "../utils";
@@ -14,10 +14,11 @@ export const getStaticProps: GetStaticProps<GameProps> = async (ctx) => {
     challenge: string;
     solution: string;
   }>(puzzleID);
+
   if (typeof cachedPuzzle === `undefined`) {
     throw new Error(`Unable to retrieve cached puzzle id: ${puzzleID}`);
   }
-  console.log(await getAll());
+
   return {
     props: {
       puzzleID,
@@ -28,7 +29,7 @@ export const getStaticProps: GetStaticProps<GameProps> = async (ctx) => {
 
 export const getStaticPaths: GetStaticPaths = () => {
   return {
-    paths: sizes.map(([width, height]) => `${width}x${height}` as const),
+    paths: sizes.map(([width, height]) => `/${width}x${height}` as const),
     fallback: "blocking"
   };
 };

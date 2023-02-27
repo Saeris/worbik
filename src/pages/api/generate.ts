@@ -1,14 +1,43 @@
 import { getAll } from "@vercel/edge-config";
-import { NextApiHandler } from "next";
-import { NextResponse } from "next/server";
+import type { NextApiHandler } from "next/types";
 import { generate, getDateKey, PuzzleState, sizes, wait } from "../../utils";
 import { filterExpiredDates } from "../../utils/getDateKey";
+
+export const config = {
+  runtime: "nodejs"
+};
 
 const handler: NextApiHandler = async (req, res) => {
   if (req.method !== `GET`) {
     res.statusMessage = `Only GET requests are accepted!`;
     return res.status(400).send(null);
   }
+
+  const existing = await getAll<Record<string, unknown>>();
+
+  const items = [
+    ,
+    // We want to delete all keys older than 2 days
+    ...Object.keys(existing ?? {})
+      .filter(filterExpiredDates)
+      .map((key) => ({ operation: `delete`, key })),
+    ...sizes.map(([width, height]) => {
+      const puzzle = generate({ width, height });
+      const solution = puzzle.initial.toString();
+      const challenge = PuzzleState.compare(puzzle.toString(), solution);
+      return {
+        operation: `create`,
+        key: getDateKey({
+          width,
+          height
+        }),
+        value: {
+          challenge,
+          solution
+        }
+      } as const;
+    })
+  ];
 
   const updatePuzzles = await fetch(
     `https://api.vercel.com/v1/edge-config/${process.env.EDGE_CONFIG_ID}/items`,
@@ -19,30 +48,7 @@ const handler: NextApiHandler = async (req, res) => {
         "Content-Type": `application/json`
       }),
       body: JSON.stringify({
-        items: [
-          ...sizes.map(([width, height]) => {
-            const puzzle = generate({ width, height });
-            const solution = puzzle.initial.toString();
-            const challenge = PuzzleState.compare(puzzle.toString(), solution);
-            return [
-              {
-                operation: `create`,
-                key: getDateKey({
-                  width,
-                  height
-                }),
-                value: {
-                  challenge,
-                  solution
-                }
-              } as const
-            ];
-          }),
-          // We also want to delete all keys older than 2 days
-          ...Object.keys((await getAll<Record<string, unknown>>()) ?? {})
-            .filter(filterExpiredDates)
-            .map((key) => ({ operation: `delete`, key }))
-        ]
+        items
       })
     }
   );
@@ -54,7 +60,7 @@ const handler: NextApiHandler = async (req, res) => {
     sizes.map(([width, height]) => res.revalidate(`/${width}x${height}`))
   );
 
-  return NextResponse.json(null, {
+  return res.status(200).json({
     status: updatePuzzles.status,
     statusText: updatePuzzles.statusText
   });

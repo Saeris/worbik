@@ -3,7 +3,12 @@
   "ts-node": {
     "transpileOnly": true
   },
-  "include": ["./src/**/*", "./scripts/**/*"],
+  "include": [
+    ".next/types/**/*.ts",
+    "./src/**/*",
+    "./scripts/**/*",
+    ".next/types/**/*.ts"
+  ],
   "exclude": [
     "node_modules",
     "**/__mocks__/**/*",
@@ -43,6 +48,11 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "incremental": true,
-    "noErrorTruncation": true
+    "noErrorTruncation": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   }
 }

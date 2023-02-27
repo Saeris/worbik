@@ -1,5 +1,4 @@
-import type { NextMiddleware } from "next/server";
-import { NextResponse } from "next/server";
+import { type NextMiddleware, NextResponse } from "next/server";
 import { get } from "@vercel/edge-config";
 import { PuzzleState } from "../../utils";
 

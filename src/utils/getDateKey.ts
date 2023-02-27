@@ -1,6 +1,5 @@
+import { DAYS_UNTIL_EXPIRED, isExpired } from "./isExpired";
 import type { PuzzleSchema } from "./puzzleSchema";
-
-export const DAYS_UNTIL_EXPIRED = 2 as const;
 
 export const dateKeyRegex = /^(?<date>(?:\d+?-?)+)_(?<width>\d)x(?<height>\d)$/;
 
@@ -27,22 +26,9 @@ export const getDateKey = ({
 
 export type DateKey = ReturnType<typeof getDateKey>;
 
-export const isExpiredKey = (key: DateKey): boolean => {
-  const date = dateKeyRegex.exec(key);
-
-  if (typeof date?.groups?.date !== `string`) {
-    throw new Error(`Could not parse date key: ${key}`);
-  }
-
-  return (
-    toDateString(new Date(date.groups.date.replace(`-`, `/`))) ===
-    getExpiredDateKey()
-  );
-};
-
 /**
  * Tests whether the given key is both a valid `DateKey`
  * and is expired.
  */
 export const filterExpiredDates = (key: string): boolean =>
-  dateKeyRegex.test(key) && isExpiredKey(key as DateKey);
+  dateKeyRegex.test(key) && isExpired(key as DateKey);

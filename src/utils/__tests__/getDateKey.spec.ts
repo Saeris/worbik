@@ -2,10 +2,10 @@ import {
   getDateKey,
   dateKeyRegex,
   getExpiredDateKey,
-  isExpiredKey,
   DateKey,
   filterExpiredDates
 } from "../getDateKey";
+import { isExpired } from "../isExpired";
 
 describe(`getDateKey`, () => {
   it(`generates a cache key based on the current date`, () => {
@@ -28,16 +28,6 @@ describe(`getDateKey`, () => {
   });
 });
 
-describe(`isExpiredKey`, () => {
-  it(`correctly validates date strings`, () => {
-    const invalid = isExpiredKey(getDateKey());
-    const valid = isExpiredKey(`${getExpiredDateKey()}_5x5`);
-
-    expect(invalid).toStrictEqual(false);
-    expect(valid).toStrictEqual(true);
-    expect(() => isExpiredKey(`foo_5x5`)).toThrow();
-  });
-});
 describe(`filterExpiredDates`, () => {
   it(`can be used to filter edge config keys`, () => {
     const actual = (

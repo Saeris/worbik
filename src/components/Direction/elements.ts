@@ -1,4 +1,4 @@
-import { styled, css } from "styled-components";
+import styled, { css } from "styled-components";
 import { Button as Base } from "ariakit/button";
 
 export const Button = styled(Base)<{ $orientation: boolean }>(

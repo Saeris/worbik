@@ -4,7 +4,7 @@ import { Puzzle } from "./Puzzle/Puzzle";
 import { Main, Title } from "./elements";
 import { usePuzzle } from "./usePuzzleState";
 import { Guide } from "./Guide";
-import { Settings } from "./Settings";
+import { Config } from "./Config";
 
 export interface GameProps {
   puzzleID: string;
@@ -23,9 +23,9 @@ export const Game: NextPage<GameProps> = ({ puzzleID, challenge }) => {
     <Main>
       <Title>
         Worbik
+        <Config />
         <Guide width={state.initial.width} height={state.initial.height} />
       </Title>
-      <Settings initial={state.config} />
       <Puzzle puzzleID={puzzleID} state={state} />
       {state.win ? <p>{winMessage()}</p> : <p>{`Moves: ${state.moves}`}</p>}
     </Main>

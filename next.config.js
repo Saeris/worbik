@@ -14,7 +14,6 @@ const nextConfig = {
     defaultLocale: "en"
   },
   experimental: {
-    typedRoutes: true,
     runtime: "experimental-edge"
   },
   productionBrowserSourceMaps: process.env.VERCEL_ENV !== `production`,

@@ -1,12 +1,16 @@
 import { getAll } from "@vercel/edge-config";
 import type { NextApiHandler } from "next/types";
-import { generate, getDateKey, PuzzleState, sizes, wait } from "../../utils";
+import { generate, getDateKey, PuzzleState, sizes } from "../../utils";
 import { filterExpiredDates } from "../../utils/getDateKey";
 
 export const config = {
   runtime: `nodejs`
 };
 
+/**
+ * Generates new puzzles once daily at 10 PM,
+ * deleting puzzles that are 3 days old
+ */
 const handler: NextApiHandler = async (req, res) => {
   if (req.method !== `GET`) {
     res.statusMessage = `Only GET requests are accepted!`;
@@ -21,6 +25,7 @@ const handler: NextApiHandler = async (req, res) => {
     ...Object.keys(existing ?? {})
       .filter(filterExpiredDates)
       .map((key) => ({ operation: `delete`, key })),
+    // Generate tomorrow's puzzles
     ...sizes.map(([width, height]) => {
       const puzzle = generate({ width, height });
       const solution = puzzle.initial.toString();
@@ -51,15 +56,6 @@ const handler: NextApiHandler = async (req, res) => {
         items
       })
     }
-  );
-
-  await wait(10000); // Wait 10s for the changes to propagate
-
-  // Revalidate all of the puzzle pages
-  await Promise.all(
-    sizes.map(
-      async ([width, height]) => await res.revalidate(`/${width}x${height}`)
-    )
   );
 
   res.status(200).json({

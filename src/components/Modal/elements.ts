@@ -1,6 +1,6 @@
 import { Button } from "ariakit/button";
 import { Dialog } from "ariakit/dialog";
-import { styled, css } from "styled-components";
+import styled, { css } from "styled-components";
 
 export const Open = styled(Button)(
   ({ theme }) => css`
@@ -44,5 +44,36 @@ export const Container = styled(Dialog)(
     font-weight: 300;
     filter: drop-shadow(0 16px 24px rgba(0, 0, 0, 15%));
     transform: translate(-50%, -60%);
+  `
+);
+
+export const ModalHeader = styled.header(
+  ({ theme }) => css`
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid ${theme.colors.neutral.border};
+
+    button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 44px;
+      height: 44px;
+      border: 0.5px solid ${theme.colors.neutral.border};
+      border-radius: 2px;
+      background: ${theme.colors.neutral.bg};
+      color: ${theme.colors.neutral.text};
+      cursor: pointer;
+
+      &:hover,
+      &:focus {
+        background: ${theme.colors.info.bg};
+        border-color: ${theme.colors.info.border};
+        color: ${theme.colors.info.text};
+        outline: none;
+      }
+    }
   `
 );

@@ -4,7 +4,7 @@ import { SSRProvider } from "react-aria";
 import { ThemeProvider } from "styled-components";
 import Head from "next/head";
 // eslint-disable-next-line import/no-unresolved
-import { Analytics } from "@vercel/analytics/react";
+// import { Analytics } from "@vercel/analytics/react";
 import { Global, theme } from "../theme";
 
 const meta = {
@@ -106,7 +106,7 @@ const _app: React.FC<AppProps> = ({ Component, pageProps }) => (
       </Head>
       <Global />
       <Component {...pageProps} />
-      <Analytics />
+      {/* <Analytics /> */}
     </ThemeProvider>
   </SSRProvider>
 );

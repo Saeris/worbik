@@ -9,11 +9,12 @@ import type { PuzzleSchema } from "./puzzleSchema";
  *
  * `${month}-${day}-${year}_${width}x${height}`
  */
-export const getDateKey = ({
-  width = 5,
-  height = 5
-}: PuzzleSchema = {}): `${string}_${number}x${number}` =>
-  `${getDateFromToday(1)}_${width}x${height}`;
+export const getDateKey = (
+  { width = 5, height = 5 }: PuzzleSchema = {},
+  /** By default, date keys will be for the next calendar day */
+  dayOffset: number = 1
+): `${string}_${number}x${number}` =>
+  `${getDateFromToday(dayOffset)}_${width}x${height}`;
 
 export type DateKey = ReturnType<typeof getDateKey>;
 

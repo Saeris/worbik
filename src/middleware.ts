@@ -18,6 +18,8 @@ export const middleware: NextMiddleware = (req) => {
     } as const;
     // The referer must match a valid host or the request is bounced
     if (!referer?.includes(hosts[process.env.VERCEL_ENV])) {
+      // eslint-disable-next-line no-console
+      console.log({ referer, hosts });
       return NextResponse.json({ message: `Unauthorized` }, { status: 401 });
     }
   }

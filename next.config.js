@@ -13,10 +13,8 @@ const nextConfig = {
     locales: ["en"],
     defaultLocale: "en"
   },
-  experimental: {
-    runtime: "experimental-edge"
-  },
   productionBrowserSourceMaps: process.env.VERCEL_ENV !== `production`,
+  swcMinify: true,
   webpack: (config) => {
     config.module.rules.push({
       test: [/(components|utils)\/index.ts$/i],

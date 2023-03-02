@@ -1,1 +1,2 @@
-export const puzzleRegex = /^(?<perRow>\d+)(?<chars>[a-z]+)(?<target>\d+)?$/i;
+export const puzzleRegex =
+  /^(?<perRow>\d+)_(?<chars>[a-z]+)_?(?<target>\d+)?$/i;

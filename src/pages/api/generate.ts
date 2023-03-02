@@ -1,85 +1,67 @@
-import { Redis } from "@upstash/redis";
-import type { NextMiddleware } from "next/server";
-import { NextResponse } from "next/server";
-import { generate, getDateKey, PuzzleState, toInt } from "../../utils";
-
-const valid = (n: number): boolean => n > 4 && n < 9;
+import { getAll } from "@vercel/edge-config";
+import type { NextApiHandler } from "next/types";
+import { generate, getDateKey, PuzzleState, sizes } from "../../utils";
+import { filterExpiredDates } from "../../utils/getDateKey";
 
 export const config = {
-  // eslint-disable-next-line @typescript-eslint/quotes
-  runtime: "experimental-edge"
+  runtime: `nodejs`
 };
 
-const handler: NextMiddleware = async (req) => {
+/**
+ * Generates new puzzles once daily at 10 PM,
+ * deleting puzzles that are 3 days old
+ */
+const handler: NextApiHandler = async (req, res) => {
   if (req.method !== `GET`) {
-    return NextResponse.json(null, {
-      status: 400,
-      statusText: `Only GET requests are accepted!`
-    });
+    res.statusMessage = `Only GET requests are accepted!`;
+    res.status(400).send(null);
+    return;
   }
 
-  const { searchParams, origin } = new URL(req.url);
-  const width = toInt(searchParams.get(`width`));
-  const height = toInt(searchParams.get(`height`));
-  const missing = !width && !height;
-  const invalid = !valid(width) && !valid(height);
+  const existing = await getAll<Record<string, unknown>>();
 
-  if (missing || invalid) {
-    return NextResponse.json(null, {
-      status: 400,
-      statusText: `Must provide a valid "length" or "count" parameter!`
-    });
-  }
-
-  const puzzleID = getDateKey({ width, height });
-  const url = new URL(`/api/cacheGet`, origin);
-  url.searchParams.set(`key`, puzzleID);
-  const cachedPair = await (await fetch(url.href)).json();
-
-  if (cachedPair) {
-    const [puzzle, solution] = cachedPair.split(`|`);
-    const challenge = PuzzleState.compare(puzzle, solution);
-
-    return NextResponse.json(
-      {
-        puzzleID,
-        challenge
-      },
-      {
-        status: 200,
-        headers: {
-          "Cache-Control": `max-age=0, s-maxage=86400`
+  const items = [
+    // We want to delete all keys older than 2 days
+    ...Object.keys(existing ?? {})
+      .filter(filterExpiredDates)
+      .map((key) => ({ operation: `delete`, key })),
+    // Generate tomorrow's puzzles
+    ...sizes.map(([width, height]) => {
+      const puzzle = generate({ width, height });
+      const solution = puzzle.initial.toString();
+      const challenge = PuzzleState.compare(puzzle.toString(), solution);
+      return {
+        operation: `create`,
+        key: getDateKey({
+          width,
+          height
+        }),
+        value: {
+          challenge,
+          solution
         }
-      }
-    );
-  }
+      } as const;
+    })
+  ];
 
-  const redis = new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL ?? ``,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN ?? ``
-  });
-
-  const puzzle = generate({ width, height });
-  const solution = puzzle.initial.toString();
-  const challenge = PuzzleState.compare(puzzle.toString(), solution);
-
-  await redis.set(puzzleID, `${challenge}|${solution}`, {
-    ex: 86400,
-    nx: true
-  });
-
-  return NextResponse.json(
+  const updatePuzzles = await fetch(
+    `https://api.vercel.com/v1/edge-config/${process.env.EDGE_CONFIG_ID}/items`,
     {
-      puzzleID,
-      challenge
-    },
-    {
-      status: 200,
-      headers: {
-        "Cache-Control": `max-age=0, s-maxage=86400`
-      }
+      method: `PATCH`,
+      headers: new Headers({
+        Authorization: `Bearer ${process.env.VERCEL_ACCESS_TOKEN}`,
+        "Content-Type": `application/json`
+      }),
+      body: JSON.stringify({
+        items
+      })
     }
   );
+
+  res.status(200).json({
+    status: updatePuzzles.status,
+    statusText: updatePuzzles.statusText
+  });
 };
 
 export default handler;

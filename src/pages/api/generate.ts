@@ -44,24 +44,32 @@ const handler: NextApiHandler = async (req, res) => {
     })
   ];
 
-  const updatePuzzles = await fetch(
-    `https://api.vercel.com/v1/edge-config/${process.env.EDGE_CONFIG_ID}/items`,
-    {
-      method: `PATCH`,
-      headers: new Headers({
-        Authorization: `Bearer ${process.env.VERCEL_ACCESS_TOKEN}`,
-        "Content-Type": `application/json`
-      }),
-      body: JSON.stringify({
-        items
-      })
-    }
-  );
+  try {
+    const updatePuzzles = await fetch(
+      `https://api.vercel.com/v1/edge-config/${process.env.EDGE_CONFIG_ID}/items`,
+      {
+        method: `PATCH`,
+        headers: new Headers({
+          Authorization: `Bearer ${process.env.VERCEL_ACCESS_TOKEN}`,
+          "Content-Type": `application/json`
+        }),
+        body: JSON.stringify({
+          items
+        })
+      }
+    );
 
-  res.status(200).json({
-    status: updatePuzzles.status,
-    statusText: updatePuzzles.statusText
-  });
+    res.status(200).json({
+      status: updatePuzzles.status,
+      statusText: updatePuzzles.statusText
+    });
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+    res.status(500).json(null);
+  }
 };
 
 export default handler;

@@ -5,7 +5,9 @@ export const middleware: NextMiddleware = (req) => {
 
   if (pathname.startsWith(`/api/`)) {
     if (
-      !req.headers.get(`referer`)?.includes(process.env.APP_URL ?? `localhost`)
+      !req.headers
+        .get(`referer`)
+        ?.includes(process.env.VERCEL_URL || `localhost`)
     ) {
       return NextResponse.json({ message: `Unauthorized` }, { status: 401 });
     }

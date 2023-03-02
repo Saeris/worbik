@@ -10,7 +10,7 @@ export interface ModalProps extends Partial<DialogState> {
 
 export const Modal: React.FC<ModalProps> = ({
   label = ``,
-  children,
+  children = null,
   ...props
 }) => {
   const dialog = useDialogState(props);

@@ -1,9 +1,8 @@
 import React from "react";
 import { DialogDismiss, DialogHeading } from "ariakit/dialog";
 import { MdOutlineInfo } from "react-icons/md";
-import { Modal } from "../../../components/Modal";
+import { Modal, ModalHeader } from "../../../components/Modal";
 import { Character, Hint, Row } from "../Puzzle/elements";
-import { ModalHeader } from "./elements";
 
 const numbers = {
   5: `five`,

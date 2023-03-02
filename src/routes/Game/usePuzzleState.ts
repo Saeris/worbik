@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useSyncExternalStore } from "react";
-import { Grid, isExpired, PuzzleState } from "../../utils";
-import { dateKeyRegex } from "../../utils/getDateKey";
+import { Grid, PuzzleState } from "../../utils";
+import { filterExpiredDates } from "../../utils/getDateKey";
 
 const useMatrix = (state: PuzzleState): string =>
   useSyncExternalStore(
@@ -50,6 +50,7 @@ export const usePuzzle = (
 ): Pick<
   PuzzleState,
   | "hints"
+  | "config"
   | "history"
   | "moves"
   | "win"
@@ -78,7 +79,7 @@ export const usePuzzle = (
       }
       // purge puzzles older than yesterday, utc-0 + 32hrs
       Object.keys(localStorage).forEach((key) => {
-        if (dateKeyRegex.test(key) && isExpired(key)) {
+        if (filterExpiredDates(key)) {
           localStorage.removeItem(key);
         }
       });
@@ -88,6 +89,7 @@ export const usePuzzle = (
   return {
     initial: state.initial,
     current,
+    config: state.config,
     hints,
     history,
     moves,

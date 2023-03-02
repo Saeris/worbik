@@ -13,17 +13,20 @@ const nextConfig = {
     locales: ["en"],
     defaultLocale: "en"
   },
-  experimental: {
-    runtime: "experimental-edge",
-    images: { allowFutureImage: true }
+  productionBrowserSourceMaps: process.env.VERCEL_ENV !== `production`,
+  swcMinify: true,
+  webpack: (config) => {
+    config.module.rules.push({
+      test: [/(components|utils)\/index.ts$/i],
+      sideEffects: false
+    });
+
+    return config;
   }
 };
 
 module.exports = withPWA({
-  pwa: {
-    dest: "public",
-    disable: process.env.NODE_ENV !== "production",
-    runtimeCaching
-  },
-  ...nextConfig
-});
+  dest: "public",
+  disable: process.env.NODE_ENV !== "production",
+  runtimeCaching
+})(nextConfig);

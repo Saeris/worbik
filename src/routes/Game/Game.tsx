@@ -1,9 +1,10 @@
 import React from "react";
-import type { NextPage } from "next";
+import type { NextPage } from "next/types";
 import { Puzzle } from "./Puzzle/Puzzle";
 import { Main, Title } from "./elements";
 import { usePuzzle } from "./usePuzzleState";
 import { Guide } from "./Guide";
+import { Config } from "./Config";
 
 export interface GameProps {
   puzzleID: string;
@@ -22,6 +23,7 @@ export const Game: NextPage<GameProps> = ({ puzzleID, challenge }) => {
     <Main>
       <Title>
         Worbik
+        <Config />
         <Guide width={state.initial.width} height={state.initial.height} />
       </Title>
       <Puzzle puzzleID={puzzleID} state={state} />

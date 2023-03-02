@@ -8,7 +8,7 @@ export const generate = ({
   height = 5
 }: PuzzleSchema = {}): PuzzleState =>
   new PuzzleState(
-    `${width}${drawNRandom(
+    `${width}_${drawNRandom(
       Object.assign(new Array<string>(wordlist[width].length), wordlist[width]),
       height
     ).join(``)}`

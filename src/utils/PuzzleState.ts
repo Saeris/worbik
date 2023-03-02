@@ -24,6 +24,13 @@ export class PuzzleState {
     return this.#grid;
   }
 
+  get config(): { width: number; height: number } {
+    return {
+      width: this.#grid.width,
+      height: this.#grid.height
+    };
+  }
+
   get history(): string[] {
     return this.#history;
   }
@@ -46,11 +53,12 @@ export class PuzzleState {
   }
 
   get snapshot(): string {
-    return `${this.#history.join(`|`)}|${this.#hints.flat().join(``)}`;
+    return `${this.#history.join(`,`)},${this.#hints.flat().join(``)}`;
   }
 
   constructor(init: string) {
-    const parsed = puzzleRegex.exec(init);
+    init; //?
+    const parsed = puzzleRegex.exec(init); //?
 
     if (!parsed?.groups || !parsed.groups.chars || !parsed.groups.perRow) {
       throw new Error(`Could not parse init string! Received: ${init}`);
@@ -93,7 +101,7 @@ export class PuzzleState {
           .every((char, i) => char.toLowerCase() === value.charAt(i))
       ) {
         this.#win = true;
-        const winningState = `${this.#grid.width}${value}`;
+        const winningState = `${this.#grid.width}_${value}`;
         // Set #current to the winning grid state
         this.#grid = Grid.fromString(winningState);
         // Discard history after the first time a winning state was achieved
@@ -107,7 +115,7 @@ export class PuzzleState {
   };
 
   restore = (snapshot: string): PuzzleState => {
-    const history = snapshot.split(`|`);
+    const history = snapshot.split(`,`);
     const hint = history.pop();
     const current = history[history.length - 1];
     if (!hint || !current) {
@@ -207,7 +215,7 @@ export class PuzzleState {
     return this;
   };
 
-  toString = (): string => `${String(this.current)}${this.moves}`;
+  toString = (): string => `${String(this.current)}_${this.moves}`;
 
   toJSON = (): {
     current: ReturnType<Grid["toJSON"]>;

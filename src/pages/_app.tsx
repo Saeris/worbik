@@ -1,7 +1,10 @@
 import React from "react";
 import type { AppProps } from "next/app";
+import { SSRProvider } from "react-aria";
 import { ThemeProvider } from "styled-components";
 import Head from "next/head";
+// eslint-disable-next-line import/no-unresolved
+// import { Analytics } from "@vercel/analytics/react";
 import { Global, theme } from "../theme";
 
 const meta = {
@@ -13,52 +16,99 @@ const meta = {
   color: `#ffffff`
 };
 
+/* Nextjs 13.2 Metadata
+export const metadata: Metadata = {
+  title: "Worbik",
+  description: "Word Puzzle Mini-Game",
+  creator: "Drake Costa",
+  authors: [{ name: "Drake Costa", url: "https://saeris.gg" }],
+  manifest: "/manifest.json",
+  themeColor: "#ffffff",
+  openGraph: {
+    title: "Worbik",
+    description: "Word Puzzle Mini-Game",
+    url: "https://worbik.saeris.io",
+    siteName: "Worbik",
+    images: [
+      {
+        url: "/share-card.webp",
+        width: 1200,
+        height: 628
+      }
+    ],
+    locale: "en-US",
+    type: "website"
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Worbik",
+    description: "Word Puzzle Mini-Game",
+    creator: "@saeris",
+    images: ["/share-card.webp"]
+  },
+  icons: {
+    shortcut: "/favicon.ico",
+    apple: [
+      { url: "/logo192.png", sizes: "192x192", type: "image/png" },
+      { url: "/logo512.png", sizes: "512x512", type: "image/png" }
+    ]
+  },
+  appleWebApp: {
+    title: "Worbik",
+    statusBarStyle: "black-translucent"
+  }
+};
+*/
+
 const _app: React.FC<AppProps> = ({ Component, pageProps }) => (
-  <ThemeProvider theme={theme}>
-    <Head>
-      <title>{meta.title}</title>
-      <link rel="shortcut icon" href="/favicon.ico" />
-      <link rel="manifest" href="/manifest.json" />
-      <meta name="theme-color" content={meta.color} />
-      <meta name="description" content={meta.description} />
-      <meta name="image" content={meta.image} />
-      {/* OpenGraph */}
-      <meta property="og:title" content={meta.title} />
-      <meta property="og:description" content={meta.description} />
-      <meta property="og:locale" content={meta.locale} />
-      <meta property="og:image" content={meta.image} />
-      <meta property="og:image:alt" content={meta.image} />
-      {/* Twitter */}
-      <meta name="twitter:title" content={meta.title} />
-      <meta name="twitter:description" content={meta.description} />
-      <meta name="twitter:creator" content={meta.twitter} />
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:image" content={meta.image} />
-      <meta name="twitter:image:alt" content={meta.title} />
-      {/* iOS */}
-      <link
-        rel="apple-touch-icon"
-        type="image/png"
-        sizes="192x192"
-        href="/logo192.png"
-      />
-      <meta
-        name="apple-mobile-web-app-status-bar"
-        content="black-translucent"
-      />
-      <meta name="apple-mobile-web-app-capable" content="yes" />
-      <meta
-        name="apple-mobile-web-app-status-bar-style"
-        content="black-translucent"
-      />
-      <meta
-        name="viewport"
-        content="viewport-fit=cover, width=device-width, initial-scale=1"
-      />
-    </Head>
-    <Global />
-    <Component {...pageProps} />
-  </ThemeProvider>
+  <SSRProvider>
+    <ThemeProvider theme={theme}>
+      <Head>
+        <title>{meta.title}</title>
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content={meta.color} />
+        <meta name="description" content={meta.description} />
+        <meta name="image" content={meta.image} />
+        {/* OpenGraph */}
+        <meta property="og:title" content={meta.title} />
+        <meta property="og:description" content={meta.description} />
+        <meta property="og:locale" content={meta.locale} />
+        <meta property="og:image" content={meta.image} />
+        <meta property="og:image:alt" content={meta.image} />
+        {/* Twitter */}
+        <meta name="twitter:title" content={meta.title} />
+        <meta name="twitter:description" content={meta.description} />
+        <meta name="twitter:creator" content={meta.twitter} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content={meta.image} />
+        <meta name="twitter:image:alt" content={meta.title} />
+        {/* iOS */}
+        <link
+          rel="apple-touch-icon"
+          type="image/png"
+          sizes="192x192"
+          href="/logo192.png"
+        />
+        <meta
+          name="apple-mobile-web-app-status-bar"
+          content="black-translucent"
+        />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
+        <meta
+          name="viewport"
+          content="viewport-fit=cover, width=device-width, initial-scale=1"
+        />
+      </Head>
+      <Global />
+      <Component {...pageProps} />
+      {/* <Analytics /> */}
+    </ThemeProvider>
+  </SSRProvider>
 );
 
 export default _app;

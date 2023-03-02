@@ -1,6 +1,8 @@
 import { differenceInHours, startOfToday } from "date-fns";
 import { utcToZonedTime } from "date-fns-tz";
-import { dateKeyRegex } from "./getDateKey";
+import { dateKeyRegex } from "./dateKeyRegex";
+
+export const DAYS_UNTIL_EXPIRED = 2 as const;
 
 export const isExpired = (puzzleID: string): boolean => {
   const parsed = dateKeyRegex.exec(puzzleID);
@@ -11,6 +13,7 @@ export const isExpired = (puzzleID: string): boolean => {
     differenceInHours(
       utcToZonedTime(startOfToday(), `Europe/Dublin`),
       new Date(parsed.groups.date)
-    ) > 32
+    ) >
+    DAYS_UNTIL_EXPIRED * 24
   );
 };

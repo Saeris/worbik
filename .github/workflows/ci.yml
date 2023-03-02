@@ -32,7 +32,7 @@ jobs:
           cache: "yarn"
 
       - name: Install dependencies
-        run: yarn
+        run: yarn install --immutable
 
       - name: Run Checks
         run: yarn turbo lint test typecheck --no-daemon

@@ -8,7 +8,12 @@ export const middleware: NextMiddleware = async (req) => {
     // This is the URL of the page sending the request to the API
     const referer = req.headers.get(`referer`);
     const hosts = {
-      production: async () => [process.env.VERCEL_URL, ...(await getDomains())],
+      production: async () => [
+        // Allow manual cron job execution from the Vercel Dashboard UI
+        `//vercel.com`,
+        process.env.VERCEL_URL,
+        ...(await getDomains())
+      ],
       preview: () => [
         `${
           process.env.VERCEL_GIT_REPO_SLUG

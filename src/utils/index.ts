@@ -1,6 +1,7 @@
 export { between } from "./between";
 export { generate } from "./generate";
 export { getDateKey } from "./getDateKey";
+export { getDomains } from "./getDomains";
 export { Grid } from "./Grid";
 export { isNonNullable } from "./isNonNullable";
 export { isExpired } from "./isExpired";

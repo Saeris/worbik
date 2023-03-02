@@ -4,11 +4,11 @@ export const middleware: NextMiddleware = (req) => {
   const { pathname } = req.nextUrl;
 
   if (pathname.startsWith(`/api/`)) {
-    if (
-      !req.headers
-        .get(`referer`)
-        ?.includes(process.env.VERCEL_URL || `localhost`)
-    ) {
+    const referer = req.headers.get(`referer`);
+    const host = process.env.VERCEL_URL || `localhost`;
+    if (!referer?.includes(host)) {
+      // eslint-disable-next-line no-console
+      console.log({ referer, host });
       return NextResponse.json({ message: `Unauthorized` }, { status: 401 });
     }
   }

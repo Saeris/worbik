@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Build and Test
+    name: Lint, Test, and Typecheck
     timeout-minutes: 15
     runs-on: ubuntu-latest
     env:
@@ -34,8 +34,8 @@ jobs:
       - name: Install dependencies
         run: yarn
 
-      - name: Run tests
-        run: yarn turbo build lint test typecheck
+      - name: Run Checks
+        run: yarn turbo lint test typecheck --no-daemon
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2

@@ -13,7 +13,7 @@ export const middleware: NextMiddleware = (req) => {
       }-git-${process.env.VERCEL_GIT_COMMIT_REF.replace(
         /(?<punctuation>\W)+/g,
         `-`
-      )}-${process.env.VERCEL_GIT_COMMIT_AUTHOR_LOGIN}.vercel.app`,
+      )}-${process.env.VERCEL_GIT_COMMIT_AUTHOR_LOGIN.toLowerCase()}.vercel.app`,
       // Unique Deployment URL
       process.env.VERCEL_URL,
       // For Local Development

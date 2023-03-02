@@ -35,15 +35,15 @@ describe(`filterExpiredDates`, () => {
         [getDateFromToday(-1)]: null,
         [getDateKey({ width: 6, height: 6 })]: null,
         [getDateKey({ width: 7, height: 7 })]: null,
-        [`${getDateFromToday()}_5x5`]: null,
-        [`${getDateFromToday()}_6x6`]: null,
-        [`${getDateFromToday()}_7x7`]: null
+        [`${getDateFromToday(-5)}_5x5`]: null,
+        [`${getDateFromToday(-5)}_6x6`]: null,
+        [`${getDateFromToday(-5)}_7x7`]: null
       }) as DateKey[]
     ).filter(filterExpiredDates);
     const expected = [
-      `${getDateFromToday()}_5x5`,
-      `${getDateFromToday()}_6x6`,
-      `${getDateFromToday()}_7x7`
+      `${getDateFromToday(-5)}_5x5`,
+      `${getDateFromToday(-5)}_6x6`,
+      `${getDateFromToday(-5)}_7x7`
     ];
 
     expect(actual).toHaveLength(3);

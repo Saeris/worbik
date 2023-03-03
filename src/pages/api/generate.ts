@@ -46,8 +46,13 @@ const handler: NextApiHandler = async (req, res) => {
   ];
 
   try {
+    const edgeConfigId = new URL(process.env.EDGE_CONFIG).pathname.replace(
+      `/`,
+      ``
+    );
+
     const updatePuzzles = await fetch(
-      `https://api.vercel.com/v1/edge-config/${process.env.EDGE_CONFIG_ID}/items`,
+      `https://api.vercel.com/v1/edge-config/${edgeConfigId}/items`,
       {
         method: `PATCH`,
         headers: new Headers({
@@ -64,6 +69,15 @@ const handler: NextApiHandler = async (req, res) => {
     // eslint-disable-next-line no-console
     console.log({ result });
 
+    if (result.error) {
+      throw new Error(
+        `Attempt to update Edge Config failed! Reason: ${result.error.message}`,
+        {
+          cause: result.error
+        }
+      );
+    }
+
     res.status(200).json({
       status: updatePuzzles.status,
       statusText: updatePuzzles.statusText
@@ -71,7 +85,7 @@ const handler: NextApiHandler = async (req, res) => {
   } catch (err: unknown) {
     if (err instanceof Error) {
       // eslint-disable-next-line no-console
-      console.error(err);
+      console.error(err.message);
     }
     res.status(500).json(null);
   }

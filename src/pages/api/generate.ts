@@ -2,6 +2,7 @@ import { getAll } from "@vercel/edge-config";
 import type { NextApiHandler } from "next/types";
 import { generate, getDateKey, PuzzleState, sizes } from "../../utils";
 import { filterExpiredDates } from "../../utils/getDateKey";
+import { updateEdgeConfig } from "../../utils/updateEdgeConfig";
 
 export const config = {
   // eslint-disable-next-line @typescript-eslint/quotes
@@ -21,66 +22,51 @@ const handler: NextApiHandler = async (req, res) => {
 
   const existing = await getAll<Record<string, unknown>>();
 
-  const items = [
-    // We want to delete all keys older than 2 days
-    ...Object.keys(existing ?? {})
-      .filter(filterExpiredDates)
-      .map((key) => ({ operation: `delete`, key })),
-    // Generate tomorrow's puzzles
-    ...sizes.map(([width, height]) => {
-      const puzzle = generate({ width, height });
-      const solution = puzzle.initial.toString();
-      const challenge = PuzzleState.compare(puzzle.toString(), solution);
-      return {
-        operation: `create`,
-        key: getDateKey({
-          width,
-          height
-        }),
-        value: {
-          challenge,
-          solution
-        }
-      } as const;
-    })
-  ];
-
   try {
-    const edgeConfigId = new URL(process.env.EDGE_CONFIG).pathname.replace(
-      `/`,
-      ``
-    );
+    const reomveOldPuzzles = await (
+      await updateEdgeConfig(
+        Object.keys(existing ?? {})
+          .filter(filterExpiredDates)
+          .map((key) => ({ operation: `delete` as const, key }))
+      )
+    ).json();
 
-    const updatePuzzles = await fetch(
-      `https://api.vercel.com/v1/edge-config/${edgeConfigId}/items`,
-      {
-        method: `PATCH`,
-        headers: new Headers({
-          Authorization: `Bearer ${process.env.VERCEL_ACCESS_TOKEN}`,
-          "Content-Type": `application/json`
-        }),
-        body: JSON.stringify({
-          items
+    const addPuzzles = await (
+      await updateEdgeConfig(
+        sizes.map(([width, height]) => {
+          const puzzle = generate({ width, height });
+          const solution = puzzle.initial.toString();
+          const challenge = PuzzleState.compare(puzzle.toString(), solution);
+          return {
+            operation: `create`,
+            key: getDateKey({
+              width,
+              height
+            }),
+            value: {
+              challenge,
+              solution
+            }
+          } as const;
         })
-      }
-    );
-
-    const result = await updatePuzzles.json();
+      )
+    ).json();
     // eslint-disable-next-line no-console
-    console.log({ result });
+    console.log({ reomveOldPuzzles, addPuzzles });
 
-    if (result.error) {
+    if (reomveOldPuzzles.error || addPuzzles.error) {
+      const cause = reomveOldPuzzles.error || addPuzzles.error;
       throw new Error(
-        `Attempt to update Edge Config failed! Reason: ${result.error.message}`,
+        `Attempt to update Edge Config failed! Reason: ${cause.message}`,
         {
-          cause: result.error
+          cause
         }
       );
     }
 
     res.status(200).json({
-      status: updatePuzzles.status,
-      statusText: updatePuzzles.statusText
+      status: addPuzzles.status,
+      statusText: addPuzzles.statusText
     });
   } catch (err: unknown) {
     if (err instanceof Error) {

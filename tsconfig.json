@@ -3,12 +3,7 @@
   "ts-node": {
     "transpileOnly": true
   },
-  "include": [
-    ".next/types/**/*.ts",
-    "./src/**/*",
-    "./scripts/**/*",
-    ".next/types/**/*.ts"
-  ],
+  "include": [".next/types/**/*.ts", "./src/**/*"],
   "exclude": [
     "node_modules",
     "**/__mocks__/**/*",

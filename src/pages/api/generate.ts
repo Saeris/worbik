@@ -4,7 +4,8 @@ import { generate, getDateKey, PuzzleState, sizes } from "../../utils";
 import { filterExpiredDates } from "../../utils/getDateKey";
 
 export const config = {
-  runtime: `nodejs`
+  // eslint-disable-next-line @typescript-eslint/quotes
+  runtime: "nodejs"
 };
 
 /**

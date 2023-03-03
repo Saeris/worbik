@@ -3,7 +3,7 @@ import { sizes } from "../../utils";
 
 export const config = {
   // eslint-disable-next-line @typescript-eslint/quotes
-  runtime: "edge"
+  runtime: "nodejs"
 };
 
 /**

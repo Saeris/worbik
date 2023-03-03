@@ -11,12 +11,12 @@ module.exports = {
   collectCoverageFrom: [
     // include
     `./src/**/*.ts`,
-    `./server/**/*.ts`,
+    `./src/**/*.tsx`,
     // exclude
     `!**/__mocks__/**/*`,
-    `!**/__test__/**/*`,
-    `!**/node_modules/**`,
-    `!**/vendor/**`
+    `!**/__tests__/**/*`,
+    `!**/__stories__/**/*`,
+    `!**/node_modules/**`
   ],
   transform: {
     "^.+\\.(js|jsx|ts|tsx)$": ["babel-jest", { presets: ["next/babel"] }]

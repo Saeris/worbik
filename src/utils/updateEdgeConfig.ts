@@ -11,8 +11,10 @@ export type ItemOperation<K = string, V = unknown> =
       readonly value: V;
     };
 
-export const updateEdgeConfig = async (items: ItemOperation[]) =>
-  fetch(`https://api.vercel.com/v1/edge-config/${edgeConfigId}/items`, {
+export const updateEdgeConfig = async (
+  items: ItemOperation[]
+): Promise<Response> =>
+  await fetch(`https://api.vercel.com/v1/edge-config/${edgeConfigId}/items`, {
     method: `PATCH`,
     headers: new Headers({
       Authorization: `Bearer ${process.env.VERCEL_ACCESS_TOKEN}`,

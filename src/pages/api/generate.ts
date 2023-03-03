@@ -1,8 +1,13 @@
 import { getAll } from "@vercel/edge-config";
 import type { NextApiHandler } from "next/types";
-import { generate, getDateKey, PuzzleState, sizes } from "../../utils";
-import { filterExpiredDates } from "../../utils/getDateKey";
-import { updateEdgeConfig } from "../../utils/updateEdgeConfig";
+import {
+  generate,
+  getDateKey,
+  PuzzleState,
+  sizes,
+  updateEdgeConfig,
+  filterExpiredDates
+} from "../../utils";
 
 export const config = {
   // eslint-disable-next-line @typescript-eslint/quotes
@@ -23,8 +28,16 @@ const handler: NextApiHandler = async (req, res) => {
   const existing = await getAll<Record<string, unknown>>();
 
   try {
+    const edgeConfigId = new URL(process.env.EDGE_CONFIG).pathname.replace(
+      `/`,
+      ``
+    );
+    const token = process.env.VERCEL_ACCESS_TOKEN;
+
     const reomveOldPuzzles = await (
       await updateEdgeConfig(
+        edgeConfigId,
+        token,
         Object.keys(existing ?? {})
           .filter(filterExpiredDates)
           .map((key) => ({ operation: `delete` as const, key }))
@@ -33,6 +46,8 @@ const handler: NextApiHandler = async (req, res) => {
 
     const addPuzzles = await (
       await updateEdgeConfig(
+        edgeConfigId,
+        token,
         sizes.map(([width, height]) => {
           const puzzle = generate({ width, height });
           const solution = puzzle.initial.toString();

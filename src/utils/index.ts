@@ -1,6 +1,6 @@
 export { between } from "./between";
 export { generate } from "./generate";
-export { getDateKey } from "./getDateKey";
+export { getDateKey, filterExpiredDates } from "./getDateKey";
 export { getDomains } from "./getDomains";
 export { Grid } from "./Grid";
 export { isNonNullable } from "./isNonNullable";
@@ -17,4 +17,5 @@ export { repeat } from "./repeat";
 export { sizes } from "./sizes";
 export { toInt } from "./toInt";
 export type { Maybe } from "./types";
+export { updateEdgeConfig } from "./updateEdgeConfig";
 export { wait } from "./wait";

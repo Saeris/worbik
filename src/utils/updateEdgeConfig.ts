@@ -1,5 +1,3 @@
-const edgeConfigId = new URL(process.env.EDGE_CONFIG).pathname.replace(`/`, ``);
-
 export type ItemOperation<K = string, V = unknown> =
   | {
       readonly operation: "delete";
@@ -12,12 +10,14 @@ export type ItemOperation<K = string, V = unknown> =
     };
 
 export const updateEdgeConfig = async (
+  id: string,
+  token: string,
   items: ItemOperation[]
 ): Promise<Response> =>
-  await fetch(`https://api.vercel.com/v1/edge-config/${edgeConfigId}/items`, {
+  await fetch(`https://api.vercel.com/v1/edge-config/${id}/items`, {
     method: `PATCH`,
     headers: new Headers({
-      Authorization: `Bearer ${process.env.VERCEL_ACCESS_TOKEN}`,
+      Authorization: `Bearer ${token}`,
       "Content-Type": `application/json`
     }),
     body: JSON.stringify({

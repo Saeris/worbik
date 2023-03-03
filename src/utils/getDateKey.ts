@@ -24,3 +24,58 @@ export type DateKey = ReturnType<typeof getDateKey>;
  */
 export const filterExpiredDates = (key: string): boolean =>
   dateKeyRegex.test(key) && isExpired(key as DateKey);
+
+/*
+const sample = {
+  "03-01-2023_5x5": null,
+  "03-01-2023_5x6": null,
+  "03-01-2023_5x7": null,
+  "03-01-2023_5x8": null,
+  "03-01-2023_6x5": null,
+  "03-01-2023_6x6": null,
+  "03-01-2023_6x7": null,
+  "03-01-2023_6x8": null,
+  "03-01-2023_7x5": null,
+  "03-01-2023_7x6": null,
+  "03-01-2023_7x7": null,
+  "03-01-2023_7x8": null,
+  "03-01-2023_8x5": null,
+  "03-01-2023_8x6": null,
+  "03-01-2023_8x7": null,
+  "03-01-2023_8x8": null,
+  "03-02-2023_5x5": null,
+  "03-02-2023_5x6": null,
+  "03-02-2023_5x7": null,
+  "03-02-2023_5x8": null,
+  "03-02-2023_6x5": null,
+  "03-02-2023_6x6": null,
+  "03-02-2023_6x7": null,
+  "03-02-2023_6x8": null,
+  "03-02-2023_7x5": null,
+  "03-02-2023_7x6": null,
+  "03-02-2023_7x7": null,
+  "03-02-2023_7x8": null,
+  "03-02-2023_8x5": null,
+  "03-02-2023_8x6": null,
+  "03-02-2023_8x7": null,
+  "03-02-2023_8x8": null,
+  "03-03-2023_5x5": null,
+  "03-03-2023_5x6": null,
+  "03-03-2023_5x7": null,
+  "03-03-2023_5x8": null,
+  "03-03-2023_6x5": null,
+  "03-03-2023_6x6": null,
+  "03-03-2023_6x7": null,
+  "03-03-2023_6x8": null,
+  "03-03-2023_7x5": null,
+  "03-03-2023_7x6": null,
+  "03-03-2023_7x7": null,
+  "03-03-2023_7x8": null,
+  "03-03-2023_8x5": null,
+  "03-03-2023_8x6": null,
+  "03-03-2023_8x7": null,
+  "03-03-2023_8x8": null
+};
+
+const actual = Object.keys(sample).filter(filterExpiredDates); //?
+*/

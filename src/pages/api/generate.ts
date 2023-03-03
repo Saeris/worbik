@@ -60,6 +60,10 @@ const handler: NextApiHandler = async (req, res) => {
       }
     );
 
+    const result = await updatePuzzles.json();
+    // eslint-disable-next-line no-console
+    console.log({ result });
+
     res.status(200).json({
       status: updatePuzzles.status,
       statusText: updatePuzzles.statusText

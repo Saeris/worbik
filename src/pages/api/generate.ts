@@ -43,7 +43,7 @@ const handler: NextApiHandler = async (req, res) => {
       await updateEdgeConfig(edgeConfigId, token, toBeRemoved)
     ).json();
 
-    await wait(10000);
+    await wait(5000);
 
     const toBeAdded = sizes.map(([width, height]) => {
       const puzzle = generate({ width, height });

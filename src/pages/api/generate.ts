@@ -6,7 +6,8 @@ import {
   PuzzleState,
   sizes,
   updateEdgeConfig,
-  filterExpiredDates
+  filterExpiredDates,
+  wait
 } from "../../utils";
 
 export const config = {
@@ -34,43 +35,48 @@ const handler: NextApiHandler = async (req, res) => {
     );
     const token = process.env.VERCEL_ACCESS_TOKEN;
 
-    const reomveOldPuzzles = await (
-      await updateEdgeConfig(
-        edgeConfigId,
-        token,
-        Object.keys(existing ?? {})
-          .filter(filterExpiredDates)
-          .map((key) => ({ operation: `delete` as const, key }))
-      )
+    const toBeRemoved = Object.keys(existing ?? {})
+      .filter(filterExpiredDates)
+      .map((key) => ({ operation: `delete` as const, key }));
+
+    const removeOldPuzzles = await (
+      await updateEdgeConfig(edgeConfigId, token, toBeRemoved)
     ).json();
+
+    await wait(10000);
+
+    const toBeAdded = sizes.map(([width, height]) => {
+      const puzzle = generate({ width, height });
+      const solution = puzzle.initial.toString();
+      const challenge = PuzzleState.compare(puzzle.toString(), solution);
+      return {
+        operation: `create`,
+        key: getDateKey({
+          width,
+          height
+        }),
+        value: {
+          challenge,
+          solution
+        }
+      } as const;
+    });
 
     const addPuzzles = await (
-      await updateEdgeConfig(
-        edgeConfigId,
-        token,
-        sizes.map(([width, height]) => {
-          const puzzle = generate({ width, height });
-          const solution = puzzle.initial.toString();
-          const challenge = PuzzleState.compare(puzzle.toString(), solution);
-          return {
-            operation: `create`,
-            key: getDateKey({
-              width,
-              height
-            }),
-            value: {
-              challenge,
-              solution
-            }
-          } as const;
-        })
-      )
+      await updateEdgeConfig(edgeConfigId, token, toBeAdded)
     ).json();
-    // eslint-disable-next-line no-console
-    console.log({ reomveOldPuzzles, addPuzzles });
 
-    if (reomveOldPuzzles.error || addPuzzles.error) {
-      const cause = reomveOldPuzzles.error || addPuzzles.error;
+    // eslint-disable-next-line no-console
+    console.log({
+      existing,
+      toBeRemoved,
+      removeOldPuzzles,
+      toBeAdded,
+      addPuzzles
+    });
+
+    if (removeOldPuzzles.error || addPuzzles.error) {
+      const cause = removeOldPuzzles.error || addPuzzles.error;
       throw new Error(
         `Attempt to update Edge Config failed! Reason: ${cause.message}`,
         {

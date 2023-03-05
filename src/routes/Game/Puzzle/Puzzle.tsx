@@ -1,11 +1,12 @@
 /* eslint-disable react/no-array-index-key */
-import React, { useCallback } from "react";
+import React from "react";
 import { useCompositeState } from "ariakit/composite/composite-state";
-import { Direction } from "../../../components/Direction";
 import { range } from "../../../utils";
-import { Container, Grid, Row, Character, Hint } from "./elements";
+import { Container, Grid, Row } from "./elements";
+import { CharacterTile } from "./CharacterTile";
+import { DirectionInput } from "./DirectionInput";
 import type { usePuzzle } from "../usePuzzleState";
-import { useQueuedAPICall } from "./useQueuedAPICall";
+import { useRotate } from "./useRotate";
 
 export interface PuzzleProps {
   puzzleID: string;
@@ -14,63 +15,7 @@ export interface PuzzleProps {
 
 export const Puzzle: React.FC<PuzzleProps> = ({ puzzleID, state }) => {
   const grid = useCompositeState();
-  const check = useCallback(
-    async (vals: string[]): Promise<void> => {
-      const url = new URL(`/api/check`, window.location.origin);
-      url.searchParams.set(`puzzle`, puzzleID);
-      url.searchParams.set(`guesses`, vals.join(`,`));
-      localStorage.setItem(
-        puzzleID,
-        state
-          .validate((await (await fetch(url.href)).json()) as string[])
-          .snapshot.join(`|`)
-      );
-    },
-    [puzzleID, state]
-  );
-  const queue = useQueuedAPICall(check);
-
-  const rotate = useCallback(
-    (rowOrCol: number, dir: `up` | `down` | `left` | `right`) => {
-      if (!state.win) {
-        queue(state.getNextState(rowOrCol, dir).toString());
-      }
-    },
-    [queue, state]
-  );
-
-  const handleClick = useCallback(
-    (
-        rowOrCol: number,
-        dir: `up` | `down` | `left` | `right`
-      ): React.MouseEventHandler<HTMLButtonElement> =>
-      (e) => {
-        e.preventDefault();
-        rotate(rowOrCol, dir);
-      },
-    [rotate]
-  );
-
-  const handleKeypress = useCallback(
-    (x: number, y: number): React.KeyboardEventHandler<HTMLButtonElement> =>
-      (e) => {
-        const key = e.key;
-        if ([`w`, `a`, `s`, `d`].includes(key)) {
-          // w | d = increment, a | s = decriment
-          const dir = {
-            w: `up`,
-            a: `left`,
-            s: `down`,
-            d: `right`
-          };
-          // a | d = horizontal, w | s = veritcal
-          const axis = [`a`, `d`].includes(key);
-          rotate(axis ? x : y, dir[key]);
-        }
-      },
-    [rotate]
-  );
-
+  const rotate = useRotate(puzzleID, state);
   const repeat = range(state.initial.width);
 
   return (
@@ -78,12 +23,12 @@ export const Puzzle: React.FC<PuzzleProps> = ({ puzzleID, state }) => {
       <Grid>
         <Row>
           {repeat.map((y) => (
-            <Direction
+            <DirectionInput
               key={`up-${y}`}
-              direction="up"
-              onClick={handleClick(y, `up`)}
-              aria-label={`Rotate column ${y + 1} up`}
+              rowOrCol={y}
+              dir="up"
               disabled={state.win}
+              rotate={rotate}
             />
           ))}
         </Row>
@@ -91,54 +36,47 @@ export const Puzzle: React.FC<PuzzleProps> = ({ puzzleID, state }) => {
           const word = row.join(``);
           return (
             <Row key={`row-${x}`}>
-              <Direction
+              <DirectionInput
                 key={`left-${x}`}
-                direction="left"
-                onClick={handleClick(x, `left`)}
-                aria-label={`Rotate row ${x + 1} left`}
+                rowOrCol={x}
+                dir="left"
                 disabled={state.win}
+                rotate={rotate}
               />
               {row.map((char, y) => {
                 const hint = state.hints[x][y];
                 const correct = word.toUpperCase() === state.hints[x].join(``);
                 return (
-                  <Character
+                  <CharacterTile
                     key={`char-${x}${y}`}
-                    $hint={char.toUpperCase() === hint}
-                    $correct={correct}
-                    onKeyDown={handleKeypress(x, y)}
-                    aria-label={`Grid tile ${x + 1}, ${
-                      y + 1
-                    }. Current character is ${char}.${
-                      hint === ` `
-                        ? ``
-                        : ` Correct character for this tile is ${hint}.`
-                    }`}
+                    x={x}
+                    y={y}
+                    char={char}
+                    hint={hint}
+                    correct={correct}
                     disabled={state.win}
-                  >
-                    {char.toUpperCase()}
-                    <Hint>{hint}</Hint>
-                  </Character>
+                    rotate={rotate}
+                  />
                 );
               })}
-              <Direction
+              <DirectionInput
                 key={`right-${x}`}
-                direction="right"
-                onClick={handleClick(x, `right`)}
-                aria-label={`Rotate row ${x + 1} right`}
+                rowOrCol={x}
+                dir="right"
                 disabled={state.win}
+                rotate={rotate}
               />
             </Row>
           );
         })}
         <Row>
           {repeat.map((y) => (
-            <Direction
+            <DirectionInput
               key={`down-${y}`}
-              direction="down"
-              onClick={handleClick(y, `down`)}
-              aria-label={`Rotate column ${y + 1} down`}
+              rowOrCol={y}
+              dir="down"
               disabled={state.win}
+              rotate={rotate}
             />
           ))}
         </Row>

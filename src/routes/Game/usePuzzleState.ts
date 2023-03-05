@@ -3,8 +3,7 @@ import {
   Grid,
   PuzzleState,
   filterExpiredDates,
-  type PuzzleStateInit,
-  type Snapshot
+  type PuzzleStateInit
 } from "../../utils";
 
 const useMatrix = (state: PuzzleState): string =>
@@ -42,11 +41,11 @@ const useWin = (state: PuzzleState): PuzzleState["win"] =>
     () => state.win
   );
 
-const useSnapshot = (state: PuzzleState): PuzzleState["snapshot"] =>
+const useSnapshot = (state: PuzzleState): string =>
   useSyncExternalStore(
     state.subscribe,
-    () => state.snapshot,
-    () => state.snapshot
+    () => state.snapshot.join(`|`),
+    () => state.snapshot.join(`|`)
   );
 
 export const usePuzzle = (
@@ -74,13 +73,13 @@ export const usePuzzle = (
   const history = useHistory(state);
   const moves = useMoves(state);
   const win = useWin(state);
-  const snapshot = useSnapshot(state);
+  const snapshot = useSnapshot(state).split(`|`) as PuzzleState["snapshot"];
 
   useEffect(() => {
     if (typeof window !== `undefined`) {
       const previousSession = localStorage.getItem(puzzleID);
       if (previousSession) {
-        state.restore(previousSession.split(`|`) as Snapshot);
+        state.restore(previousSession.split(`|`) as PuzzleState["snapshot"]);
       }
       // purge puzzles older than yesterday, utc-0 + 32hrs
       Object.keys(localStorage).forEach((key) => {

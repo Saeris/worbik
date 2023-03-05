@@ -184,8 +184,8 @@ export class PuzzleState {
     const moves = {
       left: this.#grid.rotateRowLeft,
       right: this.#grid.rotateRowRight,
-      up: this.#grid.rotateColDown,
-      down: this.#grid.rotateColUp
+      up: this.#grid.rotateColUp,
+      down: this.#grid.rotateColDown
     };
 
     const next = moves[dir](rowOrCol).toString();

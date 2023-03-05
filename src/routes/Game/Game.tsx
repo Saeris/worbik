@@ -5,10 +5,10 @@ import { Main, Title } from "./elements";
 import { usePuzzle } from "./usePuzzleState";
 import { Guide } from "./Guide";
 import { Config } from "./Config";
-import type { DateKey, PuzzleStateInit } from "../../utils";
+import type { PuzzleStateInit } from "../../utils";
 
 export interface GameProps {
-  puzzleID: DateKey;
+  puzzleID: string;
   init: PuzzleStateInit;
 }
 

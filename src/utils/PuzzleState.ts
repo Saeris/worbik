@@ -8,12 +8,7 @@ import type { Size } from "./sizes";
 
 export type PuzzleStateInit = [perRow: Size, chars: string, target?: number];
 
-export type Challenge = [
-  width: Size,
-  target: number,
-  challenge: string,
-  solution: string
-];
+export type Challenge = [target: number, challenge: string, solution: string];
 
 export type Snapshot = [width: Size, historyString: string, hint: string];
 
@@ -228,7 +223,6 @@ export class PuzzleState {
   };
 
   toChallenge = (): Challenge => [
-    this.#grid.width,
     this.target,
     PuzzleState.compare(String(this.current), String(this.initial)),
     this.initial.toString()

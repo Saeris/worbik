@@ -9,11 +9,11 @@ import type { DateKey, PuzzleStateInit } from "../../utils";
 
 export interface GameProps {
   puzzleID: DateKey;
-  challenge: PuzzleStateInit;
+  init: PuzzleStateInit;
 }
 
-export const Game: NextPage<GameProps> = ({ puzzleID, challenge }) => {
-  const state = usePuzzle(puzzleID, challenge);
+export const Game: NextPage<GameProps> = ({ puzzleID, init }) => {
+  const state = usePuzzle(puzzleID, init);
 
   const winMessage = (): string =>
     state.moves <= state.target

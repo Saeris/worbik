@@ -3,7 +3,6 @@ import type { NextApiHandler } from "next/types";
 import {
   generate,
   getDateKey,
-  PuzzleState,
   sizes,
   updateEdgeConfig,
   filterExpiredDates,
@@ -45,22 +44,17 @@ const handler: NextApiHandler = async (req, res) => {
 
     await wait(5000);
 
-    const toBeAdded = sizes.map(([width, height]) => {
-      const puzzle = generate({ width, height });
-      const solution = puzzle.initial.toString();
-      const challenge = PuzzleState.compare(puzzle.toString(), solution);
-      return {
-        operation: `create`,
-        key: getDateKey({
-          width,
-          height
-        }),
-        value: {
-          challenge,
-          solution
-        }
-      } as const;
-    });
+    const toBeAdded = sizes.map(
+      ([width, height]) =>
+        ({
+          operation: `create`,
+          key: getDateKey({
+            width,
+            height
+          }),
+          value: generate({ width, height }).toChallenge()
+        } as const)
+    );
 
     const addPuzzles = await (
       await updateEdgeConfig(edgeConfigId, token, toBeAdded)

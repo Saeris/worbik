@@ -5,10 +5,11 @@ import { Main, Title } from "./elements";
 import { usePuzzle } from "./usePuzzleState";
 import { Guide } from "./Guide";
 import { Config } from "./Config";
+import type { DateKey, PuzzleStateInit } from "../../utils";
 
 export interface GameProps {
-  puzzleID: string;
-  challenge: string;
+  puzzleID: DateKey;
+  challenge: PuzzleStateInit;
 }
 
 export const Game: NextPage<GameProps> = ({ puzzleID, challenge }) => {

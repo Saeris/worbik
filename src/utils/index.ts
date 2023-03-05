@@ -1,6 +1,6 @@
 export { between } from "./between";
 export { generate } from "./generate";
-export { getDateKey, filterExpiredDates } from "./getDateKey";
+export { getDateKey, filterExpiredDates, type DateKey } from "./getDateKey";
 export { getDomains } from "./getDomains";
 export { Grid } from "./Grid";
 export { isNonNullable } from "./isNonNullable";
@@ -11,10 +11,15 @@ export {
   type RawPuzzleSchema,
   type PuzzleSchema
 } from "./puzzleSchema";
-export { PuzzleState } from "./PuzzleState";
+export {
+  PuzzleState,
+  type PuzzleStateInit,
+  type Challenge,
+  type Snapshot
+} from "./PuzzleState";
 export { range } from "./range";
 export { repeat } from "./repeat";
-export { sizes } from "./sizes";
+export { sizes, type Size, type Dimensions } from "./sizes";
 export { toInt } from "./toInt";
 export type { Maybe } from "./types";
 export { updateEdgeConfig } from "./updateEdgeConfig";

@@ -21,8 +21,9 @@ export const Puzzle: React.FC<PuzzleProps> = ({ puzzleID, state }) => {
       url.searchParams.set(`guesses`, vals.join(`,`));
       localStorage.setItem(
         puzzleID,
-        state.validate((await (await fetch(url.href)).json()) as string[])
-          .snapshot
+        state
+          .validate((await (await fetch(url.href)).json()) as string[])
+          .snapshot.join(`|`)
       );
     },
     [puzzleID, state]

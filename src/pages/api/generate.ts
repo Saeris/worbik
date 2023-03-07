@@ -40,22 +40,17 @@ const handler: NextApiHandler = async (req, res) => {
         ...Object.keys(existing ?? {})
           .filter(filterExpiredDates)
           .map((key) => ({ operation: `delete` as const, key })),
-        ...sizes.map(([width, height]) => {
-          const puzzle = generate({ width, height });
-          const solution = puzzle.initial.toString();
-          const challenge = PuzzleState.compare(puzzle.toString(), solution);
-          return {
-            operation: `create`,
-            key: getDateKey({
-              width,
-              height
-            }),
-            value: {
-              challenge,
-              solution
-            }
-          } as const;
-        })
+        ...sizes.map(
+          ([width, height]) =>
+            ({
+              operation: `create`,
+              key: getDateKey({
+                width,
+                height
+              }),
+              value: generate({ width, height }).toChallenge()
+            } as const)
+        )
       ])
     ).json();
 

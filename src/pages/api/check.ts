@@ -1,6 +1,6 @@
 import { type NextMiddleware, NextResponse } from "next/server";
 import { get } from "@vercel/edge-config";
-import { PuzzleState } from "../../utils";
+import { PuzzleState, type Challenge } from "../../utils";
 
 export const config = {
   // eslint-disable-next-line @typescript-eslint/quotes
@@ -33,10 +33,7 @@ const handler: NextMiddleware = async (req) => {
     });
   }
 
-  const cachedPuzzle = await get<{
-    challenge: string;
-    solution: string;
-  }>(puzzleID);
+  const cachedPuzzle = await get<Challenge>(puzzleID);
 
   if (typeof cachedPuzzle === `undefined`) {
     return NextResponse.json(null, {
@@ -48,7 +45,7 @@ const handler: NextMiddleware = async (req) => {
   return NextResponse.json(
     guesses
       .split(`,`)
-      .map((guess) => PuzzleState.compare(guess, cachedPuzzle.solution)),
+      .map((guess) => PuzzleState.compare(guess, cachedPuzzle[2])),
     {
       status: 200,
       headers: {

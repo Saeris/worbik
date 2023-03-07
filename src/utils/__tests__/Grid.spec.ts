@@ -2,7 +2,8 @@ import { Grid } from "../Grid";
 
 describe(`Grid`, () => {
   it(`can be instantiated from an array of strings`, () => {
-    const actual = new Grid([`a`, `b`, `c`, `d`], 2);
+    // @ts-expect-error
+    const actual = new Grid(`abcd`, 2);
     const expected = [
       [`a`, `b`],
       [`c`, `d`]
@@ -14,7 +15,8 @@ describe(`Grid`, () => {
   });
 
   it(`can be instantiated from a string`, () => {
-    const actual = Grid.fromString(`2_abcd`);
+    // @ts-expect-error
+    const actual = new Grid(`abcd`, 2);
     const expected = [
       [`a`, `b`],
       [`c`, `d`]
@@ -27,15 +29,13 @@ describe(`Grid`, () => {
 
   it(`throws if given invalid input`, () => {
     const msg = `Array cannot be evenly divided into groups of `;
-    expect(() => new Grid([`a`, `b`, `c`], 4)).toThrow(msg);
-    expect(() => Grid.fromString(`4_abc`)).toThrow(msg);
-    expect(() => Grid.fromString(`foo`)).toThrow(
-      `Could not parse string into a Grid!`
-    );
+    // @ts-expect-error
+    expect(() => new Grid(`abc`, 4)).toThrow(msg);
   });
 
   it(`allows rows/columns to be rotated`, () => {
-    const grid = Grid.fromString(`2_abcd`);
+    // @ts-expect-error
+    const grid = new Grid(`abcd`, 2);
     const up = [
       [`c`, `b`],
       [`a`, `d`]
@@ -59,15 +59,17 @@ describe(`Grid`, () => {
   });
 
   it(`can chain commands`, () => {
-    const grid = Grid.fromString(`2_abcd`);
-    const expected = `2_dcba`;
+    // @ts-expect-error
+    const grid = new Grid(`abcd`, 2);
+    const expected = `dcba`;
     grid.rotateColUp(0).rotateColDown(1).rotateRowLeft(0).rotateRowRight(1);
     expect(grid.toString()).toStrictEqual(expected);
   });
 
   it(`serializes`, () => {
-    const string = `2_abcd`;
-    const grid = Grid.fromString(string);
+    const string = `abcd`;
+    // @ts-expect-error
+    const grid = new Grid(string, 2);
     const flat = [`a`, `b`, `c`, `d`];
     const obj = {
       matrix: [

@@ -5,14 +5,15 @@ import { Main, Title } from "./elements";
 import { usePuzzle } from "./usePuzzleState";
 import { Guide } from "./Guide";
 import { Config } from "./Config";
+import type { PuzzleStateInit } from "../../utils";
 
 export interface GameProps {
   puzzleID: string;
-  challenge: string;
+  init: PuzzleStateInit;
 }
 
-export const Game: NextPage<GameProps> = ({ puzzleID, challenge }) => {
-  const state = usePuzzle(puzzleID, challenge);
+export const Game: NextPage<GameProps> = ({ puzzleID, init }) => {
+  const state = usePuzzle(puzzleID, init);
 
   const winMessage = (): string =>
     state.moves <= state.target

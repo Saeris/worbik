@@ -1,23 +1,28 @@
 import type { GetStaticPaths, GetStaticProps } from "next/types";
 import { createClient } from "@vercel/edge-config";
 import { Game } from "../routes/Game";
-import { getDateKey, parseSize, puzzleSchema, sizes } from "../utils";
+import {
+  type Challenge,
+  getDateKey,
+  parseSize,
+  puzzleSchema,
+  sizes
+} from "../utils";
 import type { GameProps } from "../routes/Game";
 
 export const getStaticProps: GetStaticProps<GameProps | {}> = async (ctx) => {
   const size = parseSize(ctx.params?.config?.[0]);
+
   if (!size) {
     return {
       props: {}
     };
   }
+
   const config = puzzleSchema.parse(size);
   const puzzleID = getDateKey(config, 0);
   const edgeConfig = createClient(process.env.EDGE_CONFIG);
-  const cachedPuzzle = await edgeConfig.get<{
-    challenge: string;
-    solution: string;
-  }>(puzzleID);
+  const cachedPuzzle = await edgeConfig.get<Challenge>(puzzleID);
 
   if (typeof cachedPuzzle === `undefined`) {
     throw new Error(`Unable to retrieve cached puzzle id: ${puzzleID}`);
@@ -26,7 +31,7 @@ export const getStaticProps: GetStaticProps<GameProps | {}> = async (ctx) => {
   return {
     props: {
       puzzleID,
-      challenge: cachedPuzzle.challenge
+      init: [config.width ?? 5, cachedPuzzle[1], cachedPuzzle[0]]
     }
   };
 };

@@ -1,19 +1,19 @@
-import { differenceInHours, startOfToday } from "date-fns";
-import { utcToZonedTime } from "date-fns-tz";
+import { addHours, differenceInHours, parse, startOfToday } from "date-fns";
 import { dateKeyRegex } from "./dateKeyRegex";
+import type { DateKey } from "./getDateKey";
 
 export const DAYS_UNTIL_EXPIRED = 2 as const;
 
-export const isExpired = (puzzleID: string): boolean => {
-  const parsed = dateKeyRegex.exec(puzzleID);
-  if (!parsed?.groups && !parsed?.groups?.date) {
+export const isExpired = (puzzleID: DateKey): boolean => {
+  if (!dateKeyRegex.test(puzzleID)) {
     throw new Error(`Could not parse puzzleID: ${puzzleID}`);
   }
-  return (
-    differenceInHours(
-      utcToZonedTime(startOfToday(), `Europe/Dublin`),
-      new Date(parsed.groups.date)
-    ) >
-    DAYS_UNTIL_EXPIRED * 24
-  );
+  const format = `MM-dd-yyyy kk x`;
+  const genereratedOn = parse(
+    `${puzzleID.split(`_`)[0]} 06 +00`,
+    format,
+    new Date()
+  ); //?
+  const regenerateOn = addHours(startOfToday(), 10); //?
+  return differenceInHours(regenerateOn, genereratedOn) > 48;
 };

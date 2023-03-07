@@ -2,10 +2,15 @@ import { between } from "./between";
 import { Grid } from "./Grid";
 import { group } from "./group";
 import { isUppercase } from "./isUppercase";
-import { puzzleRegex } from "./puzzleRegex";
 import { randomInt } from "./randomInt";
 import { repeat } from "./repeat";
-import { toInt } from "./toInt";
+import type { Size } from "./sizes";
+
+export type PuzzleStateInit = [perRow: Size, chars: string, target?: number];
+
+export type Challenge = [target: number, challenge: string, solution: string];
+
+export type Snapshot = [width: Size, historyString: string, hint: string];
 
 export class PuzzleState {
   #initialized = false;
@@ -17,7 +22,7 @@ export class PuzzleState {
   #listeners = new Set<() => void>();
 
   get initial(): Grid {
-    return Grid.fromString(this.#history[0]);
+    return new Grid(this.#history[0], this.#grid.width);
   }
 
   get current(): Grid {
@@ -52,22 +57,31 @@ export class PuzzleState {
     return this.#win;
   }
 
-  get snapshot(): string {
-    return `${this.#history.join(`,`)},${this.#hints.flat().join(``)}`;
+  get snapshot(): Snapshot {
+    return [
+      this.#grid.width,
+      this.#history.join(`,`),
+      this.#hints.flat().join(``)
+    ];
   }
 
-  constructor(init: string) {
-    init; //?
-    const parsed = puzzleRegex.exec(init); //?
-
-    if (!parsed?.groups || !parsed.groups.chars || !parsed.groups.perRow) {
-      throw new Error(`Could not parse init string! Received: ${init}`);
+  constructor(init: PuzzleStateInit) {
+    if (!Array.isArray(init)) {
+      throw new Error(`Init value is not an array!`);
     }
 
-    this.#grid = Grid.fromString(init);
+    const [perRow, chars, target = 0] = init;
+
+    if (!perRow || !chars) {
+      throw new Error(
+        `Received invalid initialization array! Received: ${perRow} ${chars}`
+      );
+    }
+
+    this.#grid = new Grid(chars, perRow);
     this.#history = [this.#grid.toString().toLowerCase()];
-    this.#hints = group(new Array(this.#grid.size).fill(` `), this.#grid.width);
-    this.#target = toInt(parsed.groups.target);
+    this.#hints = group(new Array(chars.length).fill(` `), perRow);
+    this.#target = target;
     this.validate(this.#grid.toString());
     this.#initialized = true;
   }
@@ -80,7 +94,7 @@ export class PuzzleState {
       .join(``);
 
   #update = (): PuzzleState => {
-    if (this.#initialized) this.#listeners.forEach((l) => l());
+    if (this.#initialized && !this.#win) this.#listeners.forEach((l) => l());
     return this;
   };
 
@@ -92,38 +106,60 @@ export class PuzzleState {
     };
   };
 
-  #checkWin = (state: string | string[]): PuzzleState => {
-    const check = (value: string): void => {
-      if (
-        !this.#win &&
-        this.#hints
-          .flat()
-          .every((char, i) => char.toLowerCase() === value.charAt(i))
-      ) {
-        this.#win = true;
-        const winningState = `${this.#grid.width}_${value}`;
-        // Set #current to the winning grid state
-        this.#grid = Grid.fromString(winningState);
-        // Discard history after the first time a winning state was achieved
-        this.#history.length = this.#history.indexOf(winningState) + 1;
-      }
-    };
+  #updateHints = (chars: string): string => {
+    if (!chars.length) {
+      throw new Error(`Could not parse state string ${chars}`);
+    }
 
-    Array.isArray(state) ? state.forEach(check) : check(state);
+    this.#hints = group(
+      this.#hints
+        .flat()
+        .map((char, idx) =>
+          isUppercase(char)
+            ? char
+            : isUppercase(chars.charAt(idx))
+            ? chars.charAt(idx)
+            : ` `
+        ),
+      this.#grid.width
+    );
+
+    return chars.toLowerCase();
+  };
+
+  #check = (value: string): void => {
+    if (
+      !this.#win &&
+      this.#hints
+        .flat()
+        .every((char, i) => char.toLowerCase() === value.charAt(i))
+    ) {
+      this.#win = true;
+      const winningState = value;
+      // Set #current to the winning grid state
+      this.#grid = new Grid(winningState, this.#grid.width);
+      // Discard history after the first time a winning state was achieved
+      this.#history.length = this.#history.indexOf(winningState) + 1;
+    }
+  };
+
+  #checkWin = (state: string | string[]): PuzzleState => {
+    if (this.#win) return this;
+
+    Array.isArray(state) ? state.forEach(this.#check) : this.#check(state);
 
     return this.#update();
   };
 
-  restore = (snapshot: string): PuzzleState => {
-    const history = snapshot.split(`,`);
-    const hint = history.pop();
-    const current = history[history.length - 1];
+  restore = ([width, historyString, hint]: Snapshot): PuzzleState => {
+    const history = historyString.split(`,`); //?
+    const current = history.at(-1); //?
     if (!hint || !current) {
-      throw new Error(`Could not parse snapshot ${snapshot}`);
+      throw new Error(`Could not parse snapshot!`);
     }
-    this.#grid = Grid.fromString(current);
+    this.#grid = new Grid(current, width);
     this.#history = history;
-    this.#hints = group(hint.split(``), this.#grid.width);
+    this.#hints = group(hint.split(``), width);
     return this.#checkWin(this.current.flat().join(``));
   };
 
@@ -133,70 +169,41 @@ export class PuzzleState {
     dir: `up` | `down` | `left` | `right`
   ): PuzzleState => {
     // skip if we're already in a winning state
-    if (!this.#win) {
-      // true = horizontal, false = vertical
-      const axis = [`left`, `right`].includes(dir);
-      if (
-        !between(rowOrCol, 0, (axis ? this.#grid.height : this.#grid.width) - 1)
-      ) {
-        throw new Error(
-          `${axis ? `Row` : `Column`} value ${rowOrCol} is invalid!`
-        );
-      }
-      switch (dir) {
-        case `left`:
-          this.#grid.rotateRowLeft(rowOrCol);
-          break;
-        case `right`:
-          this.#grid.rotateRowRight(rowOrCol);
-          break;
-        case `down`:
-          this.#grid.rotateColDown(rowOrCol);
-          break;
-        default:
-          this.#grid.rotateColUp(rowOrCol);
-      }
-      const next = this.#grid.toString();
-      this.#history.push(next.toLowerCase());
+    if (this.#win) return this;
+    // true = horizontal, false = vertical
+    const axis = [`left`, `right`].includes(dir);
 
-      return this.#checkWin(next.toLowerCase());
-    }
-    return this;
-  };
-
-  validate = (next: string | string[]): PuzzleState => {
-    // skip if we're already in a winning state
-    if (!this.#win) {
-      const updateHints = (value: string): string => {
-        const parsed = puzzleRegex.exec(value);
-        if (!parsed?.groups && !parsed?.groups?.chars) {
-          throw new Error(`Could not parse state string ${value}`);
-        }
-        const chars = parsed.groups.chars;
-
-        this.#hints = group(
-          this.#hints
-            .flat()
-            .map((c, i) =>
-              isUppercase(c)
-                ? c
-                : isUppercase(chars.charAt(i))
-                ? chars.charAt(i)
-                : ` `
-            ),
-          this.#grid.width
-        );
-
-        return chars.toLowerCase();
-      };
-
-      return this.#checkWin(
-        Array.isArray(next) ? next.map(updateHints) : updateHints(next)
+    if (
+      !between(rowOrCol, 0, (axis ? this.#grid.height : this.#grid.width) - 1)
+    ) {
+      throw new Error(
+        `${axis ? `Row` : `Column`} value ${rowOrCol} is invalid!`
       );
     }
 
-    return this;
+    const moves = {
+      left: this.#grid.rotateRowLeft,
+      right: this.#grid.rotateRowRight,
+      up: this.#grid.rotateColUp,
+      down: this.#grid.rotateColDown
+    };
+
+    const next = moves[dir](rowOrCol).toString();
+
+    this.#history.push(next.toLowerCase());
+
+    return this.#checkWin(next.toLowerCase());
   };
+
+  validate = (next: string | string[]): PuzzleState =>
+    // skip if we're already in a winning state
+    this.#win
+      ? this
+      : this.#checkWin(
+          Array.isArray(next)
+            ? next.map(this.#updateHints)
+            : this.#updateHints(next)
+        );
 
   randomize = (min = 25, max = 250): PuzzleState => {
     // Generate a random number of moves between our bounds
@@ -215,7 +222,13 @@ export class PuzzleState {
     return this;
   };
 
-  toString = (): string => `${String(this.current)}_${this.moves}`;
+  toChallenge = (): Challenge => [
+    this.target,
+    PuzzleState.compare(String(this.current), String(this.initial)),
+    this.initial.toString()
+  ];
+
+  toString = (): string => String(this.current);
 
   toJSON = (): {
     current: ReturnType<Grid["toJSON"]>;

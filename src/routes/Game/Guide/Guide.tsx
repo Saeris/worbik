@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { DialogDismiss, DialogHeading } from "ariakit/dialog";
 import { MdOutlineInfo } from "react-icons/md";
 import { Modal, ModalHeader } from "../../../components/Modal";
@@ -16,7 +16,7 @@ export interface GuideProps {
   height: number;
 }
 
-export const Guide: React.FC<GuideProps> = ({ width, height }) => (
+export const Guide: React.FC<GuideProps> = memo(({ width, height }) => (
   <Modal label={<MdOutlineInfo />} aria-label={`How to Play`}>
     <ModalHeader>
       <DialogHeading>How To Play:</DialogHeading>
@@ -70,4 +70,6 @@ export const Guide: React.FC<GuideProps> = ({ width, height }) => (
     </Row>
     <p>{`When you complete a row, all of the tiles will turn green. Get all of the letters in the correct position to win!`}</p>
   </Modal>
-);
+));
+
+Guide.displayName = `Guide`;

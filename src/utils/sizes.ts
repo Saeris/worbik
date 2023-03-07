@@ -1,4 +1,10 @@
-export const sizes = [
+import type { Immutable } from "./types";
+
+export type Size = 5 | 6 | 7 | 8;
+
+export type Dimensions = `${Size}x${Size}`;
+
+export const sizes: Immutable<[Size, Size][]> = [
   [5, 5],
   [5, 6],
   [5, 7],

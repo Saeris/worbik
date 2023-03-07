@@ -1,21 +1,21 @@
 import { group } from "./group";
-import { puzzleRegex } from "./puzzleRegex";
+import type { Size } from "./sizes";
 
 export class Grid {
   #matrix: string[][];
-  #width: number;
-  #height: number;
+  #width: Size;
+  #height: Size;
   #size: number;
 
   get matrix(): string[][] {
     return this.#matrix;
   }
 
-  get width(): number {
+  get width(): Size {
     return this.#width;
   }
 
-  get height(): number {
+  get height(): Size {
     return this.#height;
   }
 
@@ -23,23 +23,11 @@ export class Grid {
     return this.#size;
   }
 
-  constructor(chars: string[], perRow: number) {
-    this.#matrix = group(chars.slice(), perRow);
+  constructor(chars: string, perRow: Size) {
+    this.#matrix = group(chars.split(``), perRow);
     this.#width = perRow;
-    this.#height = chars.length / perRow;
+    this.#height = (chars.length / perRow) as Size;
     this.#size = chars.length;
-  }
-
-  static fromString(str: string): Grid {
-    const parsed = puzzleRegex.exec(str);
-    if (!parsed?.groups || !parsed.groups.chars || !parsed.groups.perRow) {
-      throw new Error(`Could not parse string into a Grid! Received: ${str}`);
-    }
-
-    return new Grid(
-      parsed.groups.chars.split(``),
-      parseInt(parsed.groups.perRow, 10)
-    );
   }
 
   #rotateLeft = (arr: string[]): string[] => {
@@ -88,7 +76,7 @@ export class Grid {
 
   flat = (): string[] => this.#matrix.flat();
 
-  toString = (): string => `${this.#width}_${this.flat().join(``)}`;
+  toString = (): string => this.flat().join(``);
 
   toJSON = (): {
     matrix: string[][];

@@ -1,14 +1,16 @@
 import { between } from "../between";
-import { PuzzleState } from "../PuzzleState";
+import { PuzzleState, type PuzzleStateInit } from "../PuzzleState";
 
 describe(`PuzzleState`, () => {
-  it(`can be instantiated from a string`, () => {
-    expect(() => new PuzzleState(`2_abcd`)).not.toThrow();
+  it(`can be instantiated from a an init array`, () => {
+    // @ts-expect-error
+    expect(() => new PuzzleState([2, `abcd`])).not.toThrow();
   });
 
   it(`can restore state from a snapshot`, () => {
-    const solution = `2_abcd`;
-    const expected = new PuzzleState(`2_cabd`);
+    const solution = `abcd`;
+    // @ts-expect-error
+    const expected = new PuzzleState([2, `cabd`]);
     expected.validate(
       PuzzleState.compare(expected.getNextState(0, `down`).toString(), solution)
     );
@@ -18,9 +20,13 @@ describe(`PuzzleState`, () => {
         solution
       )
     );
-    const actual = new PuzzleState(`2_cabd`).restore(
-      `2_cabd,2_bacd,2_abcd,ABCD`
-    );
+    // @ts-expect-error
+    const actual = new PuzzleState([2, `cabd`]).restore([
+      // @ts-expect-error
+      2,
+      `cabd,bacd,abcd`,
+      `ABCD`
+    ]);
 
     expect(actual.history).toStrictEqual(expected.history);
     expect(actual.toString()).toStrictEqual(expected.toString());
@@ -31,14 +37,27 @@ describe(`PuzzleState`, () => {
     expect(actual.win).toStrictEqual(expected.win);
   });
 
-  it(`throws when instantiaed with an invalid string`, () => {
-    expect(() => new PuzzleState(`foo`)).toThrow(
-      `Could not parse init string!`
+  it(`can generate a challenge`, () => {
+    // @ts-expect-error
+    const puzzle = new PuzzleState([2, `abcd`, 25]);
+    const actual = puzzle.toChallenge(); //?
+    const expected = [25, `ABCD`, `abcd`];
+    expect(puzzle.target).toStrictEqual(25);
+    expect(actual).toStrictEqual(expected);
+  });
+
+  it(`throws when instantiaed with an invalid init value`, () => {
+    // @ts-expect-error
+    expect(() => new PuzzleState(`foo`)).toThrow(`Init value is not an array!`);
+    // @ts-expect-error
+    expect(() => new PuzzleState([0, ``])).toThrow(
+      `Received invalid initialization array! Received: `
     );
   });
 
   it(`returns expected values for property getters`, () => {
-    const state = new PuzzleState(`2_abcd`);
+    // @ts-expect-error
+    const state = new PuzzleState([2, `abcd`]);
     const grid = {
       height: 2,
       matrix: [
@@ -48,7 +67,7 @@ describe(`PuzzleState`, () => {
       size: 4,
       width: 2
     };
-    const history = [`2_abcd`];
+    const history = [`abcd`];
     const hints = [
       [` `, ` `],
       [` `, ` `]
@@ -67,12 +86,13 @@ describe(`PuzzleState`, () => {
     expect(state.hints).toStrictEqual(hints);
     expect(state.moves).toStrictEqual(0);
     expect(state.target).toStrictEqual(0);
-    expect(state.toString()).toStrictEqual(`2_abcd_0`);
+    expect(state.toString()).toStrictEqual(`abcd`);
     expect(state.toJSON()).toStrictEqual(obj);
   });
 
   it(`can generate new states`, () => {
-    const state = new PuzzleState(`2_abcd`);
+    // @ts-expect-error
+    const state = new PuzzleState([2, `abcd`]);
     const initial = {
       height: 2,
       matrix: [
@@ -91,7 +111,7 @@ describe(`PuzzleState`, () => {
       size: 4,
       width: 2
     };
-    const history = [`2_abcd`, `2_cbad`, `2_cdab`, `2_dcab`, `2_dcba`];
+    const history = [`abcd`, `cbad`, `cdab`, `dcab`, `dcba`];
     state
       .getNextState(0, `up`)
       .getNextState(1, `down`)
@@ -112,16 +132,17 @@ describe(`PuzzleState`, () => {
   });
 
   it(`caches hints`, () => {
-    const init = `5_rcaet`;
+    const init = [5, `rcaet`] as PuzzleStateInit;
     const state = new PuzzleState(init);
-    const solution = PuzzleState.compare(init, `5_react`);
+    const solution = PuzzleState.compare(init[1], `react`);
     state.validate(solution);
     const expected = [[`R`, ` `, `A`, ` `, `T`]];
     expect(state.hints).toStrictEqual(expected);
   });
 
   it(`notifies subscribers of updates`, () => {
-    const state = new PuzzleState(`2_abcd`);
+    // @ts-expect-error
+    const state = new PuzzleState([2, `abcd`]);
     const listener = jest.fn();
     const unsubscribe = state.subscribe(listener);
     state.getNextState(0, `up`);
@@ -136,19 +157,19 @@ describe(`PuzzleState`, () => {
 
   it(`can randomize it's state`, () => {
     const cases = [
-      `5_react`,
-      `5_reactgoose`,
-      `5_reactgooseteach`,
-      `5_reactgooseteachdrink`,
-      `5_reactgooseteachdrinkclear`,
-      `7_emotion`,
-      `7_emotionfreedom`,
-      `7_emotionfreedomhelpful`,
-      `7_emotionfreedomhelpfulmagical`,
-      `7_emotionfreedomhelpfulmagicalalright`,
-      `7_emotionfreedomhelpfulmagicalalrightfighter`,
-      `7_emotionfreedomhelpfulmagicalalrightfightermonster`
-    ];
+      [5, `react`],
+      [5, `reactgoose`],
+      [5, `reactgooseteach`],
+      [5, `reactgooseteachdrink`],
+      [5, `reactgooseteachdrinkclear`],
+      [7, `emotion`],
+      [7, `emotionfreedom`],
+      [7, `emotionfreedomhelpful`],
+      [7, `emotionfreedomhelpfulmagical`],
+      [7, `emotionfreedomhelpfulmagicalalright`],
+      [7, `emotionfreedomhelpfulmagicalalrightfighter`],
+      [7, `emotionfreedomhelpfulmagicalalrightfightermonster`]
+    ] as PuzzleStateInit[];
 
     for (const val of cases) {
       const listener = jest.fn();
@@ -162,10 +183,10 @@ describe(`PuzzleState`, () => {
 
   it(`can validate a winning state`, () => {
     const listener = jest.fn();
-    const solution = `6_worbik`;
-    const history = [`6_kworbi`, `6_worbik`, `6_kworbi`, `6_worbik`];
-    const truncated = [`6_kworbi`, `6_worbik`];
-    const state = new PuzzleState(`6_kworbi`);
+    const solution = `worbik`;
+    const history = [`kworbi`, `worbik`, `kworbi`, `worbik`];
+    const truncated = [`kworbi`, `worbik`];
+    const state = new PuzzleState([6, `kworbi`]);
     state.subscribe(listener);
     state.getNextState(0, `left`); // win state 1
     state.getNextState(0, `right`);
@@ -177,9 +198,9 @@ describe(`PuzzleState`, () => {
     // Don't trigger another update if a winning state has been reached
     state.getNextState(0, `left`);
     state.validate(solution);
-    expect(state.toString()).toStrictEqual(`6_worbik_1`);
     expect(state.moves).toStrictEqual(1);
+    expect(state.toString()).toStrictEqual(`worbik`);
     expect(state.history).toStrictEqual(truncated);
-    expect(listener).toHaveBeenCalledTimes(4);
+    expect(listener).toHaveBeenCalledTimes(3);
   });
 });

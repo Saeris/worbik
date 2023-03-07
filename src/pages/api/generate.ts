@@ -3,7 +3,6 @@ import type { NextApiHandler } from "next/types";
 import {
   generate,
   getDateKey,
-  PuzzleState,
   sizes,
   updateEdgeConfig,
   filterExpiredDates,
@@ -18,6 +17,8 @@ export const config = {
 /**
  * Generates new puzzles once daily at 10 PM,
  * deleting puzzles that are 3 days old
+ *
+ * 10 PM in PDX is UTC 06:00 AM
  */
 const handler: NextApiHandler = async (req, res) => {
   if (req.method !== `GET`) {
@@ -45,22 +46,17 @@ const handler: NextApiHandler = async (req, res) => {
 
     await wait(5000);
 
-    const toBeAdded = sizes.map(([width, height]) => {
-      const puzzle = generate({ width, height });
-      const solution = puzzle.initial.toString();
-      const challenge = PuzzleState.compare(puzzle.toString(), solution);
-      return {
-        operation: `create`,
-        key: getDateKey({
-          width,
-          height
-        }),
-        value: {
-          challenge,
-          solution
-        }
-      } as const;
-    });
+    const toBeAdded = sizes.map(
+      ([width, height]) =>
+        ({
+          operation: `create`,
+          key: getDateKey({
+            width,
+            height
+          }),
+          value: generate({ width, height }).toChallenge()
+        } as const)
+    );
 
     const addPuzzles = await (
       await updateEdgeConfig(edgeConfigId, token, toBeAdded)

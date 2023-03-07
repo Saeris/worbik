@@ -7,7 +7,9 @@ export const config = {
 };
 
 /**
- * Revalidates all puzzles roughly at 1 AM every day
+ * Revalidates all puzzles roughly at 2 AM every day
+ *
+ * 2 AM in PDX is UTC 10:00 AM
  */
 const handler: NextApiHandler = async (req, res) => {
   if (req.method !== `GET`) {

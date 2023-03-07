@@ -17,6 +17,8 @@ export const config = {
 /**
  * Generates new puzzles once daily at 10 PM,
  * deleting puzzles that are 3 days old
+ *
+ * 10 PM in PDX is UTC 06:00 AM
  */
 const handler: NextApiHandler = async (req, res) => {
   if (req.method !== `GET`) {

@@ -7,6 +7,7 @@ export const middleware: NextMiddleware = async (req) => {
   if (pathname.startsWith(`/api/`)) {
     // This is the URL of the page sending the request to the API
     const referer = req.headers.get(`referer`);
+    const ua = req.headers.get(`User-Agent`);
     const hosts = {
       production: async () => [
         // Allow manual cron job execution from the Vercel Dashboard UI
@@ -28,10 +29,11 @@ export const middleware: NextMiddleware = async (req) => {
     if (
       !(await hosts[process.env.VERCEL_ENV]()).some((host) =>
         referer?.includes(host)
-      )
+      ) &&
+      !ua?.startsWith(`vercel-cron`)
     ) {
       // eslint-disable-next-line no-console
-      console.log({ referer, hosts });
+      console.error({ referer, ua, req });
       return NextResponse.json({ message: `Unauthorized` }, { status: 401 });
     }
   }

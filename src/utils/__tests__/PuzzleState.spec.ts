@@ -40,8 +40,12 @@ describe(`PuzzleState`, () => {
   it(`can generate a challenge`, () => {
     // @ts-expect-error
     const puzzle = new PuzzleState([2, `abcd`, 25]);
+    // Simulate randomize increasing the move count
+    puzzle.getNextState(0, `up`);
+    puzzle.getNextState(0, `down`);
     const actual = puzzle.toChallenge(); //?
-    const expected = [25, `ABCD`, `abcd`];
+    const expected = [2, `ABCD`, `abcd`];
+    expect(puzzle.moves).toStrictEqual(2);
     expect(puzzle.target).toStrictEqual(25);
     expect(actual).toStrictEqual(expected);
   });

@@ -223,7 +223,7 @@ export class PuzzleState {
   };
 
   toChallenge = (): Challenge => [
-    this.target,
+    this.moves,
     PuzzleState.compare(String(this.current), String(this.initial)),
     this.initial.toString()
   ];

@@ -18,11 +18,19 @@ const handler: NextApiHandler = async (req, res) => {
     return;
   }
 
-  await Promise.all(
-    sizes.map(
-      async ([width, height]) => await res.revalidate(`/${width}x${height}`)
-    )
-  );
+  try {
+    await Promise.all(
+      sizes.map(
+        async ([width, height]) => await res.revalidate(`/${width}x${height}`)
+      )
+    );
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      // eslint-disable-next-line no-console
+      console.error(`Failed to revalidate puzzles!`, err.message);
+    }
+    res.status(500).send(null);
+  }
 
   res.status(200).send(null);
 };

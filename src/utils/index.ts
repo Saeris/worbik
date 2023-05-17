@@ -19,6 +19,7 @@ export {
 } from "./PuzzleState";
 export { range } from "./range";
 export { repeat } from "./repeat";
+export { sendDiscordWebhook } from "./sendDiscordWebhook";
 export { sizes, type Size, type Dimensions } from "./sizes";
 export { toInt } from "./toInt";
 export type { Maybe } from "./types";

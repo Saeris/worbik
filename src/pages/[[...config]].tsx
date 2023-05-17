@@ -6,7 +6,8 @@ import {
   getDateKey,
   parseSize,
   puzzleSchema,
-  sizes
+  sizes,
+  sendDiscordWebhook
 } from "../utils";
 import type { GameProps } from "../routes/Game";
 
@@ -26,8 +27,9 @@ export const getStaticProps: GetStaticProps<GameProps | {}> = async (ctx) => {
     init: [config.width ?? 5, cachedPuzzle[1], cachedPuzzle[0]]
   };
 
-  // eslint-disable-next-line no-console
-  console.log(props);
+  await sendDiscordWebhook(
+    `Generated new puzzle ${puzzleID} and initial value of "${cachedPuzzle[1]}"`
+  );
 
   return {
     props

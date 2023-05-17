@@ -187,6 +187,7 @@ namespace NodeJS {
 
     // Project Specific
 
+    DISCORD_WEBHOOK_URL: string;
     REDIS_URL: string;
     UPSTASH_REDIS_REST_URL: `https://${string}.upstash.io`;
     UPSTASH_REDIS_REST_TOKEN: string;

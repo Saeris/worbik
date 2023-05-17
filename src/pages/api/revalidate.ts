@@ -1,5 +1,5 @@
 import type { NextApiHandler } from "next/types";
-import { sizes } from "../../utils";
+import { sendDiscordWebhook, sizes } from "../../utils";
 
 export const config = {
   // eslint-disable-next-line @typescript-eslint/quotes
@@ -24,6 +24,11 @@ const handler: NextApiHandler = async (req, res) => {
         async ([width, height]) => await res.revalidate(`/${width}x${height}`)
       )
     );
+
+    await sendDiscordWebhook(
+      `Revalidation initiated at ${new Date().toLocaleString()}`
+    );
+
     res.json({ revalidated: true });
   } catch (err: unknown) {
     if (err instanceof Error) {

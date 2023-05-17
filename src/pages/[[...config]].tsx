@@ -27,7 +27,7 @@ export const getStaticProps: GetStaticProps<GameProps | {}> = async (ctx) => {
   };
 
   // eslint-disable-next-line no-console
-  console.log({ size, config, props });
+  console.log(props);
 
   return {
     props

@@ -1,6 +1,6 @@
 export const parseSize = (
   size: string = `5x5`
-): { width: number; height: number } | undefined => {
+): { width: number; height: number } => {
   const [width, height] = size.split(`x`);
   const sizes = {
     5: 5,
@@ -14,4 +14,5 @@ export const parseSize = (
       height: sizes[height]
     };
   }
+  throw new Error(`Received invalid size value: "${size}"`);
 };

@@ -12,13 +12,6 @@ import type { GameProps } from "../routes/Game";
 
 export const getStaticProps: GetStaticProps<GameProps | {}> = async (ctx) => {
   const size = parseSize(ctx.params?.config?.[0]);
-
-  if (!size) {
-    return {
-      props: {}
-    };
-  }
-
   const config = puzzleSchema.parse(size);
   const puzzleID = getDateKey(config, 0);
   const edgeConfig = createClient(process.env.EDGE_CONFIG);
@@ -28,11 +21,16 @@ export const getStaticProps: GetStaticProps<GameProps | {}> = async (ctx) => {
     throw new Error(`Unable to retrieve cached puzzle id: ${puzzleID}`);
   }
 
+  const props = {
+    puzzleID,
+    init: [config.width ?? 5, cachedPuzzle[1], cachedPuzzle[0]]
+  };
+
+  // eslint-disable-next-line no-console
+  console.log({ size, config, props });
+
   return {
-    props: {
-      puzzleID,
-      init: [config.width ?? 5, cachedPuzzle[1], cachedPuzzle[0]]
-    }
+    props
   };
 };
 

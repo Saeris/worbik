@@ -8,6 +8,7 @@ export const middleware: NextMiddleware = async (req) => {
     // This is the URL of the page sending the request to the API
     const referer = req.headers.get(`referer`);
     const ua = req.headers.get(`User-Agent`);
+    const env = process.env.VERCEL_ENV;
     const hosts = {
       production: async () => [
         // Allow manual cron job execution from the Vercel Dashboard UI
@@ -22,14 +23,12 @@ export const middleware: NextMiddleware = async (req) => {
           /(?<punctuation>\W)+/g,
           `-`
         )}-${process.env.VERCEL_GIT_COMMIT_AUTHOR_LOGIN.toLowerCase()}.vercel.app`
-      ],
-      development: () => [`localhost`]
+      ]
     } as const;
     // The referer must match a valid host or the request is bounced
     if (
-      !(await hosts[process.env.VERCEL_ENV]()).some((host) =>
-        referer?.includes(host)
-      ) &&
+      env !== `development` &&
+      !(await hosts[env]()).some((host) => referer?.includes(host)) &&
       !ua?.startsWith(`vercel-cron`)
     ) {
       // eslint-disable-next-line no-console

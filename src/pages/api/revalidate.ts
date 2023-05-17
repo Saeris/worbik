@@ -24,15 +24,14 @@ const handler: NextApiHandler = async (req, res) => {
         async ([width, height]) => await res.revalidate(`/${width}x${height}`)
       )
     );
+    res.json({ revalidated: true });
   } catch (err: unknown) {
     if (err instanceof Error) {
       // eslint-disable-next-line no-console
       console.error(`Failed to revalidate puzzles!`, err.message);
     }
-    res.status(500).send(null);
+    res.status(500).send(`Error revalidating`);
   }
-
-  res.status(200).send(null);
 };
 
 export default handler;

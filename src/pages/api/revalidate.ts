@@ -1,6 +1,8 @@
 import type { NextApiHandler } from "next/types";
 import { sendDiscordWebhook, sizes } from "../../utils";
-import { locales } from "../../../next.config.mjs";
+
+// Until there is a better way to get this from next.config.mjs...
+const locales = [`en`];
 
 export const config = {
   // eslint-disable-next-line @typescript-eslint/quotes

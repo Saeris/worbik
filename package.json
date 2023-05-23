@@ -6,6 +6,7 @@
   "license": "ISC",
   "keywords": [],
   "main": "src/pages/index.tsx",
+  "type": "module",
   "scripts": {
     "lint": "next lint",
     "format": "yarn test:lint --fix",

@@ -1,5 +1,6 @@
 import z from "zod";
 import { between } from "./between";
+import type { Size } from "./sizes";
 
 const numeric = z
   .preprocess(
@@ -19,7 +20,7 @@ const numeric = z
       )
       .transform(Number)
       .refine(
-        (v) => between(v, 5, 8),
+        (v): v is Size => between(v, 5, 8),
         (v) => ({
           message: `Value must be between 5 and 8 (inclusive), received ${v}`
         })

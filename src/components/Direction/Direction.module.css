@@ -1,17 +1,22 @@
 .button {
+  --min: var(--spacing-8);
+  --max: var(--spacing-20);
+  flex: 1 1 auto;
   display: flex;
   justify-content: center;
   align-items: center;
   border-radius: var(--spacing-0);
   background: var(--neutral-bg);
   box-shadow: 0px var(--spacing-0) 0px 0px var(--neutral-bd);
+  box-sizing: border-box;
   color: var(--neutral-fg);
   font-size: var(--font-size-6);
   cursor: pointer;
 
   svg {
-    width: var(--spacing-8);
-    height: var(--spacing-8);
+    aspect-ratio: 1 / 1;
+    max-width: var(--spacing-8);
+    max-height: var(--spacing-8);
   }
 
   &:hover,
@@ -25,8 +30,18 @@
 
 .horizontal {
   padding: var(--spacing-2) 0;
+  min-width: var(--spacing-8);
+  max-width: var(--spacing-8);
+  min-height: var(--min);
+  height: 100%;
+  max-height: var(--max);
 }
 
 .vertical {
   padding: 0 var(--spacing-2);
+  min-width: var(--min);
+  width: 100%;
+  max-width: var(--max);
+  min-height: var(--spacing-8);
+  max-height: var(--spacing-8);
 }

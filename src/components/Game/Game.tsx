@@ -1,9 +1,10 @@
+"use client";
 import React from "react";
 import type { NextPage } from "next/types";
-import { Puzzle } from "./Puzzle/Puzzle";
+import { Puzzle } from "../Puzzle/Puzzle";
 import { usePuzzle } from "./usePuzzleState";
-import { Guide } from "./Guide";
-import { Config } from "./Config";
+import { Guide } from "../Guide";
+import { Config } from "../Config";
 import type { PuzzleStateInit } from "../../utils";
 import styles from "./Game.module.css";
 

@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useQueuedAPICall } from "./useQueuedAPICall";
-import type { usePuzzle } from "../usePuzzleState";
+import type { usePuzzle } from "../Game/usePuzzleState";
 
 export const useRotate = (
   puzzleID: string,

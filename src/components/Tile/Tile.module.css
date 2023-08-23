@@ -1,11 +1,17 @@
 .tile {
+  --min: var(--spacing-8);
+  --max: var(--spacing-20);
   position: relative;
-  width: var(--spacing-12);
-  height: var(--spacing-12);
-  min-width: var(--spacing-12);
-  max-width: var(--spacing-20);
-  min-height: var(--spacing-12);
-  max-height: var(--spacing-20);
+  flex: 1 1 auto;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-width: var(--min);
+  max-width: var(--max);
+  min-height: var(--min);
+  max-height: var(--max);
   border-radius: var(--spacing-0);
   background: var(--neutral-bg);
   box-shadow: 0px var(--spacing-0) 0px 0px var(--neutral-bd);
@@ -28,6 +34,7 @@
     position: absolute;
     bottom: var(--spacing-0);
     right: var(--spacing-0);
+    width: var(--font-height-1);
     font-size: var(--font-size-1);
     font-weight: 300;
     line-height: var(--font-height-1);

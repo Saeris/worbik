@@ -1,3 +1,4 @@
+"use client";
 /* eslint-disable react/no-array-index-key */
 import React from "react";
 import {
@@ -6,10 +7,10 @@ import {
   CompositeRow,
   useCompositeStore
 } from "@ariakit/react";
-import { Direction } from "../../../components/Direction";
-import { Tile } from "../../../components/Tile";
-import { range } from "../../../utils";
-import type { usePuzzle } from "../usePuzzleState";
+import { Direction } from "../Direction";
+import { Tile } from "../Tile";
+import { range } from "../../utils";
+import type { usePuzzle } from "../Game/usePuzzleState";
 import { useRotate } from "./useRotate";
 import styles from "./Puzzle.module.css";
 
@@ -24,7 +25,11 @@ export const Puzzle: React.FC<PuzzleProps> = ({ puzzleID, state }) => {
   const repeat = range(state.initial.width);
 
   return (
-    <Composite store={grid} className={styles.container}>
+    <Composite
+      store={grid}
+      style={{ "--items": state.initial.width } as React.CSSProperties}
+      className={styles.container}
+    >
       <CompositeGroup className={styles.grid}>
         <CompositeRow className={styles.row}>
           {repeat.map((y) => (

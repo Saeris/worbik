@@ -1,9 +1,10 @@
+"use client";
 import React, { memo } from "react";
 import Link from "next/link";
 import { DialogDismiss, DialogHeading } from "@ariakit/react";
 import { PiGearThin, PiXThin } from "react-icons/pi";
-import { Modal, ModalHeader } from "../../../components/Modal";
-import { sizes } from "../../../utils";
+import { Modal, ModalHeader } from "../Modal";
+import { sizes } from "../../utils";
 import styles from "./Config.module.css";
 
 const SizeButtons: React.FC = memo(() => (

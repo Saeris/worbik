@@ -1,8 +1,9 @@
+"use client";
 import React, { memo } from "react";
 import { DialogDismiss, DialogHeading } from "@ariakit/react";
 import { PiInfoThin, PiXThin } from "react-icons/pi";
-import { Modal, ModalHeader } from "../../../components/Modal";
-import { Tile } from "../../../components/Tile";
+import { Modal, ModalHeader } from "../Modal";
+import { Tile } from "../Tile";
 import styles from "./Guide.module.css";
 
 const numbers = {

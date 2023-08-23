@@ -1,3 +1,4 @@
+"use client";
 import React, { memo, useCallback } from "react";
 import { Button } from "@ariakit/react";
 import { cva } from "class-variance-authority";

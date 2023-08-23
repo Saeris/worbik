@@ -1,17 +1,28 @@
 import React, { memo, useCallback } from "react";
-import { Character, Hint } from "./elements";
+import { CompositeItem } from "@ariakit/react";
+import { cva } from "class-variance-authority";
+import styles from "./Tile.module.css";
 
-export interface CharacterTileProps {
+const variants = cva(styles.tile, {
+  variants: {
+    variant: {
+      hint: styles.hint,
+      correct: styles.correct
+    }
+  }
+});
+
+export interface TileProps {
   x: number;
   y: number;
   char: string;
-  hint: string;
-  correct: boolean;
-  disabled: boolean;
-  rotate: (rowOrCol: number, dir: `up` | `down` | `left` | `right`) => void;
+  hint?: string;
+  correct?: boolean;
+  disabled?: boolean;
+  rotate?: (rowOrCol: number, dir: `up` | `down` | `left` | `right`) => void;
 }
 
-export const CharacterTile: React.FC<CharacterTileProps> = memo(
+export const Tile: React.FC<TileProps> = memo(
   ({ x, y, char, hint, correct, disabled, rotate }) => {
     const handleKeypress: React.KeyboardEventHandler<HTMLButtonElement> =
       useCallback(
@@ -27,17 +38,23 @@ export const CharacterTile: React.FC<CharacterTileProps> = memo(
             };
             // a | d = horizontal, w | s = veritcal
             const axis = [`a`, `d`].includes(key);
-            rotate(axis ? x : y, dir[key]);
+            if (rotate) {
+              rotate(axis ? x : y, dir[key]);
+            }
           }
         },
         [rotate, x, y]
       );
 
+    const variant = correct
+      ? `correct`
+      : char.toUpperCase() === hint
+      ? `hint`
+      : null;
+
     return (
-      <Character
+      <CompositeItem
         key={`char-${x}${y}`}
-        $hint={char.toUpperCase() === hint}
-        $correct={correct}
         onKeyDown={handleKeypress}
         aria-label={`Grid tile ${x + 1}, ${
           y + 1
@@ -45,12 +62,13 @@ export const CharacterTile: React.FC<CharacterTileProps> = memo(
           hint === ` ` ? `` : ` Correct character for this tile is ${hint}.`
         }`}
         disabled={disabled}
+        className={variants({ variant })}
       >
         {char.toUpperCase()}
-        <Hint>{hint}</Hint>
-      </Character>
+        <span>{hint}</span>
+      </CompositeItem>
     );
   }
 );
 
-CharacterTile.displayName = `CharacterTile`;
+Tile.displayName = `Tile`;

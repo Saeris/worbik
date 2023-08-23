@@ -1,11 +1,10 @@
 import React from "react";
 import type { AppProps } from "next/app";
-import { SSRProvider } from "react-aria";
-import { ThemeProvider } from "styled-components";
 import Head from "next/head";
 // eslint-disable-next-line import/no-unresolved
 // import { Analytics } from "@vercel/analytics/react";
-import { Global, theme } from "../theme";
+import "../theme/theme.css";
+import "../theme/global.css";
 
 const meta = {
   title: `Worbik`,
@@ -61,54 +60,51 @@ export const metadata: Metadata = {
 */
 
 const _app: React.FC<AppProps> = ({ Component, pageProps }) => (
-  <SSRProvider>
-    <ThemeProvider theme={theme}>
-      <Head>
-        <title>{meta.title}</title>
-        <link rel="shortcut icon" href="/favicon.ico" />
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content={meta.color} />
-        <meta name="description" content={meta.description} />
-        <meta name="image" content={meta.image} />
-        {/* OpenGraph */}
-        <meta property="og:title" content={meta.title} />
-        <meta property="og:description" content={meta.description} />
-        <meta property="og:locale" content={meta.locale} />
-        <meta property="og:image" content={meta.image} />
-        <meta property="og:image:alt" content={meta.image} />
-        {/* Twitter */}
-        <meta name="twitter:title" content={meta.title} />
-        <meta name="twitter:description" content={meta.description} />
-        <meta name="twitter:creator" content={meta.twitter} />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content={meta.image} />
-        <meta name="twitter:image:alt" content={meta.title} />
-        {/* iOS */}
-        <link
-          rel="apple-touch-icon"
-          type="image/png"
-          sizes="192x192"
-          href="/logo192.png"
-        />
-        <meta
-          name="apple-mobile-web-app-status-bar"
-          content="black-translucent"
-        />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta
-          name="apple-mobile-web-app-status-bar-style"
-          content="black-translucent"
-        />
-        <meta
-          name="viewport"
-          content="viewport-fit=cover, width=device-width, initial-scale=1"
-        />
-      </Head>
-      <Global />
-      <Component {...pageProps} />
-      {/* <Analytics /> */}
-    </ThemeProvider>
-  </SSRProvider>
+  <>
+    <Head>
+      <title>{meta.title}</title>
+      <link rel="shortcut icon" href="/favicon.ico" />
+      <link rel="manifest" href="/manifest.json" />
+      <meta name="theme-color" content={meta.color} />
+      <meta name="description" content={meta.description} />
+      <meta name="image" content={meta.image} />
+      {/* OpenGraph */}
+      <meta property="og:title" content={meta.title} />
+      <meta property="og:description" content={meta.description} />
+      <meta property="og:locale" content={meta.locale} />
+      <meta property="og:image" content={meta.image} />
+      <meta property="og:image:alt" content={meta.image} />
+      {/* Twitter */}
+      <meta name="twitter:title" content={meta.title} />
+      <meta name="twitter:description" content={meta.description} />
+      <meta name="twitter:creator" content={meta.twitter} />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:image" content={meta.image} />
+      <meta name="twitter:image:alt" content={meta.title} />
+      {/* iOS */}
+      <link
+        rel="apple-touch-icon"
+        type="image/png"
+        sizes="192x192"
+        href="/logo192.png"
+      />
+      <meta
+        name="apple-mobile-web-app-status-bar"
+        content="black-translucent"
+      />
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta
+        name="apple-mobile-web-app-status-bar-style"
+        content="black-translucent"
+      />
+      <meta
+        name="viewport"
+        content="viewport-fit=cover, width=device-width, initial-scale=1"
+      />
+    </Head>
+    <Component {...pageProps} />
+    {/* <Analytics /> */}
+  </>
 );
 
 export default _app;

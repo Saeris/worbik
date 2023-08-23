@@ -1,18 +1,19 @@
 import React, { memo } from "react";
-import { DialogDismiss, DialogHeading } from "ariakit";
-import { MdOutlineSettings } from "react-icons/md";
+import Link from "next/link";
+import { DialogDismiss, DialogHeading } from "@ariakit/react";
+import { PiGearThin, PiXThin } from "react-icons/pi";
 import { Modal, ModalHeader } from "../../../components/Modal";
 import { sizes } from "../../../utils";
-import { Frame, SizeButton } from "./elements";
+import styles from "./Config.module.css";
 
 const SizeButtons: React.FC = memo(() => (
   <>
     {sizes.map(([width, height]) => {
       const size = `${width}×${height}`;
       return (
-        <SizeButton key={size} href={`${width}x${height}`}>
+        <Link key={size} className={styles.size} href={`${width}x${height}`}>
           {size}
-        </SizeButton>
+        </Link>
       );
     })}
   </>
@@ -21,14 +22,16 @@ const SizeButtons: React.FC = memo(() => (
 SizeButtons.displayName = `SizeButtons`;
 
 export const Config: React.FC = memo(() => (
-  <Modal label={<MdOutlineSettings />} aria-label={`Config`}>
+  <Modal label={<PiGearThin />} aria-label={`Config`}>
     <ModalHeader>
       <DialogHeading>Game Settings:</DialogHeading>
-      <DialogDismiss />
+      <DialogDismiss>
+        <PiXThin />
+      </DialogDismiss>
     </ModalHeader>
-    <Frame>
+    <article className={styles.frame}>
       <SizeButtons />
-    </Frame>
+    </article>
   </Modal>
 ));
 

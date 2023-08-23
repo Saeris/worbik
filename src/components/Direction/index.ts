@@ -1,1 +1,1 @@
-export { Direction } from "./Direction";
+export { Direction, type DirectionProps } from "./Direction";

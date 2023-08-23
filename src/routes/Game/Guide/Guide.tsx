@@ -1,8 +1,9 @@
 import React, { memo } from "react";
-import { DialogDismiss, DialogHeading } from "ariakit/dialog";
-import { MdOutlineInfo } from "react-icons/md";
+import { DialogDismiss, DialogHeading } from "@ariakit/react";
+import { PiInfoThin, PiXThin } from "react-icons/pi";
 import { Modal, ModalHeader } from "../../../components/Modal";
-import { Character, Hint, Row } from "../Puzzle/elements";
+import { Tile } from "../../../components/Tile";
+import styles from "./Guide.module.css";
 
 const numbers = {
   5: `five`,
@@ -17,10 +18,12 @@ export interface GuideProps {
 }
 
 export const Guide: React.FC<GuideProps> = memo(({ width, height }) => (
-  <Modal label={<MdOutlineInfo />} aria-label={`How to Play`}>
+  <Modal label={<PiInfoThin />} aria-label={`How to Play`}>
     <ModalHeader>
       <DialogHeading>How To Play:</DialogHeading>
-      <DialogDismiss />
+      <DialogDismiss>
+        <PiXThin />
+      </DialogDismiss>
     </ModalHeader>
     <p>
       {`Hidden in this puzzle are `}
@@ -35,39 +38,18 @@ export const Guide: React.FC<GuideProps> = memo(({ width, height }) => (
         rotate the columns and rows in order to find the correct position of
         each letter and decode all ${String(numbers[height])} words.`}
     </p>
-    <Row>
-      <Character $hint disabled>
-        {`W`}
-        <Hint>{`W`}</Hint>
-      </Character>
-    </Row>
+    <div className={styles.row}>
+      <Tile x={0} y={0} char="W" hint="W" disabled />
+    </div>
     <p>{`As you play, letters in the correct position will turn their tile yellow and will permanently display a reminder in the bottom right corner.`}</p>
-    <Row>
-      <Character $correct disabled>
-        {`W`}
-        <Hint>{`W`}</Hint>
-      </Character>
-      <Character $correct disabled>
-        {`O`}
-        <Hint>{`O`}</Hint>
-      </Character>
-      <Character $correct disabled>
-        {`R`}
-        <Hint>{`R`}</Hint>
-      </Character>
-      <Character $correct disabled>
-        {`B`}
-        <Hint>{`B`}</Hint>
-      </Character>
-      <Character $correct disabled>
-        {`I`}
-        <Hint>{`I`}</Hint>
-      </Character>
-      <Character $correct disabled>
-        {`K`}
-        <Hint>{`K`}</Hint>
-      </Character>
-    </Row>
+    <div className={styles.row}>
+      <Tile x={0} y={0} char="W" hint="W" correct disabled />
+      <Tile x={0} y={0} char="O" hint="O" correct disabled />
+      <Tile x={0} y={0} char="R" hint="R" correct disabled />
+      <Tile x={0} y={0} char="B" hint="B" correct disabled />
+      <Tile x={0} y={0} char="I" hint="I" correct disabled />
+      <Tile x={0} y={0} char="K" hint="K" correct disabled />
+    </div>
     <p>{`When you complete a row, all of the tiles will turn green. Get all of the letters in the correct position to win!`}</p>
   </Modal>
 ));

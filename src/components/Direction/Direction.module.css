@@ -1,0 +1,32 @@
+.button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: var(--spacing-0);
+  background: var(--neutral-bg);
+  box-shadow: 0px var(--spacing-0) 0px 0px var(--neutral-bd);
+  color: var(--neutral-fg);
+  font-size: var(--font-size-6);
+  cursor: pointer;
+
+  svg {
+    width: var(--spacing-8);
+    height: var(--spacing-8);
+  }
+
+  &:hover,
+  &:focus {
+    &:not(:disabled) {
+      box-shadow: var(--focus-ring);
+      outline: none;
+    }
+  }
+}
+
+.horizontal {
+  padding: var(--spacing-2) 0;
+}
+
+.vertical {
+  padding: 0 var(--spacing-2);
+}

@@ -1,0 +1,21 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 4ch;
+  align-items: center;
+  font-size: var(--font-size-6);
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  gap: var(--spacing-1);
+  touch-action: manipulation;
+}
+
+.row {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-1);
+}

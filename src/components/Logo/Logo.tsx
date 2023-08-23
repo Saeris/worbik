@@ -1,5 +1,5 @@
 import React, { useId } from "react";
-import { Overlay } from "./elements";
+import styles from "./Logo.module.css";
 
 export interface LogoProps extends React.HTMLAttributes<SVGElement> {
   scale?: number;
@@ -36,7 +36,7 @@ export const Logo = React.forwardRef<SVGSVGElement, LogoProps>(
 		c2.6,0.1,3.7-0.5,5-0.9c0.2-0.1,0.4-0.1,0.6-0.1c0.7,0,1.6,0.4,1.9,0.7c0.1,0.1,0.2,0.3,0.2,0.4c0,0,0,0,0,0L32,5.2
 		C32.2,6.2,30.8,8.2,30.2,8.8z"
         />
-        <Overlay>
+        <g className={styles.overlay}>
           <clipPath id={clip}>
             <path
               opacity={0.5}
@@ -130,7 +130,7 @@ export const Logo = React.forwardRef<SVGSVGElement, LogoProps>(
 				c0.2-0.1,0.4-0.1,0.6-0.1c0.7,0,1.6,0.4,1.9,0.7C32.3,4.4,30.6,6.8,29.9,7.5z"
             />
           </g>
-        </Overlay>
+        </g>
       </svg>
     );
   }

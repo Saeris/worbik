@@ -1,4 +1,3 @@
-import type { NextApiHandler } from "next/types";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { sendDiscordWebhook, sizes } from "#utils";
@@ -11,7 +10,9 @@ export const runtime = "edge";
  *
  * 2 AM in PDX is UTC 10:00 AM
  */
-export const GET: NextApiHandler = async () => {
+export const GET = async (): Promise<
+  NextResponse<{ revalidated: true; now: number } | null>
+> => {
   try {
     sizes.map(([width, height]) => revalidatePath(`/${width}x${height}`));
 

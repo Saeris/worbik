@@ -7,13 +7,12 @@ import {
   CompositeRow,
   useCompositeStore
 } from "@ariakit/react";
-import { Direction } from "../../Direction";
-import { Tile } from "../../Tile";
+import { Tile } from "#components/Tile";
+import { Direction } from "#components/Direction";
+import { range } from "#utils";
 import type { usePuzzle } from "../usePuzzleState";
 import { useRotate } from "./useRotate";
 import styles from "./Puzzle.module.css";
-// eslint-disable-next-line import/first
-import { range } from "#utils";
 
 export interface PuzzleProps {
   readonly puzzleID: string;

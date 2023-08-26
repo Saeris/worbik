@@ -3,10 +3,9 @@ import React, { memo } from "react";
 import Link from "next/link";
 import { DialogDismiss, DialogHeading } from "@ariakit/react";
 import { PiGearThin, PiXThin } from "react-icons/pi";
+import { sizes } from "#utils";
 import { Modal, ModalHeader } from "../Modal";
 import styles from "./Config.module.css";
-// eslint-disable-next-line import/first
-import { sizes } from "#utils";
 
 const SizeButtons: React.FC = memo(() => (
   <>

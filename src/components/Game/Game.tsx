@@ -1,13 +1,12 @@
 "use client";
 import React from "react";
 import type { NextPage } from "next/types";
+import type { PuzzleStateInit } from "#utils";
 import { Puzzle } from "./Puzzle";
 import { usePuzzle } from "./usePuzzleState";
 import { Guide } from "../Guide";
 import { Config } from "../Config";
 import styles from "./Game.module.css";
-// eslint-disable-next-line import/first
-import type { PuzzleStateInit } from "#utils";
 
 export interface GameProps {
   puzzleID: string;

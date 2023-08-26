@@ -46,7 +46,7 @@
     "zod": "3.22.2"
   },
   "devDependencies": {
-    "@saeris/eslint-config": "^2.4.1",
+    "@saeris/eslint-config": "^2.5.0",
     "@types/jest": "^29.5.4",
     "@types/node": "18.17.11",
     "@types/react": "18.2.21",
@@ -78,13 +78,10 @@
     "ignorePatterns": [
       ".next/**/*",
       "*.js",
+      "*.cjs",
       "*.mjs",
       "*.d.ts"
-    ],
-    "rules": {
-      "multiline-ternary": "off",
-      "react/require-default-props": "off"
-    }
+    ]
   },
   "browserslist": {
     "production": [

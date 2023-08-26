@@ -72,7 +72,7 @@ export class PuzzleState {
 
     const [perRow, chars, target = 0] = init;
 
-    if (!perRow || !chars) {
+    if (typeof perRow !== `number` || !chars) {
       throw new Error(
         `Received invalid initialization array! Received: ${perRow} ${chars}`
       );
@@ -94,7 +94,11 @@ export class PuzzleState {
       .join(``);
 
   #update = (): this => {
-    if (this.#initialized && !this.#win) this.#listeners.forEach((l) => l());
+    if (this.#initialized && !this.#win) {
+      this.#listeners.forEach((l) => {
+        l();
+      });
+    }
     return this;
   };
 

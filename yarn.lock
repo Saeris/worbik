@@ -2391,9 +2391,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@saeris/eslint-config@npm:^2.4.1":
-  version: 2.4.1
-  resolution: "@saeris/eslint-config@npm:2.4.1"
+"@saeris/eslint-config@npm:^2.5.0":
+  version: 2.5.0
+  resolution: "@saeris/eslint-config@npm:2.5.0"
   dependencies:
     "@next/eslint-plugin-next": ^13.4.19
     "@typescript-eslint/eslint-plugin": ^6.4.1
@@ -2408,7 +2408,7 @@ __metadata:
     typescript: ^5.2.2
   peerDependencies:
     eslint: ">= 8.3.0"
-  checksum: 080c515ea4e46aad7e5fabfba73ab6e9538d71e73afca95fa8ab31e6d756722969d879f1b143c4a6d593566d2bf25db816deec2549b64dfe39cce0736555f1cb
+  checksum: afb4d73448088da6ba0daea30b62131a6aac2b85421abcae27b1bb40394e29250a99e48c0305cc7ebe8190a800de7909bc5a3b3d8b57a5671c8a1d770286df00
   languageName: node
   linkType: hard
 
@@ -10172,7 +10172,7 @@ __metadata:
   resolution: "worbik@workspace:."
   dependencies:
     "@ariakit/react": ^0.2.17
-    "@saeris/eslint-config": ^2.4.1
+    "@saeris/eslint-config": ^2.5.0
     "@supabase/supabase-auth-helpers": ^1.4.2
     "@supabase/supabase-js": ^2.33.1
     "@types/jest": ^29.5.4

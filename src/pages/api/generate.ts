@@ -38,7 +38,7 @@ const handler: NextApiHandler = async (req, res) => {
 
     const updatePuzzles = await (
       await updateEdgeConfig(edgeConfigId, token, [
-        ...Object.keys(existing ?? {})
+        ...Object.keys(existing)
           .filter(filterExpiredDates)
           .map((key) => ({ operation: `delete` as const, key })),
         ...sizes.map(

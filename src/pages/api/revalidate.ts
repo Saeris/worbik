@@ -1,5 +1,5 @@
 import type { NextApiHandler } from "next/types";
-import { sendDiscordWebhook, sizes } from "../../utils";
+import { sendDiscordWebhook, sizes } from "#utils";
 
 // Until there is a better way to get this from next.config.mjs...
 const locales = [`en`];
@@ -23,14 +23,12 @@ const handler: NextApiHandler = async (req, res) => {
 
   try {
     await Promise.all(
-      sizes.map(
-        async ([width, height]) =>
-          await Promise.all(
-            locales.map(
-              async (locale) =>
-                await res.revalidate(`/${locale}/${width}x${height}`)
-            )
+      sizes.map(async ([width, height]) =>
+        Promise.all(
+          locales.map(async (locale) =>
+            res.revalidate(`/${locale}/${width}x${height}`)
           )
+        )
       )
     );
 

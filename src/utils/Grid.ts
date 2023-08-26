@@ -1,5 +1,5 @@
-import { group } from "./group";
-import type { Size } from "./sizes";
+import { group } from "./group.ts";
+import type { Size } from "./sizes.ts";
 
 export class Grid {
   #matrix: string[][];
@@ -54,22 +54,22 @@ export class Grid {
     }, this.#matrix);
   };
 
-  rotateColUp = (col: number): Grid => {
+  rotateColUp = (col: number): this => {
     this.#remapCol(col, this.#rotateLeft(this.#matrix.map((row) => row[col])));
     return this;
   };
 
-  rotateColDown = (col: number): Grid => {
+  rotateColDown = (col: number): this => {
     this.#remapCol(col, this.#rotateRight(this.#matrix.map((row) => row[col])));
     return this;
   };
 
-  rotateRowLeft = (row: number): Grid => {
+  rotateRowLeft = (row: number): this => {
     this.#remapRow(row, this.#rotateLeft(this.#matrix[row].slice(0)));
     return this;
   };
 
-  rotateRowRight = (row: number): Grid => {
+  rotateRowRight = (row: number): this => {
     this.#remapRow(row, this.#rotateRight(this.#matrix[row].slice(0)));
     return this;
   };

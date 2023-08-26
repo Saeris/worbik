@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-unresolved
 import { getAll } from "@vercel/edge-config";
 import type { NextApiHandler } from "next/types";
 import {
@@ -6,7 +7,7 @@ import {
   sizes,
   updateEdgeConfig,
   filterExpiredDates
-} from "../../utils";
+} from "#utils";
 
 export const config = {
   // eslint-disable-next-line @typescript-eslint/quotes
@@ -49,7 +50,7 @@ const handler: NextApiHandler = async (req, res) => {
                 height
               }),
               value: generate({ width, height }).toChallenge()
-            } as const)
+            }) as const
         )
       ])
     ).json();

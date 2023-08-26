@@ -1,6 +1,7 @@
 import { type NextMiddleware, NextResponse } from "next/server";
+// eslint-disable-next-line import/no-unresolved
 import { get } from "@vercel/edge-config";
-import { PuzzleState, type Challenge } from "../../utils";
+import { PuzzleState, type Challenge } from "#utils";
 
 export const config = {
   // eslint-disable-next-line @typescript-eslint/quotes

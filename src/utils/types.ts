@@ -2,19 +2,19 @@ export type Maybe<T> = T | null | undefined;
 
 /** Primitive types which cannot have the `readonly` data access modifier */
 type ImmutablePrimitive =
-  | undefined
-  | null
+  | Function
   | boolean
-  | string
   | number
-  | Function;
+  | string
+  | null
+  | undefined;
 
 export type Immutable<T> = T extends ImmutablePrimitive
   ? // If T is a primitive, return the primitive
     T
   : // If T is an Array, make it readonly
-  T extends (infer U)[]
-  ? readonly Immutable<U>[]
+  T extends Array<infer U>
+  ? ReadonlyArray<Immutable<U>>
   : // If T is a Map, make it readonly
   T extends Map<infer K, infer V>
   ? ReadonlyMap<K, V>
@@ -28,7 +28,7 @@ export type Mutable<T> = T extends ImmutablePrimitive
   ? // If T is a primitive, return the primitive
     T
   : // If T is a Readonly Array, infer it's element types and return a mutable Array
-  T extends readonly (infer U)[]
+  T extends ReadonlyArray<infer U>
   ? U[]
   : // If T is a Readonly Map, infer it's keys and values and return mutable Map
   T extends ReadonlyMap<infer K, infer V>

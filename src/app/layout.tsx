@@ -1,8 +1,8 @@
 import React from "react";
 import type { Metadata } from "next";
-import { body } from "../theme/fonts";
-import "../theme/theme.css";
-import "../theme/global.css";
+import { body } from "#theme/fonts";
+import "#theme/theme.css";
+import "#theme/global.css";
 
 /* eslint-disable @typescript-eslint/quotes */
 export const metadata: Metadata = {

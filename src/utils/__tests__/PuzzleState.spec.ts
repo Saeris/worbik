@@ -1,7 +1,7 @@
 import { between } from "../between";
 import { PuzzleState, type PuzzleStateInit } from "../PuzzleState";
 
-describe(`PuzzleState`, () => {
+describe(`puzzleState`, () => {
   it(`can be instantiated from a an init array`, () => {
     // @ts-expect-error
     expect(() => new PuzzleState([2, `abcd`])).not.toThrow();
@@ -45,8 +45,8 @@ describe(`PuzzleState`, () => {
     puzzle.getNextState(0, `down`);
     const actual = puzzle.toChallenge(); //?
     const expected = [2, `ABCD`, `abcd`];
-    expect(puzzle.moves).toStrictEqual(2);
-    expect(puzzle.target).toStrictEqual(25);
+    expect(puzzle.moves).toBe(2);
+    expect(puzzle.target).toBe(25);
     expect(actual).toStrictEqual(expected);
   });
 
@@ -88,9 +88,9 @@ describe(`PuzzleState`, () => {
     expect(state.current).toStrictEqual(expect.objectContaining(grid));
     expect(state.history).toStrictEqual(history);
     expect(state.hints).toStrictEqual(hints);
-    expect(state.moves).toStrictEqual(0);
-    expect(state.target).toStrictEqual(0);
-    expect(state.toString()).toStrictEqual(`abcd`);
+    expect(state.moves).toBe(0);
+    expect(state.target).toBe(0);
+    expect(state.toString()).toBe(`abcd`);
     expect(state.toJSON()).toStrictEqual(obj);
   });
 
@@ -122,7 +122,7 @@ describe(`PuzzleState`, () => {
       .getNextState(0, `left`)
       .getNextState(1, `right`);
     expect(state.current).toStrictEqual(expect.objectContaining(final));
-    expect(state.moves).toStrictEqual(4);
+    expect(state.moves).toBe(4);
     expect(state.history).toStrictEqual(history);
     expect(state.initial).toStrictEqual(expect.objectContaining(initial));
   });
@@ -181,7 +181,7 @@ describe(`PuzzleState`, () => {
       state.subscribe(listener);
       const result = state.randomize().toString();
       expect(result).not.toStrictEqual(val);
-      expect(between(listener.mock.calls.length, 25, 250)).toStrictEqual(true);
+      expect(between(listener.mock.calls.length, 25, 250)).toBe(true);
     }
   });
 
@@ -195,15 +195,15 @@ describe(`PuzzleState`, () => {
     state.getNextState(0, `left`); // win state 1
     state.getNextState(0, `right`);
     state.getNextState(0, `left`); // win state 2
-    expect(state.moves).toStrictEqual(3);
+    expect(state.moves).toBe(3);
     expect(state.history).toStrictEqual(history);
     state.validate(PuzzleState.compare(state.toString(), solution));
-    expect(state.win).toStrictEqual(true);
+    expect(state.win).toBe(true);
     // Don't trigger another update if a winning state has been reached
     state.getNextState(0, `left`);
     state.validate(solution);
-    expect(state.moves).toStrictEqual(1);
-    expect(state.toString()).toStrictEqual(`worbik`);
+    expect(state.moves).toBe(1);
+    expect(state.toString()).toBe(`worbik`);
     expect(state.history).toStrictEqual(truncated);
     expect(listener).toHaveBeenCalledTimes(3);
   });

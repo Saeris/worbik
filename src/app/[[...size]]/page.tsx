@@ -8,16 +8,16 @@ import {
   parseSize,
   getDateKey,
   type Challenge
-} from "../../utils";
-import { Game } from "../../components/Game";
+} from "#utils";
+import { Game } from "#components/Game";
 
 export const dynamicParams = true;
 
 type SizeString = `${Size}x${Size}`;
 
-export const generateStaticParams = (): {
+export const generateStaticParams = (): Array<{
   size: readonly [SizeString];
-}[] =>
+}> =>
   sizes.map(([width, height]) => ({ size: [`${width}x${height}`] as const }));
 
 const Page = async ({

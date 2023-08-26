@@ -4,9 +4,7 @@ export const parse = async (): Promise<void> => {
   await fs.writeFile(
     `../../content/words.json`,
     JSON.stringify(
-      (
-        await fs.readFile(`../content/ready.txt`, `utf8`)
-      )
+      (await fs.readFile(`../content/ready.txt`, `utf8`))
         .trim()
         .split(`\n`)
         .reduce<Record<number, string[]>>((hash, str) => {

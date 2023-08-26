@@ -1,11 +1,11 @@
 import { useCallback } from "react";
 import { useQueuedAPICall } from "./useQueuedAPICall";
-import type { usePuzzle } from "../Game/usePuzzleState";
+import type { usePuzzle } from "../usePuzzleState";
 
 export const useRotate = (
   puzzleID: string,
   state: ReturnType<typeof usePuzzle>
-): ((rowOrCol: number, dir: `up` | `down` | `left` | `right`) => void) => {
+): ((rowOrCol: number, dir: `down` | `left` | `right` | `up`) => void) => {
   const queue = useQueuedAPICall(
     useCallback(
       async (vals: string[]): Promise<void> => {
@@ -24,7 +24,7 @@ export const useRotate = (
   );
 
   return useCallback(
-    (rowOrCol: number, dir: `up` | `down` | `left` | `right`) => {
+    (rowOrCol: number, dir: `down` | `left` | `right` | `up`) => {
       if (!state.win) {
         queue(state.getNextState(rowOrCol, dir).toString());
       }

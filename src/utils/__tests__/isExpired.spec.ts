@@ -7,8 +7,8 @@ describe(`isExpired`, () => {
     const invalid = isExpired(getDateKey());
     const valid = isExpired(`${getDateFromToday(-5)}_5x5`); //?
 
-    expect(invalid).toStrictEqual(false);
-    expect(valid).toStrictEqual(true);
+    expect(invalid).toBe(false);
+    expect(valid).toBe(true);
     // @ts-expect-error
     expect(() => isExpired(`foo_5x5`)).toThrow(`Could not parse puzzleID: `);
   });

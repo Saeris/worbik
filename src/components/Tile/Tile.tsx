@@ -20,7 +20,7 @@ export interface TileProps {
   hint?: string;
   correct?: boolean;
   disabled?: boolean;
-  rotate?: (rowOrCol: number, dir: `up` | `down` | `left` | `right`) => void;
+  rotate?: (rowOrCol: number, dir: `down` | `left` | `right` | `up`) => void;
 }
 
 export const Tile: React.FC<TileProps> = memo(

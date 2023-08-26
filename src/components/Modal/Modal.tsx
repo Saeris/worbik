@@ -14,8 +14,8 @@ import type { As, Options } from "@ariakit/react-core/utils/types";
 import styles from "./Modal.module.css";
 
 export interface ModalProps extends Partial<DialogStoreProps> {
-  label?: React.ReactNode;
-  children?: React.ReactNode;
+  readonly label?: React.ReactNode;
+  readonly children?: React.ReactNode;
 }
 
 export const Modal: React.FC<ModalProps> = ({

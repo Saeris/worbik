@@ -1,6 +1,6 @@
 import { Grid } from "../Grid";
 
-describe(`Grid`, () => {
+describe(`grid`, () => {
   it(`can be instantiated from an array of strings`, () => {
     // @ts-expect-error
     const actual = new Grid(`abcd`, 2);
@@ -8,9 +8,9 @@ describe(`Grid`, () => {
       [`a`, `b`],
       [`c`, `d`]
     ];
-    expect(actual.width).toStrictEqual(2);
-    expect(actual.height).toStrictEqual(2);
-    expect(actual.size).toStrictEqual(4);
+    expect(actual.width).toBe(2);
+    expect(actual.height).toBe(2);
+    expect(actual.size).toBe(4);
     expect(actual.matrix).toStrictEqual(expected);
   });
 
@@ -21,9 +21,9 @@ describe(`Grid`, () => {
       [`a`, `b`],
       [`c`, `d`]
     ];
-    expect(actual.width).toStrictEqual(2);
-    expect(actual.height).toStrictEqual(2);
-    expect(actual.size).toStrictEqual(4);
+    expect(actual.width).toBe(2);
+    expect(actual.height).toBe(2);
+    expect(actual.size).toBe(4);
     expect(actual.matrix).toStrictEqual(expected);
   });
 

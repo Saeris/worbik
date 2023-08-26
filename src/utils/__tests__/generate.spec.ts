@@ -22,6 +22,7 @@ describe(`generate`, () => {
       });
     const cases = range(4, 5).flatMap((width, _, vals) =>
       vals.map((height) => [
+        // @ts-expect-error
         generate({ width, height }),
         mockExpected(width, height)
       ])

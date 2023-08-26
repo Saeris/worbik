@@ -3,9 +3,9 @@ import React, { useId } from "react";
 import styles from "./Logo.module.css";
 
 export interface LogoProps extends React.HTMLAttributes<SVGElement> {
-  scale?: number;
-  width?: number;
-  height?: number;
+  readonly scale?: number;
+  readonly width?: number;
+  readonly height?: number;
 }
 
 export const Logo = React.forwardRef<SVGSVGElement, LogoProps>(

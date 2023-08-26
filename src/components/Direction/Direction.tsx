@@ -28,9 +28,9 @@ const directions = {
 
 export interface DirectionProps {
   rowOrCol: number;
-  dir: `up` | `down` | `left` | `right`;
+  dir: `down` | `left` | `right` | `up`;
   disabled: boolean;
-  rotate: (rowOrCol: number, dir: `up` | `down` | `left` | `right`) => void;
+  rotate: (rowOrCol: number, dir: `down` | `left` | `right` | `up`) => void;
 }
 
 export const Direction: React.FC<DirectionProps> = memo(

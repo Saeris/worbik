@@ -11,7 +11,7 @@ describe(`drawFrom`, () => {
   it(`draws from the given index`, () => {
     const arr = [1, 2, 3, 4];
     const expected = [1, 2, 4];
-    expect(drawFrom(arr, 2)).toStrictEqual(3);
+    expect(drawFrom(arr, 2)).toBe(3);
     expect(arr).toHaveLength(3);
     expect(arr).toStrictEqual(expected);
   });

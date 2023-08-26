@@ -4,7 +4,7 @@ import {
   PuzzleState,
   filterExpiredDates,
   type PuzzleStateInit
-} from "../../utils";
+} from "#utils";
 
 const useMatrix = (state: PuzzleState): string =>
   useSyncExternalStore(
@@ -53,16 +53,16 @@ export const usePuzzle = (
   init: PuzzleStateInit
 ): Pick<
   PuzzleState,
-  | "hints"
   | "config"
+  | "getNextState"
+  | "hints"
   | "history"
   | "moves"
-  | "win"
   | "snapshot"
   | "target"
-  | "getNextState"
-  | "validate"
   | "toString"
+  | "validate"
+  | "win"
 > & {
   initial: Grid;
   current: Grid;

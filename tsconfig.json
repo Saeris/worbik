@@ -20,6 +20,7 @@
     /* Basic Options */
     "target": "ESNext",
     "module": "ESNext",
+    "allowImportingTsExtensions": true,
     "lib": [
       "ESNext", // adds support for ESNext functionality
       "DOM" // adds support for 'window' other dom methods
@@ -36,7 +37,11 @@
     "noFallthroughCasesInSwitch": true,
     // "strictFunctionTypes": true,
     /* Module Resolution Options */
-    "moduleResolution": "node",
+    "baseUrl": "./",
+    "paths": {
+      "#*": ["./src/*"]
+    },
+    "moduleResolution": "Bundler",
     "esModuleInterop": true,
     "resolveJsonModule": true,
     /* Advanced Options */

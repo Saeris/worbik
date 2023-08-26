@@ -1,12 +1,12 @@
 export type ItemOperation<K = string, V = unknown> =
   | {
-      readonly operation: "delete";
-      readonly key: K;
-    }
-  | {
       readonly operation: "create" | "update" | "upsert";
       readonly key: K;
       readonly value: V;
+    }
+  | {
+      readonly operation: "delete";
+      readonly key: K;
     };
 
 export const updateEdgeConfig = async (
@@ -14,7 +14,7 @@ export const updateEdgeConfig = async (
   token: string,
   items: ItemOperation[]
 ): Promise<Response> =>
-  await fetch(`https://api.vercel.com/v1/edge-config/${id}/items`, {
+  fetch(`https://api.vercel.com/v1/edge-config/${id}/items`, {
     method: `PATCH`,
     headers: new Headers({
       Authorization: `Bearer ${token}`,

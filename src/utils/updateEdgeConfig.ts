@@ -9,6 +9,16 @@ export type ItemOperation<K = string, V = unknown> =
       readonly key: K;
     };
 
+export type UpdateItemsResponse =
+  | {
+      error: {
+        code: string;
+        message: string;
+        missingToken: boolean;
+      };
+    }
+  | { status: string; statusText: string };
+
 export const updateEdgeConfig = async (
   id: string,
   token: string,

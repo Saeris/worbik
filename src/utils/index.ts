@@ -23,5 +23,8 @@ export { sendDiscordWebhook } from "./sendDiscordWebhook.ts";
 export { sizes, type Size, type Dimensions } from "./sizes.ts";
 export { toInt } from "./toInt.ts";
 export type { Maybe } from "./types.ts";
-export { updateEdgeConfig } from "./updateEdgeConfig.ts";
+export {
+  updateEdgeConfig,
+  type UpdateItemsResponse
+} from "./updateEdgeConfig.ts";
 export { wait } from "./wait.ts";

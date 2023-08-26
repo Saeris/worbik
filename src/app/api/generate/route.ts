@@ -1,18 +1,17 @@
 // eslint-disable-next-line import/no-unresolved
 import { getAll } from "@vercel/edge-config";
-import type { NextApiHandler } from "next/types";
+import { NextResponse } from "next/server";
 import {
   generate,
   getDateKey,
   sizes,
   updateEdgeConfig,
+  type UpdateItemsResponse,
   filterExpiredDates
 } from "#utils";
 
-export const config = {
-  // eslint-disable-next-line @typescript-eslint/quotes
-  runtime: "nodejs"
-};
+// eslint-disable-next-line @typescript-eslint/quotes
+export const runtime = "edge";
 
 /**
  * Generates new puzzles once daily at 10 PM,
@@ -20,13 +19,9 @@ export const config = {
  *
  * 10 PM in PDX is UTC 06:00 AM
  */
-const handler: NextApiHandler = async (req, res) => {
-  if (req.method !== `GET`) {
-    res.statusMessage = `Only GET requests are accepted!`;
-    res.status(400).send(null);
-    return;
-  }
-
+export const GET = async (): Promise<
+  NextResponse<{ status: string; statusText: string } | null>
+> => {
   const existing = await getAll<Record<string, unknown>>();
 
   try {
@@ -34,10 +29,9 @@ const handler: NextApiHandler = async (req, res) => {
       `/`,
       ``
     );
-    const token = process.env.VERCEL_ACCESS_TOKEN;
 
-    const updatePuzzles = await (
-      await updateEdgeConfig(edgeConfigId, token, [
+    const updatePuzzles: UpdateItemsResponse = await (
+      await updateEdgeConfig(edgeConfigId, process.env.VERCEL_ACCESS_TOKEN, [
         ...Object.keys(existing)
           .filter(filterExpiredDates)
           .map((key) => ({ operation: `delete` as const, key })),
@@ -55,7 +49,7 @@ const handler: NextApiHandler = async (req, res) => {
       ])
     ).json();
 
-    if (updatePuzzles.error) {
+    if (`error` in updatePuzzles) {
       const cause = updatePuzzles.error;
       throw new Error(
         `Attempt to update Edge Config failed! Reason: ${cause.message}`,
@@ -65,7 +59,7 @@ const handler: NextApiHandler = async (req, res) => {
       );
     }
 
-    res.status(200).json({
+    return NextResponse.json({
       status: updatePuzzles.status,
       statusText: updatePuzzles.statusText
     });
@@ -74,8 +68,9 @@ const handler: NextApiHandler = async (req, res) => {
       // eslint-disable-next-line no-console
       console.error(err.message);
     }
-    res.status(500).json(null);
+    return NextResponse.json(null, {
+      status: 500,
+      statusText: `Failed to generate puzzles`
+    });
   }
 };
-
-export default handler;

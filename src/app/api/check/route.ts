@@ -1,21 +1,14 @@
-import { type NextMiddleware, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 // eslint-disable-next-line import/no-unresolved
 import { get } from "@vercel/edge-config";
 import { PuzzleState, type Challenge } from "#utils";
 
-export const config = {
-  // eslint-disable-next-line @typescript-eslint/quotes
-  runtime: "edge"
-};
+// eslint-disable-next-line @typescript-eslint/quotes
+export const runtime = "edge";
 
-const handler: NextMiddleware = async (req) => {
-  if (req.method !== `GET`) {
-    return NextResponse.json(null, {
-      status: 400,
-      statusText: `Only GET requests are accepted!`
-    });
-  }
-
+export const GET = async (
+  req: Request
+): Promise<NextResponse<string[] | null>> => {
   const { searchParams } = new URL(req.url);
   const puzzleID = searchParams.get(`puzzle`);
   const guesses = searchParams.get(`guesses`);
@@ -48,12 +41,9 @@ const handler: NextMiddleware = async (req) => {
       .split(`,`)
       .map((guess) => PuzzleState.compare(guess, cachedPuzzle[2])),
     {
-      status: 200,
       headers: {
         "Cache-Control": `max-age=0, s-maxage=86400`
       }
     }
   );
 };
-
-export default handler;

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { body } from "#theme/fonts";
 import "#theme/theme.css";
 import "#theme/global.css";
+import { Providers } from "./providers";
 
 /* eslint-disable @typescript-eslint/quotes */
 export const metadata: Metadata = {
@@ -53,7 +54,9 @@ const RootLayout: React.FC<{ readonly children: React.ReactNode }> = ({
 }) => (
   <html lang="en" suppressHydrationWarning>
     <head />
-    <body className={body.variable}>{children}</body>
+    <body className={body.variable}>
+      <Providers>{children}</Providers>
+    </body>
   </html>
 );
 

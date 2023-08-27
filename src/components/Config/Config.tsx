@@ -1,9 +1,16 @@
 "use client";
 import React, { memo } from "react";
 import Link from "next/link";
-import { DialogDismiss, DialogHeading } from "@ariakit/react";
+import {
+  DialogDismiss,
+  DialogHeading,
+  useRadioStore,
+  RadioGroup,
+  Radio
+} from "@ariakit/react";
 import { PiGearThin, PiXThin } from "react-icons/pi";
 import { sizes } from "#utils";
+import { useThemeMode } from "#hooks";
 import { Modal, ModalHeader } from "../Modal";
 import styles from "./Config.module.css";
 
@@ -22,18 +29,36 @@ const SizeButtons: React.FC = memo(() => (
 
 SizeButtons.displayName = `SizeButtons`;
 
-export const Config: React.FC = memo(() => (
-  <Modal label={<PiGearThin />} aria-label={`Config`}>
-    <ModalHeader>
-      <DialogHeading>Game Settings:</DialogHeading>
-      <DialogDismiss>
-        <PiXThin />
-      </DialogDismiss>
-    </ModalHeader>
-    <article className={styles.frame}>
-      <SizeButtons />
-    </article>
-  </Modal>
-));
+export const Config: React.FC = memo(() => {
+  const { modes, themeMode, setThemeMode } = useThemeMode();
+  const radio = useRadioStore({
+    defaultValue: themeMode,
+    setValue: (val) => setThemeMode(val as (typeof modes)[number])
+  });
+
+  return (
+    <Modal label={<PiGearThin />} aria-label={`Config`}>
+      <ModalHeader>
+        <DialogHeading>Settings:</DialogHeading>
+        <DialogDismiss>
+          <PiXThin />
+        </DialogDismiss>
+      </ModalHeader>
+      <h1 className={styles.header}>Theme Mode</h1>
+      <RadioGroup store={radio} className={styles.group}>
+        {modes.map((option) => (
+          <label key={option} className={styles.radio}>
+            <Radio value={option} />
+            {option}
+          </label>
+        ))}
+      </RadioGroup>
+      <h1 className={styles.header}>Board Size</h1>
+      <article className={styles.frame}>
+        <SizeButtons />
+      </article>
+    </Modal>
+  );
+});
 
 Config.displayName = `Config`;

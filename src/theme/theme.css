@@ -20,7 +20,7 @@
   --bd: oklch(85.99% 0.006 59.64); /* flint-4 */
   --muted: oklch(46.84% 0.01 56.14); /* flint-9 */
 
-  .dark {
+  &.dark {
     --green-fg: oklch(97.78% 0.017 110.28); /* grass-1 */
     --green-bg: oklch(69.21% 0.134 118.56); /* grass-6 */
     --green-bd: oklch(48.38% 0.091 120.17); /* grass-8 */

@@ -5,6 +5,13 @@
   padding: var(--spacing-2);
 }
 
+.header {
+  color: var(--fg);
+  font-size: 24px;
+  font-weight: 500;
+  margin: 0;
+}
+
 .size {
   display: flex;
   justify-content: center;
@@ -26,5 +33,25 @@
       box-shadow: var(--focus-ring);
       outline: none;
     }
+  }
+}
+
+.group {
+  display: flex;
+  justify-content: space-around;
+  gap: var(--spacing-2);
+  width: 100%;
+}
+
+.radio {
+  display: flex;
+  align-items: center;
+  gap: 1ch;
+  color: var(--fg);
+  cursor: pointer;
+
+  &:hover,
+  &:focus {
+    color: var(--hover);
   }
 }

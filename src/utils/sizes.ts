@@ -1,10 +1,10 @@
-import type { Immutable } from "./types";
+import type { Immutable } from "./types.ts";
 
 export type Size = 5 | 6 | 7 | 8;
 
 export type Dimensions = `${Size}x${Size}`;
 
-export const sizes: Immutable<[Size, Size][]> = [
+export const sizes: Immutable<Array<[Size, Size]>> = [
   [5, 5],
   [5, 6],
   [5, 7],

@@ -1,0 +1,42 @@
+.container {
+  --items: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4ch;
+  width: 100%;
+  max-width: calc(
+    var(--spacing-16) + calc(var(--items) * var(--spacing-20)) +
+      calc(calc(var(--items) + 1) * var(--spacing-1))
+  );
+  max-height: calc(
+    var(--spacing-16) + calc(var(--items) * var(--spacing-20)) +
+      calc(calc(var(--items) + 1) * calc(var(--spacing-1) + var(--spacing-0)))
+  );
+  font-size: var(--font-size-6);
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: calc(var(--spacing-1) + var(--spacing-0));
+  width: 100%;
+  touch-action: manipulation;
+
+  > .row:first-child,
+  > .row:last-child {
+    max-height: var(--spacing-8);
+    padding: 0px 36px;
+  }
+}
+
+.row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-1);
+  max-height: var(--spacing-20);
+  width: 100%;
+}

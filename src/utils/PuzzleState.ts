@@ -1,10 +1,10 @@
-import { between } from "./between";
-import { Grid } from "./Grid";
-import { group } from "./group";
-import { isUppercase } from "./isUppercase";
-import { randomInt } from "./randomInt";
-import { repeat } from "./repeat";
-import type { Size } from "./sizes";
+import { between } from "./between.ts";
+import { Grid } from "./Grid.ts";
+import { group } from "./group.ts";
+import { isUppercase } from "./isUppercase.ts";
+import { randomInt } from "./randomInt.ts";
+import { repeat } from "./repeat.ts";
+import type { Size } from "./sizes.ts";
 
 export type PuzzleStateInit = [perRow: Size, chars: string, target?: number];
 
@@ -72,7 +72,7 @@ export class PuzzleState {
 
     const [perRow, chars, target = 0] = init;
 
-    if (!perRow || !chars) {
+    if (typeof perRow !== `number` || !chars) {
       throw new Error(
         `Received invalid initialization array! Received: ${perRow} ${chars}`
       );
@@ -93,8 +93,12 @@ export class PuzzleState {
       .map((c, i) => (solution.charAt(i) === c ? c.toUpperCase() : c))
       .join(``);
 
-  #update = (): PuzzleState => {
-    if (this.#initialized && !this.#win) this.#listeners.forEach((l) => l());
+  #update = (): this => {
+    if (this.#initialized && !this.#win) {
+      this.#listeners.forEach((l) => {
+        l();
+      });
+    }
     return this;
   };
 
@@ -143,7 +147,7 @@ export class PuzzleState {
     }
   };
 
-  #checkWin = (state: string | string[]): PuzzleState => {
+  #checkWin = (state: string[] | string): this => {
     if (this.#win) return this;
 
     Array.isArray(state) ? state.forEach(this.#check) : this.#check(state);
@@ -151,7 +155,7 @@ export class PuzzleState {
     return this.#update();
   };
 
-  restore = ([width, historyString, hint]: Snapshot): PuzzleState => {
+  restore = ([width, historyString, hint]: Snapshot): this => {
     const history = historyString.split(`,`); //?
     const current = history.at(-1); //?
     if (!hint || !current) {
@@ -166,8 +170,8 @@ export class PuzzleState {
   getNextState = (
     rowOrCol: number,
     // true = left/down, false = right/up
-    dir: `up` | `down` | `left` | `right`
-  ): PuzzleState => {
+    dir: `down` | `left` | `right` | `up`
+  ): this => {
     // skip if we're already in a winning state
     if (this.#win) return this;
     // true = horizontal, false = vertical
@@ -195,7 +199,7 @@ export class PuzzleState {
     return this.#checkWin(next.toLowerCase());
   };
 
-  validate = (next: string | string[]): PuzzleState =>
+  validate = (next: string[] | string): this =>
     // skip if we're already in a winning state
     this.#win
       ? this
@@ -205,7 +209,7 @@ export class PuzzleState {
             : this.#updateHints(next)
         );
 
-  randomize = (min = 25, max = 250): PuzzleState => {
+  randomize = (min = 25, max = 250): this => {
     // Generate a random number of moves between our bounds
     // Then simulate user inputs to take our initial solved
     // state to randomize it into an unsolved state

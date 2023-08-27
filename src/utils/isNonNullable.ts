@@ -1,6 +1,6 @@
-import type { Maybe } from "./types";
+import type { Maybe } from "./types.ts";
 
-/**
+/**s
  * Used to test whether a `Maybe` typed value is `null` or `undefined`.
  *
  * When called, the given value's type is narrowed to `NonNullable<T>`.

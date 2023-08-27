@@ -16,8 +16,8 @@ describe(`randomInt`, () => {
 
     repeat(100)(() => {
       for (const [min, max] of cases) {
-        expect(between(randomInt(min, max), min, max)).toStrictEqual(true);
-        expect(Number.isInteger(randomInt(min, max))).toStrictEqual(true);
+        expect(between(randomInt(min, max), min, max)).toBe(true);
+        expect(Number.isInteger(randomInt(min, max))).toBe(true);
       }
     });
   });

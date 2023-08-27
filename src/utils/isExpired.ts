@@ -1,6 +1,6 @@
 import { addHours, differenceInHours, parse, startOfToday } from "date-fns";
-import { dateKeyRegex } from "./dateKeyRegex";
-import type { DateKey } from "./getDateKey";
+import { dateKeyRegex } from "./dateKeyRegex.ts";
+import type { DateKey } from "./getDateKey.ts";
 
 export const DAYS_UNTIL_EXPIRED = 2 as const;
 

@@ -1,0 +1,29 @@
+.main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4ch;
+  padding: var(--spacing-4);
+  height: 100%;
+  color: var(--fg);
+  font-family: Montserrat;
+  font-size: var(--font-size-6);
+
+  p {
+    max-width: 30ch;
+    font-weight: 300;
+    text-align: center;
+  }
+}
+
+.title {
+  display: inline-flex;
+  gap: 0.5ch;
+  align-items: baseline;
+  font-size: var(--font-size-8);
+
+  button {
+    font-size: var(--font-size-5);
+  }
+}

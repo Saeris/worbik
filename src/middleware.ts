@@ -1,5 +1,5 @@
 import { NextResponse, type NextMiddleware } from "next/server";
-import { getDomains } from "./utils";
+import { getDomains } from "#utils";
 
 export const middleware: NextMiddleware = async (req) => {
   const { pathname } = req.nextUrl;

@@ -1,9 +1,9 @@
-import { dateKeyRegex } from "./dateKeyRegex";
-import { getDateFromToday } from "./getDateFromToday";
-import { isExpired } from "./isExpired";
-import type { PuzzleSchema } from "./puzzleSchema";
-import type { Dimensions, Size } from "./sizes";
-import type { DateString } from "./toDateString";
+import { dateKeyRegex } from "./dateKeyRegex.ts";
+import { getDateFromToday } from "./getDateFromToday.ts";
+import { isExpired } from "./isExpired.ts";
+import type { PuzzleSchema } from "./puzzleSchema.ts";
+import type { Dimensions } from "./sizes.ts";
+import type { DateString } from "./toDateString.ts";
 
 export type DateKey = `${DateString}_${Dimensions}`;
 
@@ -17,8 +17,7 @@ export const getDateKey = (
   { width = 5, height = 5 }: PuzzleSchema = {},
   /** By default, date keys will be for the next calendar day */
   dayOffset: number = 1
-): DateKey =>
-  `${getDateFromToday(dayOffset)}_${width as Size}x${height as Size}`;
+): DateKey => `${getDateFromToday(dayOffset)}_${width}x${height}`;
 
 /**
  * Tests whether the given key is both a valid `DateKey`

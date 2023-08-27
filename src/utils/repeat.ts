@@ -1,4 +1,4 @@
-import { range } from "./range";
+import { range } from "./range.ts";
 
 export type Repeat = <U>(
   count: number

@@ -1,14 +1,13 @@
 // @ts-check
 import withPWA from "next-pwa";
-import runtimeCaching from "next-pwa/cache.js";
 
-/**
- * @type {import('next/types').NextConfig}
- */
-export const nextConfig = {
+export default withPWA({
+  dest: "public",
+  disable: process.env.NODE_ENV !== "production"
+})({
   reactStrictMode: true,
-  compiler: {
-    styledComponents: true
+  experimental: {
+    serverActions: true
   },
   i18n: {
     locales: [`en`],
@@ -24,10 +23,4 @@ export const nextConfig = {
 
     return config;
   }
-};
-
-export default withPWA({
-  dest: `public`,
-  disable: process.env.NODE_ENV !== `production`,
-  runtimeCaching
-})(nextConfig);
+});

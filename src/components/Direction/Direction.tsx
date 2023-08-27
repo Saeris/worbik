@@ -1,11 +1,23 @@
-import React from "react";
+"use client";
+import React, { memo, useCallback } from "react";
+import { Button } from "@ariakit/react";
+import { cva } from "class-variance-authority";
 import {
-  MdOutlineKeyboardArrowDown as Down,
-  MdOutlineKeyboardArrowUp as Up,
-  MdOutlineKeyboardArrowLeft as Left,
-  MdOutlineKeyboardArrowRight as Right
-} from "react-icons/md";
-import { Button } from "./elements";
+  PiCaretDownThin as Down,
+  PiCaretUpThin as Up,
+  PiCaretLeftThin as Left,
+  PiCaretRightThin as Right
+} from "react-icons/pi";
+import styles from "./Direction.module.css";
+
+const variants = cva(styles.button, {
+  variants: {
+    orientation: {
+      vertical: styles.vertical,
+      horizontal: styles.horizontal
+    }
+  }
+});
 
 const directions = {
   up: <Up />,
@@ -14,23 +26,39 @@ const directions = {
   right: <Right />
 };
 
-interface DirectionProps extends React.HTMLAttributes<HTMLButtonElement> {
-  direction: "up" | "down" | "left" | "right";
-  disabled?: boolean;
+export interface DirectionProps {
+  rowOrCol: number;
+  dir: `down` | `left` | `right` | `up`;
+  disabled: boolean;
+  rotate: (rowOrCol: number, dir: `down` | `left` | `right` | `up`) => void;
 }
 
-export const Direction: React.FC<DirectionProps> = ({
-  direction,
-  onClick = (): void => {},
-  ...props
-}) => (
-  <Button
-    type="button"
-    tabIndex={-1}
-    onClick={onClick}
-    {...props}
-    $orientation={[`up`, `down`].includes(direction)}
-  >
-    {directions[direction]}
-  </Button>
+export const Direction: React.FC<DirectionProps> = memo(
+  ({ rowOrCol, dir, disabled, rotate }) => {
+    const axis = [`up`, `down`].includes(dir) ? `column` : `row`;
+    const handleClick: React.MouseEventHandler<HTMLButtonElement> = useCallback(
+      (e) => {
+        e.preventDefault();
+        rotate(rowOrCol, dir);
+      },
+      [rotate, rowOrCol, dir]
+    );
+
+    return (
+      <Button
+        type="button"
+        tabIndex={-1}
+        onClick={handleClick}
+        className={variants({
+          orientation: [`up`, `down`].includes(dir) ? `vertical` : `horizontal`
+        })}
+        aria-label={`Rotate ${axis} ${rowOrCol + 1} ${dir}`}
+        disabled={disabled}
+      >
+        {directions[dir]}
+      </Button>
+    );
+  }
 );
+
+Direction.displayName = `Direction`;

@@ -32,7 +32,7 @@
   background-color: var(--bg);
   color: var(--fg);
   overflow: auto;
-  font-family: Montserrat;
+  font-family: var(--font-body);
   font-size: var(--font-size-5);
   font-weight: 300;
   filter: drop-shadow(0 var(--spacing-4) var(--spacing-6) rgba(0, 0, 0, 15%));

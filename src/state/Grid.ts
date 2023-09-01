@@ -1,5 +1,5 @@
-import { group } from "./group.ts";
-import type { Size } from "./sizes.ts";
+import { group } from "../utils/group.ts";
+import type { Size } from "../utils/sizes.ts";
 
 export class Grid {
   #matrix: string[][];

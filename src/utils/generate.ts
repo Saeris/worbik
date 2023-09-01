@@ -1,7 +1,7 @@
 import { default as wordlist } from "../words.json";
-import { drawNRandom } from "./draw.ts";
-import type { PuzzleSchema } from "./puzzleSchema.ts";
-import { PuzzleState } from "./PuzzleState.ts";
+import { drawNRandom } from "./draw";
+import type { PuzzleSchema } from "./puzzleSchema";
+import { PuzzleState } from "../state/PuzzleState";
 
 export const generate = ({
   width = 5,

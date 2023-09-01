@@ -2,8 +2,8 @@
 import React from "react";
 import type { NextPage } from "next/types";
 import type { PuzzleStateInit } from "#utils";
+import { usePuzzle } from "#hooks";
 import { Puzzle } from "./Puzzle";
-import { usePuzzle } from "./usePuzzleState";
 import { Guide } from "../Guide";
 import { Config } from "../Config";
 import styles from "./Game.module.css";
@@ -11,10 +11,11 @@ import styles from "./Game.module.css";
 export interface GameProps {
   puzzleID: string;
   init: PuzzleStateInit;
+  persist?: boolean;
 }
 
-export const Game: NextPage<GameProps> = ({ puzzleID, init }) => {
-  const state = usePuzzle(puzzleID, init);
+export const Game: NextPage<GameProps> = ({ puzzleID, init, persist }) => {
+  const state = usePuzzle(puzzleID, init, persist);
 
   const winMessage = (): string =>
     state.moves <= state.target
@@ -28,7 +29,7 @@ export const Game: NextPage<GameProps> = ({ puzzleID, init }) => {
         <Config />
         <Guide width={state.initial.width} height={state.initial.height} />
       </h1>
-      <Puzzle puzzleID={puzzleID} state={state} />
+      <Puzzle state={state} />
       {state.win ? <p>{winMessage()}</p> : <p>{`Moves: ${state.moves}`}</p>}
     </main>
   );

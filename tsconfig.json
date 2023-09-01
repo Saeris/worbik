@@ -3,12 +3,11 @@
   "ts-node": {
     "transpileOnly": true
   },
-  "include": [".next/types/**/*.ts", "./src/**/*"],
-  "exclude": [
-    "node_modules",
-    "**/__mocks__/**/*",
-    "**/__test__/**/*",
-    "**/*.spec.ts"
+  "include": [
+    ".next/types/**/*.ts",
+    "./src/**/*.*",
+    "./scripts/**/*.*",
+    "./src/**/*.d.ts"
   ],
   "compilerOptions": {
     "noEmit": true,

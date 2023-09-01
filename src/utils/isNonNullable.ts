@@ -1,4 +1,4 @@
-import type { Maybe } from "./types.ts";
+import type { Maybe } from "./types";
 
 /**s
  * Used to test whether a `Maybe` typed value is `null` or `undefined`.

@@ -1,5 +1,5 @@
-import { randomInt } from "./randomInt.ts";
-import { repeat } from "./repeat.ts";
+import { randomInt } from "./randomInt";
+import { repeat } from "./repeat";
 
 export const drawFrom = <T extends unknown[], I extends number>(
   arr: T,

@@ -2,13 +2,13 @@
 import { getAll } from "@vercel/edge-config";
 import { NextResponse } from "next/server";
 import {
-  generate,
   getDateKey,
   sizes,
   updateEdgeConfig,
   type UpdateItemsResponse,
   filterExpiredDates
 } from "#utils";
+import { generate } from "#utils/generate";
 
 // eslint-disable-next-line @typescript-eslint/quotes
 export const runtime = "edge";

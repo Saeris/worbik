@@ -5,13 +5,9 @@ import {
   useState,
   useSyncExternalStore
 } from "react";
-import {
-  Grid,
-  PuzzleState,
-  filterExpiredDates,
-  type PuzzleStateInit
-} from "#utils";
 import { useQueuedAPICall } from "#hooks";
+import { Grid, PuzzleState, type PuzzleStateInit } from "#state";
+import { filterExpiredDates } from "#utils";
 
 const useMatrix = (state: PuzzleState): string =>
   useSyncExternalStore(
@@ -48,11 +44,6 @@ export const usePuzzle = (
 } => {
   const [restore, setRestore] = useState(persist);
   const state = useMemo(() => new PuzzleState(init), [init]);
-  const url = useMemo(() => {
-    const endpoint = new URL(`/api/check`, window.location.origin);
-    endpoint.searchParams.set(`puzzle`, puzzleID);
-    return endpoint;
-  }, [puzzleID]);
   const moves = useMoves(state);
   const win = useWin(state);
 
@@ -76,6 +67,8 @@ export const usePuzzle = (
   const queue = useQueuedAPICall(
     useCallback(
       async (vals: string[]): Promise<void> => {
+        const url = new URL(`/api/check`, window.location.origin);
+        url.searchParams.set(`puzzle`, puzzleID);
         url.searchParams.set(`guesses`, vals.join(`,`));
         const snapshot = state
           .validate((await (await fetch(url.href)).json()) as string[])
@@ -85,7 +78,7 @@ export const usePuzzle = (
           localStorage.setItem(puzzleID, snapshot);
         }
       },
-      [puzzleID, state, url, persist]
+      [puzzleID, state, persist]
     )
   );
 

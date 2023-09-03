@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import type { NextPage } from "next/types";
-import type { PuzzleStateInit } from "#utils";
+import type { PuzzleStateInit } from "#state";
 import { usePuzzle } from "#hooks";
 import { Puzzle } from "./Puzzle";
 import { Guide } from "../Guide";

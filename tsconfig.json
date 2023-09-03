@@ -9,6 +9,7 @@
     "./scripts/**/*.*",
     "./src/**/*.d.ts"
   ],
+  "exclude": ["node_modules"],
   "compilerOptions": {
     "noEmit": true,
     "isolatedModules": true,
@@ -52,7 +53,9 @@
       {
         "name": "next"
       },
-      { "name": "typescript-plugin-css-modules" }
+      {
+        "name": "typescript-plugin-css-modules"
+      }
     ]
   }
 }

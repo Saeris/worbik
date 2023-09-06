@@ -70,9 +70,11 @@ jobs:
       - name: Install Playwright
         run: npx playwright install --with-deps
 
-      - name: Start Storybook and Test
+      - name: Build Storybook
+        run: yarn build-storybook --quiet
+
+      - name: Serve Storybook and Test
         run: |
           npx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
-          "storybook dev -p 6006 --ci --quiet" \
+          "npx serve storybook-static -L -p 6006" \
           "npx wait-on tcp:6006 && test-storybook"
-

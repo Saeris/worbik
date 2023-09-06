@@ -3,13 +3,13 @@
   "ts-node": {
     "transpileOnly": true
   },
-  "include": [".next/types/**/*.ts", "./src/**/*"],
-  "exclude": [
-    "node_modules",
-    "**/__mocks__/**/*",
-    "**/__test__/**/*",
-    "**/*.spec.ts"
+  "include": [
+    ".next/types/**/*.ts",
+    "./src/**/*.*",
+    "./scripts/**/*.*",
+    "./src/**/*.d.ts"
   ],
+  "exclude": ["node_modules"],
   "compilerOptions": {
     "noEmit": true,
     "isolatedModules": true,
@@ -53,7 +53,9 @@
       {
         "name": "next"
       },
-      { "name": "typescript-plugin-css-modules" }
+      {
+        "name": "typescript-plugin-css-modules"
+      }
     ]
   }
 }

@@ -1,4 +1,4 @@
-import type { Immutable } from "./types.ts";
+import type { Immutable } from "./types";
 
 export type Size = 5 | 6 | 7 | 8;
 

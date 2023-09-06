@@ -1,10 +1,12 @@
-import { between } from "./between.ts";
-import { Grid } from "./Grid.ts";
-import { group } from "./group.ts";
-import { isUppercase } from "./isUppercase.ts";
-import { randomInt } from "./randomInt.ts";
-import { repeat } from "./repeat.ts";
-import type { Size } from "./sizes.ts";
+import {
+  between,
+  group,
+  isUppercase,
+  randomInt,
+  repeat,
+  type Size
+} from "../utils";
+import { Grid } from "./Grid";
 
 export type PuzzleStateInit = [perRow: Size, chars: string, target?: number];
 
@@ -29,7 +31,7 @@ export class PuzzleState {
     return this.#grid;
   }
 
-  get config(): { width: number; height: number } {
+  get config(): { width: Size; height: Size } {
     return {
       width: this.#grid.width,
       height: this.#grid.height
@@ -94,7 +96,7 @@ export class PuzzleState {
       .join(``);
 
   #update = (): this => {
-    if (this.#initialized && !this.#win) {
+    if (this.#initialized) {
       this.#listeners.forEach((l) => {
         l();
       });
@@ -144,6 +146,7 @@ export class PuzzleState {
       this.#grid = new Grid(winningState, this.#grid.width);
       // Discard history after the first time a winning state was achieved
       this.#history.length = this.#history.indexOf(winningState) + 1;
+      this.#update();
     }
   };
 
@@ -198,6 +201,11 @@ export class PuzzleState {
 
     return this.#checkWin(next.toLowerCase());
   };
+
+  getHintAt = (x: number, y: number): string => this.#hints[x][y];
+
+  isRowCorrect = (row: number): boolean =>
+    this.#grid.matrix[row].join(``).toUpperCase() === this.#hints[row].join(``);
 
   validate = (next: string[] | string): this =>
     // skip if we're already in a winning state

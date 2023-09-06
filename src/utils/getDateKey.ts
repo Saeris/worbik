@@ -1,9 +1,9 @@
-import { dateKeyRegex } from "./dateKeyRegex.ts";
-import { getDateFromToday } from "./getDateFromToday.ts";
-import { isExpired } from "./isExpired.ts";
-import type { PuzzleSchema } from "./puzzleSchema.ts";
-import type { Dimensions } from "./sizes.ts";
-import type { DateString } from "./toDateString.ts";
+import { dateKeyRegex } from "./dateKeyRegex";
+import { getDateFromToday } from "./getDateFromToday";
+import { isExpired } from "./isExpired";
+import type { PuzzleSchema } from "./puzzleSchema";
+import type { Dimensions } from "./sizes";
+import type { DateString } from "./toDateString";
 
 export type DateKey = `${DateString}_${Dimensions}`;
 

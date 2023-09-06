@@ -1,15 +1,9 @@
 import React from "react";
 // eslint-disable-next-line import/no-unresolved
 import { get } from "@vercel/edge-config";
-import {
-  sizes,
-  type Size,
-  puzzleSchema,
-  parseSize,
-  getDateKey,
-  type Challenge
-} from "#utils";
 import { Game } from "#components/Game";
+import type { Challenge } from "#state";
+import { sizes, type Size, puzzleSchema, parseSize, getDateKey } from "#utils";
 
 export const dynamicParams = true;
 

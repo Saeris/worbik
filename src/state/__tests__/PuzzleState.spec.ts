@@ -1,4 +1,4 @@
-import { between } from "../between";
+import { between } from "../../utils";
 import { PuzzleState, type PuzzleStateInit } from "../PuzzleState";
 
 describe(`puzzleState`, () => {
@@ -199,12 +199,11 @@ describe(`puzzleState`, () => {
     expect(state.history).toStrictEqual(history);
     state.validate(PuzzleState.compare(state.toString(), solution));
     expect(state.win).toBe(true);
-    // Don't trigger another update if a winning state has been reached
     state.getNextState(0, `left`);
     state.validate(solution);
     expect(state.moves).toBe(1);
     expect(state.toString()).toBe(`worbik`);
     expect(state.history).toStrictEqual(truncated);
-    expect(listener).toHaveBeenCalledTimes(3);
+    expect(listener).toHaveBeenCalledTimes(5);
   });
 });

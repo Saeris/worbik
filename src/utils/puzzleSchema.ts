@@ -1,6 +1,6 @@
 import z from "zod";
-import { between } from "./between.ts";
-import type { Size } from "./sizes.ts";
+import { between } from "./between";
+import type { Size } from "./sizes";
 
 const numeric = z
   .preprocess(

@@ -68,6 +68,9 @@ packages/**/coverage
 !.yarn/sdks
 !.yarn/versions
 
+# Storybook
+storybook-static/
+
 # dotenv environment variables file
 .env
 .env.*

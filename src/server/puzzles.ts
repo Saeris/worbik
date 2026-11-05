@@ -9,14 +9,26 @@ import { dateKeyRegex } from "#utils/dateKeyRegex";
 import { generate } from "#utils/generate";
 
 /**
- * How long a puzzle is kept after it was created, in seconds.
+ * How long a Worker goes on using a puzzle that it has already looked up
+ * before it looks again, in milliseconds.
  *
- * This outlives the day a puzzle is playable for, so that a game left
- * open in a browser tab overnight can still be checked and finished.
+ * Nearly every request the game makes needs a puzzle: each move a player
+ * makes is checked against one. Remembering puzzles here answers those
+ * from memory, which is quicker than any store and doesn't count against
+ * how many reads of one are allowed.
+ *
+ * It is kept this short because of the one moment a puzzle can be in
+ * doubt. Two Workers that create the same puzzle at once can disagree on
+ * it when a deployment has just altered the word list or the generator,
+ * and only one of theirs is kept. Looking again is how the other comes to
+ * serve the puzzle that was. A minute is how long KV itself may take to
+ * show a Worker what another has written, so this adds no doubt of its own.
  */
-const PUZZLE_TTL = 60 * 60 * 24 * 3;
+const REMEMBER_FOR = 60 * 1000;
 
 const puzzles = kv.map<Challenge>(`puzzles`);
+
+const remembered = new Map<string, { puzzle: Challenge; until: number }>();
 
 /**
  * Retrieves the puzzle with the given ID, creating it if it's the first
@@ -28,8 +40,10 @@ const puzzles = kv.map<Challenge>(`puzzles`);
  * its ID, which means that simultaneous first requests all arrive at the
  * very same puzzle, no matter which of them ends up being stored.
  *
- * Once created, a puzzle is pinned in KV so that it can't change part way
- * through its day when a deployment alters the word list or the generator.
+ * Once created, a puzzle is kept in KV for good. That pins it, so that it
+ * can't change part way through its day when a deployment alters the word
+ * list or the generator, and it is what lets a puzzle be played, and the
+ * scores on it mean something, long after its day.
  */
 export const getPuzzle = async (id: string): Promise<Challenge | null> => {
   const { width, height } = dateKeyRegex.exec(id)?.groups ?? {};
@@ -37,19 +51,33 @@ export const getPuzzle = async (id: string): Promise<Challenge | null> => {
 
   if (!width || !height || !config.success) return null;
 
-  const existing = await puzzles.get(id);
+  const known = remembered.get(id);
 
-  if (existing) return existing;
-  // Past puzzles have expired, and future ones would let players solve a puzzle before its day
-  if (id !== getPuzzleID(config.output)) return null;
+  if (known && known.until > Date.now()) return known.puzzle;
+
+  const puzzle = (await puzzles.get(id)) ?? (await create(id, config.output));
+
+  if (puzzle) {
+    remembered.set(id, { puzzle, until: Date.now() + REMEMBER_FOR });
+  }
+
+  return puzzle;
+};
+
+const create = async (
+  id: string,
+  config: v.InferOutput<typeof puzzleSchema>
+): Promise<Challenge | null> => {
+  // A past puzzle that was never stored is gone, and a future one would let players solve a puzzle before its day
+  if (id !== getPuzzleID(config)) return null;
 
   const puzzle = generate(
-    config.output,
+    config,
     await seededRandom(`${env.PUZZLE_SECRET}:${id}`)
   ).toChallenge();
 
   try {
-    await puzzles.put(id, puzzle, { ttl: PUZZLE_TTL });
+    await puzzles.put(id, puzzle);
   } catch (err: unknown) {
     // The same puzzle will be derived again on the next request, so the game remains playable
     console.error(`Failed to store puzzle ${id}`, err);

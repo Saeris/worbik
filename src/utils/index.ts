@@ -4,6 +4,7 @@ export { getPuzzleID, ROLLOVER_HOUR_UTC } from "./getPuzzleID";
 export { group } from "./group";
 export { isNonNullable } from "./isNonNullable";
 export { isExpired } from "./isExpired";
+export { isOpenForScores, SCORING_WINDOW } from "./isOpenForScores";
 export { isUppercase } from "./isUppercase";
 export { parseSize } from "./parseSize";
 export {

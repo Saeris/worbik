@@ -2,7 +2,7 @@ import { HTTPException } from "hono/http-exception";
 import { and, asc, db, eq } from "void/db";
 import { scores } from "#db/schema";
 import { replay } from "#state";
-import { parseSize } from "#utils";
+import { isOpenForScores, parseSize } from "#utils";
 import { getPuzzle } from "./puzzles";
 
 export interface Score {
@@ -50,6 +50,9 @@ export const recordScore = async (
  * The game is replayed to check that it really does solve the puzzle, and
  * its score is the number of moves that the replay counted, rather than one
  * that the player claims.
+ *
+ * Only a recent puzzle can be scored. Older ones can still be played, but
+ * their leaderboards have closed.
  */
 export const submitGame = async (
   puzzleID: string,
@@ -61,6 +64,12 @@ export const submitGame = async (
   if (!puzzle) {
     throw new HTTPException(404, {
       message: `Could not retrieve a puzzle for id: ${puzzleID}`
+    });
+  }
+
+  if (!isOpenForScores(puzzleID)) {
+    throw new HTTPException(403, {
+      message: `The leaderboard for this puzzle has closed`
     });
   }
 

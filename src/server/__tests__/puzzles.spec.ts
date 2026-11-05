@@ -1,8 +1,10 @@
-import { HTTPException } from "hono/http-exception";
 import type { Challenge } from "../../state";
-import { getGameProps, getPuzzle } from "../puzzles";
+import type * as Puzzles from "../puzzles";
 
 const store = vi.hoisted(() => new Map<string, unknown>());
+const get = vi.hoisted(() =>
+  vi.fn<(key: string) => unknown>((key) => store.get(key) ?? null)
+);
 const put = vi.hoisted(() =>
   vi.fn<(key: string, value: unknown, options?: { ttl?: number }) => void>()
 );
@@ -11,7 +13,7 @@ vi.mock(`void/env`, () => ({ env: { PUZZLE_SECRET: `secret` } }));
 vi.mock(`void/kv`, () => ({
   kv: {
     map: () => ({
-      get: async (key: string) => store.get(key) ?? null,
+      get: async (key: string) => get(key),
       put: async (key: string, value: unknown, options?: { ttl?: number }) => {
         put(key, value, options);
         store.set(key, value);
@@ -20,7 +22,19 @@ vi.mock(`void/kv`, () => ({
   }
 }));
 
+/**
+ * Starts a Worker that has yet to look up any puzzle.
+ *
+ * A Worker remembers the puzzles it has looked up, so every test starts
+ * one of its own rather than inheriting what the test before it learned.
+ */
+const start = async (): Promise<typeof Puzzles> => {
+  vi.resetModules();
+  return import(`../puzzles`);
+};
+
 const today = `03-02-2026_5x5`;
+const stored: Challenge = [42, `abcdefghijklmnopqrstuvwxy`, `solution`];
 
 describe(`puzzles`, () => {
   beforeEach(() => {
@@ -32,6 +46,7 @@ describe(`puzzles`, () => {
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
+    get.mockReset();
     put.mockReset();
     store.clear();
   });
@@ -39,6 +54,7 @@ describe(`puzzles`, () => {
   describe(`getPuzzle`, () => {
     it(`creates the current puzzle the first time it's requested`, async () => {
       // There is no scheduled job to rely on, so a puzzle must always be available on demand
+      const { getPuzzle } = await start();
       const [target, challenge, solution] = (await getPuzzle(today))!;
 
       expect(target).toBeGreaterThan(0);
@@ -48,25 +64,27 @@ describe(`puzzles`, () => {
       expect(store.get(today)).toStrictEqual([target, challenge, solution]);
     });
 
-    it(`keeps a puzzle around for longer than the day it's playable for`, async () => {
-      // A game left open overnight still needs its puzzle in order to be finished
+    it(`keeps a puzzle for good`, async () => {
+      // A puzzle that expired could never be played again, and the scores on it would rank a game nobody can see
+      const { getPuzzle } = await start();
       await getPuzzle(today);
 
       const [, , options] = put.mock.calls[0];
 
-      expect(options?.ttl).toBeGreaterThan(60 * 60 * 24);
+      expect(options).toBeUndefined();
     });
 
     it(`derives the same puzzle no matter which request creates it`, async () => {
       // Simultaneous first requests each create the puzzle, and must not disagree on what it is
-      const first = await getPuzzle(today);
+      const first = await (await start()).getPuzzle(today);
       store.clear();
-      const second = await getPuzzle(today);
+      const second = await (await start()).getPuzzle(today);
 
       expect(second).toStrictEqual(first);
     });
 
     it(`creates different puzzles for different days and sizes`, async () => {
+      const { getPuzzle } = await start();
       const puzzle = await getPuzzle(today);
       const otherSize = await getPuzzle(`03-02-2026_5x6`);
 
@@ -80,22 +98,25 @@ describe(`puzzles`, () => {
 
     it(`serves a stored puzzle as is, rather than creating it again`, async () => {
       // A puzzle must not change part way through its day, e.g. when the word list is updated
-      const stored: Challenge = [42, `abcdefghijklmnopqrstuvwxy`, `solution`];
+      const { getPuzzle } = await start();
       store.set(today, stored);
 
       await expect(getPuzzle(today)).resolves.toStrictEqual(stored);
       expect(put).not.toHaveBeenCalled();
     });
 
-    it(`still serves yesterday's puzzle while it's stored`, async () => {
-      const stored: Challenge = [42, `abcdefghijklmnopqrstuvwxy`, `solution`];
-      store.set(`03-01-2026_5x5`, stored);
+    it(`still serves a puzzle from long ago`, async () => {
+      // Past puzzles stay playable for as long as they are stored, which is for good
+      const { getPuzzle } = await start();
+      store.set(`01-15-2025_5x5`, stored);
 
-      await expect(getPuzzle(`03-01-2026_5x5`)).resolves.toStrictEqual(stored);
+      await expect(getPuzzle(`01-15-2025_5x5`)).resolves.toStrictEqual(stored);
     });
 
     it(`refuses to create any puzzle other than the current one`, async () => {
       // Creating upcoming puzzles on request would let them be solved ahead of time
+      const { getPuzzle } = await start();
+
       await expect(getPuzzle(`03-03-2026_5x5`)).resolves.toBeNull();
       await expect(getPuzzle(`03-01-2026_5x5`)).resolves.toBeNull();
       await expect(getPuzzle(`03-02-2026_9x9`)).resolves.toBeNull();
@@ -105,16 +126,53 @@ describe(`puzzles`, () => {
 
     it(`still serves the puzzle when it can't be stored`, async () => {
       // A storage failure shouldn't take the game down, as the same puzzle can be derived again
+      const { getPuzzle } = await start();
       put.mockImplementation(() => {
         throw new Error(`KV is unavailable`);
       });
 
       await expect(getPuzzle(today)).resolves.toHaveLength(3);
     });
+
+    it(`answers from memory while requests for a puzzle keep arriving`, async () => {
+      // Every move a player makes is checked against a puzzle, so a read of the store for each would be most of what the game costs to run
+      const { getPuzzle } = await start();
+      store.set(today, stored);
+
+      await getPuzzle(today);
+      await getPuzzle(today);
+
+      await expect(getPuzzle(today)).resolves.toStrictEqual(stored);
+      expect(get).toHaveBeenCalledTimes(1);
+    });
+
+    it(`stores a puzzle once, however long the store takes to show it`, async () => {
+      // KV can go on reporting a puzzle as missing for a while after it's written, and only so many writes are allowed in a day
+      const { getPuzzle } = await start();
+      get.mockReturnValue(null);
+
+      const first = await getPuzzle(today);
+      await getPuzzle(today);
+
+      await expect(getPuzzle(today)).resolves.toStrictEqual(first);
+      expect(put).toHaveBeenCalledTimes(1);
+    });
+
+    it(`comes to serve the stored puzzle when another Worker's was kept over its own`, async () => {
+      // Two Workers that create a puzzle at once can disagree on it right after a deployment, and players must not be checked against two different answers for long
+      const { getPuzzle } = await start();
+      await getPuzzle(today);
+      store.set(today, stored);
+
+      vi.advanceTimersByTime(60 * 1000);
+
+      await expect(getPuzzle(today)).resolves.toStrictEqual(stored);
+    });
   });
 
   describe(`getGameProps`, () => {
     it(`loads the current puzzle without revealing its solution`, async () => {
+      const { getGameProps } = await start();
       const props = await getGameProps(`6x7`);
       const [, , solution] = store.get(`03-02-2026_6x7`) as Challenge;
 
@@ -125,16 +183,17 @@ describe(`puzzles`, () => {
     });
 
     it(`defaults to a 5x5 puzzle`, async () => {
+      const { getGameProps } = await start();
+
       await expect(getGameProps()).resolves.toMatchObject({
         puzzleID: `03-02-2026_5x5`
       });
     });
 
     it(`responds with a 404 for sizes that don't exist`, async () => {
-      const error = await getGameProps(`9x9`).catch((err: unknown) => err);
+      const { getGameProps } = await start();
 
-      expect(error).toBeInstanceOf(HTTPException);
-      expect((error as HTTPException).status).toBe(404);
+      await expect(getGameProps(`9x9`)).rejects.toMatchObject({ status: 404 });
     });
   });
 });

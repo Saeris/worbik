@@ -6,13 +6,10 @@
   color: var(--fg);
   cursor: pointer;
 
-  &:hover {
-    filter: brightness(2);
-  }
-
-  &:focus {
-    filter: brightness(2);
-    outline: none;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      filter: brightness(2);
+    }
   }
 }
 
@@ -78,11 +75,9 @@
       height: var(--spacing-6);
     }
 
-    &:hover,
-    &:focus {
-      &:not(:disabled) {
-        box-shadow: var(--focus-ring);
-        outline: none;
+    @media (hover: hover) and (pointer: fine) {
+      &:hover:not(:disabled) {
+        box-shadow: var(--hover-ring);
       }
     }
   }

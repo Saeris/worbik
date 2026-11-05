@@ -66,8 +66,8 @@ export const Tile: React.FC<TileProps> = memo(
         disabled={disabled}
         className={variants({ variant })}
       >
-        {char.toUpperCase()}
-        <span>{hint}</span>
+        <span className={styles.letter}>{char.toUpperCase()}</span>
+        <span className={styles.hint}>{hint}</span>
       </CompositeItem>
     );
   }

@@ -20,7 +20,7 @@
 
 .schemes {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr));
 }
 
 /* The theme's colors resolve against whichever scheme their element is using */
@@ -61,4 +61,23 @@
 .row {
   display: flex;
   gap: var(--spacing-1);
+}
+
+/* Tiles at each of the sizes they can be, to check that their letters never touch */
+.scale {
+  display: grid;
+  gap: var(--spacing-3);
+  padding: var(--spacing-6);
+}
+
+.size {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+
+  figcaption {
+    inline-size: 5ch;
+    font-size: var(--font-size-2);
+    font-variant-numeric: tabular-nums;
+  }
 }

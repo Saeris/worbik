@@ -12,6 +12,16 @@ body {
   height: 100%;
 }
 
+/*
+ * Shows which control has the focus of the keyboard. `:root` lends this the
+ * specificity to replace the resting shadow of any control that has one.
+ */
+:root :focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-offset);
+  box-shadow: var(--focus-gap);
+}
+
 /* Prevent the page from scrolling behind an open modal */
 html:has(dialog:modal) {
   overflow: hidden;

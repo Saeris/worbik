@@ -10,9 +10,11 @@ type Scheme = (typeof schemes)[number];
  * Every color in the theme that is declared as `light-dark(<light>, <dark>)`,
  * read straight from the stylesheet so that what's tested is what ships
  */
+const css = readFileSync(new URL(`../theme.css`, import.meta.url), `utf8`);
+
 const tokens = new Map(
   Array.from(
-    readFileSync(new URL(`../theme.css`, import.meta.url), `utf8`).matchAll(
+    css.matchAll(
       /--(?<name>[\w-]+):\s*light-dark\(\s*(?<light>oklch\([^)]*\))\s*,\s*(?<dark>oklch\([^)]*\))\s*\)/g
     ),
     ({ groups }) => [
@@ -21,6 +23,15 @@ const tokens = new Map(
     ]
   )
 );
+
+/** The name of the color that one of the non-color tokens, like the focus ring's, is drawn in */
+const colorOf = (name: string): string => {
+  const [, color] =
+    new RegExp(`--${name}:[^;]*var\\(--(?<color>[\\w-]+)\\)\\s*;`).exec(css) ??
+    [];
+  if (!color) throw new Error(`The theme's --${name} doesn't use a color`);
+  return color;
+};
 
 const token = (name: string, scheme: Scheme): Color => {
   const value = tokens.get(name);
@@ -116,5 +127,32 @@ describe.each(schemes)(`tile states in the %s color scheme`, (scheme) => {
     );
 
     expect(contrast).toBeGreaterThanOrEqual(60);
+  });
+});
+
+describe.each(schemes)(`the focus ring in the %s color scheme`, (scheme) => {
+  // WCAG asks for a contrast of 3:1 between a focus indicator and the colors next to it
+  const contrast = (a: Color, b: Color): number => a.contrast(b, `WCAG21`);
+  const outline = token(colorOf(`focus-outline`), scheme);
+  const gap = token(colorOf(`focus-gap`), scheme);
+
+  it(`is made of two tones that stand apart from one another`, () => {
+    expect(contrast(outline, gap)).toBeGreaterThanOrEqual(3);
+  });
+
+  it.each(states)(
+    `stands out against a %s tile with at least one of its tones`,
+    (state) => {
+      // No single color contrasts with every tile, which is the whole reason for the ring having two
+      const tile = token(`${state}-bg`, scheme);
+
+      expect(
+        Math.max(contrast(outline, tile), contrast(gap, tile))
+      ).toBeGreaterThanOrEqual(3);
+    }
+  );
+
+  it(`stands out against the page`, () => {
+    expect(contrast(outline, token(`bg`, scheme))).toBeGreaterThanOrEqual(3);
   });
 });

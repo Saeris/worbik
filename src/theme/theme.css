@@ -145,8 +145,19 @@
   --font-size-11: 64px;
 
   /* Effects */
-  --focus-ring:
+  /* Highlights the control that is underneath the pointer */
+  --hover-ring:
     0px var(--spacing-0) 0px 0px var(--hover),
     0px var(--spacing-0) var(--spacing-1) var(--spacing-0)
       color-mix(in oklch, var(--hover) 50%, transparent);
+
+  /*
+   * Focus is shown as a ring of two tones: the color of text, held apart
+   * from the focused control by a gap in the color of the page. Those two
+   * are the furthest apart in lightness of any colors in the theme, so at
+   * least one of them always stands out against whatever the ring surrounds.
+   */
+  --focus-outline: 2px solid var(--fg);
+  --focus-offset: 2px;
+  --focus-gap: 0 0 0 var(--focus-offset) var(--bg);
 }

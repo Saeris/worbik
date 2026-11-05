@@ -41,7 +41,7 @@ yarn dev
 
 ### Reviewing the palette
 
-While `yarn dev` is running, `/palette` shows a board with a tile in every state, in both color schemes, as it appears with typical vision, under each color vision deficiency, and in grayscale. The page only exists in development. The same guarantees are enforced by `src/theme/__tests__/palette.spec.ts`, which reads the colors straight out of `src/theme/theme.css`.
+While `yarn dev` is running, `/palette` shows a board with a tile in every state, in both color schemes, as it appears with typical vision, under each color vision deficiency, and in grayscale. It also shows tiles at every size from 32px to 80px, for checking that a tile's letter and its hint never touch. The page only exists in development. The same guarantees are enforced by `src/theme/__tests__/palette.spec.ts`, which reads the colors straight out of `src/theme/theme.css`.
 
 ### How daily puzzles work
 

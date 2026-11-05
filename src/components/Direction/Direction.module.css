@@ -19,11 +19,9 @@
     max-height: var(--spacing-8);
   }
 
-  &:hover,
-  &:focus {
-    &:not(:disabled) {
-      box-shadow: var(--focus-ring);
-      outline: none;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover:not(:disabled) {
+      box-shadow: var(--hover-ring);
     }
   }
 }

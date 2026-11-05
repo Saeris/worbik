@@ -27,11 +27,9 @@
   letter-spacing: 0.25em;
   cursor: pointer;
 
-  &:hover,
-  &:focus {
-    &:not(:disabled) {
-      box-shadow: var(--focus-ring);
-      outline: none;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover:not(:disabled) {
+      box-shadow: var(--hover-ring);
     }
   }
 }
@@ -92,8 +90,9 @@
   }
 
   &:has(:focus-visible) {
-    outline: 2px solid var(--fg);
-    outline-offset: 2px;
+    outline: var(--focus-outline);
+    outline-offset: var(--focus-offset);
+    box-shadow: var(--focus-gap);
   }
 
   &:active {

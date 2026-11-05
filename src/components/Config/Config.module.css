@@ -50,6 +50,16 @@
   color: var(--fg);
   cursor: pointer;
 
+  /* Shows which color scheme the system setting currently resolves to */
+  &:has([value="system"])::after {
+    content: "(light)";
+    color: var(--muted);
+
+    @media (prefers-color-scheme: dark) {
+      content: "(dark)";
+    }
+  }
+
   &:hover,
   &:focus {
     color: var(--hover);

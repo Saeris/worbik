@@ -4,6 +4,7 @@ import {
   isUppercase,
   randomInt,
   repeat,
+  type Random,
   type Size
 } from "../utils";
 import { Grid } from "./Grid";
@@ -124,8 +125,8 @@ export class PuzzleState {
           isUppercase(char)
             ? char
             : isUppercase(chars.charAt(idx))
-            ? chars.charAt(idx)
-            : ` `
+              ? chars.charAt(idx)
+              : ` `
         ),
       this.#grid.width
     );
@@ -217,16 +218,18 @@ export class PuzzleState {
             : this.#updateHints(next)
         );
 
-  randomize = (min = 25, max = 250): this => {
+  randomize = (min = 25, max = 250, random?: Random): this => {
     // Generate a random number of moves between our bounds
     // Then simulate user inputs to take our initial solved
     // state to randomize it into an unsolved state
-    repeat(randomInt(min, max))(() => {
+    repeat(randomInt(min, max, random))(() => {
       // true = horizontal / word size, false = vertical / num of words
-      const dir = ([`up`, `down`, `left`, `right`] as const)[randomInt(0, 3)];
+      const dir = ([`up`, `down`, `left`, `right`] as const)[
+        randomInt(0, 3, random)
+      ];
       const axis = [`left`, `right`].includes(dir);
       const limit = (axis ? this.#grid.height : this.#grid.width) - 1;
-      const pos = randomInt(0, limit);
+      const pos = randomInt(0, limit, random);
       //const pair = [pos, dir, limit, axis]; //?
       this.getNextState(pos, dir);
     });

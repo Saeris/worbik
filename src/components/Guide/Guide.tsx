@@ -1,8 +1,7 @@
-"use client";
-import React, { memo } from "react";
-import { DialogDismiss, DialogHeading } from "@ariakit/react";
-import { PiInfoThin, PiXThin } from "react-icons/pi";
-import { Modal, ModalHeader } from "../Modal";
+import { memo } from "react";
+import type { Size } from "#utils";
+import { PiInfoThin } from "react-icons/pi";
+import { Modal } from "../Modal";
 import { Tile } from "../Tile";
 import styles from "./Guide.module.css";
 
@@ -14,18 +13,12 @@ const numbers = {
 } as const;
 
 export interface GuideProps {
-  width: number;
-  height: number;
+  width: Size;
+  height: Size;
 }
 
 export const Guide: React.FC<GuideProps> = memo(({ width, height }) => (
-  <Modal label={<PiInfoThin />} aria-label={`How to Play`}>
-    <ModalHeader>
-      <DialogHeading>How To Play:</DialogHeading>
-      <DialogDismiss>
-        <PiXThin />
-      </DialogDismiss>
-    </ModalHeader>
+  <Modal label={<PiInfoThin />} aria-label="How to Play" title="How To Play:">
     <p>
       {`Hidden in this puzzle are `}
       <strong>{`${String(numbers[height])} words`}</strong>

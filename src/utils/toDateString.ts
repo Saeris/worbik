@@ -47,11 +47,16 @@ type Day =
 
 export type DateString = `${Month}-${Day}-${number}`;
 
-export const toDateString = (date: Date): DateString =>
+/**
+ * Formats a date as `MM-DD-YYYY`, in the local timezone of
+ * the runtime unless an explicit IANA `timeZone` is given.
+ */
+export const toDateString = (date: Date, timeZone?: string): DateString =>
   date
     .toLocaleDateString(`en-US`, {
       month: `2-digit`,
       day: `2-digit`,
-      year: `numeric`
+      year: `numeric`,
+      timeZone
     })
     .replaceAll(`/`, `-`) as DateString;

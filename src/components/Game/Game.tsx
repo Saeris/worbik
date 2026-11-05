@@ -1,6 +1,3 @@
-"use client";
-import React from "react";
-import type { NextPage } from "next/types";
 import type { PuzzleStateInit } from "#state";
 import { usePuzzle } from "#hooks";
 import { Puzzle } from "./Puzzle";
@@ -14,7 +11,7 @@ export interface GameProps {
   persist?: boolean;
 }
 
-export const Game: NextPage<GameProps> = ({ puzzleID, init, persist }) => {
+export const Game: React.FC<GameProps> = ({ puzzleID, init, persist }) => {
   const state = usePuzzle(puzzleID, init, persist);
 
   const winMessage = (): string =>
@@ -24,11 +21,11 @@ export const Game: NextPage<GameProps> = ({ puzzleID, init, persist }) => {
 
   return (
     <main className={styles.main}>
-      <h1 className={styles.title}>
-        Worbik
+      <header className={styles.title}>
+        <h1>Worbik</h1>
         <Config />
         <Guide width={state.initial.width} height={state.initial.height} />
-      </h1>
+      </header>
       <Puzzle state={state} />
       {state.win ? <p>{winMessage()}</p> : <p>{`Moves: ${state.moves}`}</p>}
     </main>

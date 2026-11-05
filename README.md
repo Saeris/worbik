@@ -20,3 +20,27 @@ Upon winning, players are given the option to share their score on social media.
 1. Keyboard (WASD rotates current column/row + Up/Left/Down/Right control focus in grid)
 1. Gamepad (D-pad controls focus in grid + A/B/X/Y rotates current column/row)
 1. Touch (Swipe to rotate a column or row)
+
+## Development
+
+Worbik is a [Void](https://void.cloud) app that runs on Cloudflare Workers, built and checked with [Vite+](https://viteplus.dev).
+
+```sh
+yarn install
+echo "PUZZLE_SECRET=any-local-value" > .env
+yarn dev
+```
+
+| Command       | Purpose                                    |
+| ------------- | ------------------------------------------ |
+| `yarn dev`    | Run the app locally on the Workers runtime |
+| `yarn check`  | Format, lint, and typecheck                |
+| `yarn test`   | Run the unit tests                         |
+| `yarn build`  | Build for production                       |
+| `yarn deploy` | Deploy to Cloudflare                       |
+
+### How daily puzzles work
+
+Each puzzle is derived on demand from its ID (the puzzle's date and size) and the `PUZZLE_SECRET`, the first time it is requested, and is then stored in Workers KV for three days. A new day's puzzles become available at 10:00 UTC. Solutions never leave the server: the browser sends its guesses to `/api/check`, which reports the letters that are in the right position.
+
+Before the first deploy, set the production secret with `yarn void secret put PUZZLE_SECRET`.

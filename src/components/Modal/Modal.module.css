@@ -16,18 +16,17 @@
   }
 }
 
+/* A modal <dialog> is centered in the top layer by the browser */
 .container {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  z-index: 50;
-  display: flex;
   flex-direction: column;
   gap: 0.75em;
+  /* Restores the centering that is otherwise undone by the global margin reset */
+  margin: auto;
   width: calc(100% - var(--spacing-8));
   max-width: 40ch;
   max-height: 80%;
   padding: var(--spacing-6) var(--spacing-5);
+  border: none;
   border-radius: var(--spacing-2);
   background-color: var(--bg);
   color: var(--fg);
@@ -35,8 +34,17 @@
   font-family: var(--font-body);
   font-size: var(--font-size-5);
   font-weight: 300;
+  text-align: start;
   filter: drop-shadow(0 var(--spacing-4) var(--spacing-6) rgba(0, 0, 0, 15%));
-  transform: translate(-50%, -50%);
+
+  /* Only set a display type while open, so as to not reveal a closed dialog */
+  &[open] {
+    display: flex;
+  }
+
+  &::backdrop {
+    background-color: rgb(0 0 0 / 15%);
+  }
 }
 
 .header {

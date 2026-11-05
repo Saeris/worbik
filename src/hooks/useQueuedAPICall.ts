@@ -7,17 +7,17 @@ export const useQueuedAPICall = <T>(
   const [queue, setQueue] = useState(new Array<T>());
 
   useEffect(() => {
-    if (queue.length) {
-      const timer = setTimeout(() => {
-        void fn(queue);
-        // flush queue
-        queue.length = 0;
-      }, delay);
+    if (!queue.length) return undefined;
 
-      return () => {
-        clearTimeout(timer);
-      };
-    }
+    const timer = setTimeout(() => {
+      void fn(queue);
+      // flush queue
+      queue.length = 0;
+    }, delay);
+
+    return (): void => {
+      clearTimeout(timer);
+    };
   }, [fn, queue, delay]);
 
   return (item: T) => {

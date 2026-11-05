@@ -5,6 +5,7 @@ import {
   useState,
   useSyncExternalStore
 } from "react";
+import { fetch } from "void/client";
 import { useQueuedAPICall } from "#hooks";
 import { Grid, PuzzleState, type PuzzleStateInit } from "#state";
 import { filterExpiredDates } from "#utils";
@@ -67,11 +68,12 @@ export const usePuzzle = (
   const queue = useQueuedAPICall(
     useCallback(
       async (vals: string[]): Promise<void> => {
-        const url = new URL(`/api/check`, window.location.origin);
-        url.searchParams.set(`puzzle`, puzzleID);
-        url.searchParams.set(`guesses`, vals.join(`,`));
         const snapshot = state
-          .validate((await (await fetch(url.href)).json()) as string[])
+          .validate(
+            await fetch(`/api/check`, {
+              query: { puzzle: puzzleID, guesses: vals.join(`,`) }
+            })
+          )
           .snapshot.join(`|`);
 
         if (persist) {

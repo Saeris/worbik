@@ -147,7 +147,7 @@ describe(`puzzleState`, () => {
   it(`notifies subscribers of updates`, () => {
     // @ts-expect-error
     const state = new PuzzleState([2, `abcd`]);
-    const listener = jest.fn();
+    const listener = vi.fn<() => void>();
     const unsubscribe = state.subscribe(listener);
     state.getNextState(0, `up`);
     state.getNextState(0, `up`);
@@ -176,7 +176,7 @@ describe(`puzzleState`, () => {
     ] as PuzzleStateInit[];
 
     for (const val of cases) {
-      const listener = jest.fn();
+      const listener = vi.fn<() => void>();
       const state = new PuzzleState(val);
       state.subscribe(listener);
       const result = state.randomize().toString();
@@ -186,7 +186,7 @@ describe(`puzzleState`, () => {
   });
 
   it(`can validate a winning state`, () => {
-    const listener = jest.fn();
+    const listener = vi.fn<() => void>();
     const solution = `worbik`;
     const history = [`kworbi`, `worbik`, `kworbi`, `worbik`];
     const truncated = [`kworbi`, `worbik`];

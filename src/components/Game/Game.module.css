@@ -9,7 +9,7 @@
   color: var(--fg);
   font-size: var(--font-size-6);
 
-  p {
+  > p {
     max-width: 30ch;
     font-weight: 300;
     text-align: center;
@@ -22,7 +22,11 @@
   align-items: baseline;
   font-size: var(--font-size-8);
 
-  button {
+  > h1 {
+    font-size: inherit;
+  }
+
+  > button {
     font-size: var(--font-size-5);
   }
 }

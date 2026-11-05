@@ -1,38 +1,25 @@
-import z from "zod";
-import { between } from "./between";
+import * as v from "valibot";
 import type { Size } from "./sizes";
 
-const numeric = z
-  .preprocess(
-    // eslint-disable-next-line no-eq-null
-    (value) => (value == null ? value : String(value).trim()),
-    z
-      .string()
-      .min(1, `Expected number or numeric string, received empty string`)
-      .refine(
-        (s) => {
-          const n = Number(s);
-          return Number.isFinite(n) && !Number.isNaN(n);
-        },
-        (v) => ({
-          message: `Expected number or numeric string, received '${v}'`
-        })
-      )
-      .transform(Number)
-      .refine(
-        (v): v is Size => between(v, 5, 8),
-        (v) => ({
-          message: `Value must be between 5 and 8 (inclusive), received ${v}`
-        })
-      )
+/** Accepts one of the supported sizes, given as either a number or a numeric string */
+const size = v.optional(
+  v.pipe(
+    v.unknown(),
+    v.transform((value) =>
+      typeof value === `string` && value.trim() ? Number(value) : value
+    ),
+    v.picklist(
+      [5, 6, 7, 8] satisfies Size[],
+      `Expected a number or numeric string between 5 and 8 (inclusive)`
+    )
   )
-  .optional();
+);
 
-export const puzzleSchema = z.object({
-  width: numeric,
-  height: numeric
+export const puzzleSchema = v.object({
+  width: size,
+  height: size
 });
 
-export type RawPuzzleSchema = z.input<typeof puzzleSchema>;
+export type RawPuzzleSchema = v.InferInput<typeof puzzleSchema>;
 
-export type PuzzleSchema = z.infer<typeof puzzleSchema>;
+export type PuzzleSchema = v.InferOutput<typeof puzzleSchema>;

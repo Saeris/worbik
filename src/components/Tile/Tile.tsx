@@ -1,5 +1,4 @@
-"use client";
-import React, { memo, useCallback } from "react";
+import { memo, useCallback } from "react";
 import { CompositeItem } from "@ariakit/react";
 import { cva } from "class-variance-authority";
 import styles from "./Tile.module.css";
@@ -31,7 +30,7 @@ export const Tile: React.FC<TileProps> = memo(
           const key = e.key;
           if ([`w`, `a`, `s`, `d`].includes(key)) {
             // w | d = increment, a | s = decriment
-            const dir = {
+            const dir: Record<string, `down` | `left` | `right` | `up`> = {
               w: `up`,
               a: `left`,
               s: `down`,
@@ -50,8 +49,8 @@ export const Tile: React.FC<TileProps> = memo(
     const variant = correct
       ? `correct`
       : char.toUpperCase() === hint
-      ? `hint`
-      : null;
+        ? `hint`
+        : null;
 
     return (
       <CompositeItem

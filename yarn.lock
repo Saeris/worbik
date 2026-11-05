@@ -86,6 +86,132 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@atcute/cbor@npm:^2.3.8":
+  version: 2.3.8
+  resolution: "@atcute/cbor@npm:2.3.8"
+  dependencies:
+    "@atcute/cid": "npm:^2.5.0"
+    "@atcute/multibase": "npm:^1.2.5"
+    "@atcute/uint8array": "npm:^1.2.0"
+  peerDependencies:
+    "@atcute/cid": ^2.5.0
+  checksum: 10/058fe8af7b65da27cf95c719bcf4935bd4ff96b22d76c2a3e11ecb40ab51de9ffe0bd9e3e3ce730edcfeb5d5412ca6638899f02dd32abb8007acb3e1fa31b7fe
+  languageName: node
+  linkType: hard
+
+"@atcute/cid@npm:^2.5.0":
+  version: 2.5.0
+  resolution: "@atcute/cid@npm:2.5.0"
+  dependencies:
+    "@atcute/multibase": "npm:^1.2.5"
+    "@atcute/uint8array": "npm:^1.2.0"
+  checksum: 10/0e273ec7a10dcfb55acf7340360d0a5c80cac0b956cb771cfa83f8ad76b68cd745b9ac9d2785eab5c3089ca48506265574bdc142f288b28c89760351e02e2b73
+  languageName: node
+  linkType: hard
+
+"@atcute/crypto@npm:^2.4.4":
+  version: 2.4.4
+  resolution: "@atcute/crypto@npm:2.4.4"
+  dependencies:
+    "@atcute/multibase": "npm:^1.2.5"
+    "@atcute/uint8array": "npm:^1.1.5"
+    "@noble/secp256k1": "npm:^3.1.0"
+  checksum: 10/fb7069c21f1015f0a6e4b73d698cb110719657814dac3ed22f7f4aac4395f9efedcdfc1641a08c17fda9a60bbb298e92c8a2590c4d3682c52f19ef05bfb58a5f
+  languageName: node
+  linkType: hard
+
+"@atcute/identity-resolver@npm:^2.0.3":
+  version: 2.0.3
+  resolution: "@atcute/identity-resolver@npm:2.0.3"
+  dependencies:
+    "@atcute/lexicons": "npm:^2.1.1"
+    "@atcute/util-fetch": "npm:^2.1.0"
+    valibot: "npm:^1.5.0"
+  peerDependencies:
+    "@atcute/identity": ^2.0.0
+    "@atcute/lexicons": ^2.0.0
+  checksum: 10/9b3e25475c688aaf0360dc77c148dd0fc2bf3d8d081ceb1098165ff62f8341766d0b604eaf5cd567d01a88a7debb7a8d068992187577740255fd625014592f2b
+  languageName: node
+  linkType: hard
+
+"@atcute/identity@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "@atcute/identity@npm:2.0.2"
+  dependencies:
+    "@atcute/lexicons": "npm:^2.0.3"
+    valibot: "npm:^1.4.2"
+  peerDependencies:
+    "@atcute/lexicons": ^2.0.0
+  checksum: 10/8050539e9ef6d43e739777b95d8851d355d634e15e57e20f1333477e92e88b8c6c0fa4103b1e6b60f95fb2f318a52176b824809a1eb8ab047ad55193cfd531b9
+  languageName: node
+  linkType: hard
+
+"@atcute/lexicons@npm:^2.0.3, @atcute/lexicons@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "@atcute/lexicons@npm:2.1.1"
+  dependencies:
+    "@atcute/uint8array": "npm:^1.1.5"
+    "@atcute/util-text": "npm:^1.3.4"
+    "@oomfware/eval": "npm:^0.1.0"
+    "@standard-schema/spec": "npm:^1.1.0"
+    esm-env: "npm:^1.2.2"
+  checksum: 10/960d7b52efeb5b598b88a30a8e249e9655f807f8284e01ee79a1e560b13c3a5463b4d6ebd01c4418e5cd387a94321a56aaaeb087ee927ca4dc2d47595d53fba5
+  languageName: node
+  linkType: hard
+
+"@atcute/multibase@npm:^1.2.5":
+  version: 1.2.5
+  resolution: "@atcute/multibase@npm:1.2.5"
+  dependencies:
+    "@atcute/uint8array": "npm:^1.1.5"
+  checksum: 10/fa06e933f877a561927ed81de20eb3054057beb0e08b2c3976603aa73d8e5d9fb97e705b47432b9a240e0a8ccf4f2b27ba9572a997efb28a13b97a2a79e17000
+  languageName: node
+  linkType: hard
+
+"@atcute/uint8array@npm:^1.1.5, @atcute/uint8array@npm:^1.2.0":
+  version: 1.2.1
+  resolution: "@atcute/uint8array@npm:1.2.1"
+  checksum: 10/692e201874d0135b089d5d62d806bb413cd6ce3a1fe51c5e8e5336256bb11d4df52e8edebeff659916c0c54db33319c23bb5eda007e2415619270daa5e1d89c9
+  languageName: node
+  linkType: hard
+
+"@atcute/util-fetch@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "@atcute/util-fetch@npm:2.1.0"
+  dependencies:
+    valibot: "npm:^1.5.0"
+  checksum: 10/bd76b43e52f185fd83553cb580eae389662d8db61644ddce07086b1ceded43a5acf2b7675045b836e6b6946cf99ff629acdf7582663473a0618a6706d5d5bddd
+  languageName: node
+  linkType: hard
+
+"@atcute/util-text@npm:^1.3.4":
+  version: 1.3.4
+  resolution: "@atcute/util-text@npm:1.3.4"
+  dependencies:
+    unicode-segmenter: "npm:^0.17.0"
+  checksum: 10/c57751ebba7fd1c95aae461ea29dd65f55ac3cf3198b307a7305f75712b2bfe9b7d42ad3fc8f2f5a258a14df74ea743097da9756b8ed6f77729b93da18e789e9
+  languageName: node
+  linkType: hard
+
+"@atcute/xrpc-server@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "@atcute/xrpc-server@npm:2.1.0"
+  dependencies:
+    "@atcute/cbor": "npm:^2.3.8"
+    "@atcute/crypto": "npm:^2.4.4"
+    "@atcute/identity": "npm:^2.0.2"
+    "@atcute/identity-resolver": "npm:^2.0.3"
+    "@atcute/lexicons": "npm:^2.1.1"
+    "@atcute/multibase": "npm:^1.2.5"
+    "@atcute/uint8array": "npm:^1.2.0"
+    nanoid: "npm:^6.0.1"
+    valibot: "npm:^1.5.0"
+  peerDependencies:
+    "@atcute/lexicons": ^2.0.0
+  checksum: 10/8591559fba13404061eeea1c546dd33e6a81827d282d89d1cb7a148b3d34752cd5af990f361a6b1bb8e4a439ed54b8ab6497dc696b1be648b098de32dd851721
+  languageName: node
+  linkType: hard
+
 "@babel/code-frame@npm:^7.10.4":
   version: 7.18.6
   resolution: "@babel/code-frame@npm:7.18.6"
@@ -1507,6 +1633,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@noble/secp256k1@npm:^3.1.0":
+  version: 3.2.0
+  resolution: "@noble/secp256k1@npm:3.2.0"
+  checksum: 10/f9bbce1f1c0287aa42fb4b01722d575b843ea0cbc01f077826c2d070c6ebe445b153884dc2c412a323facd95c2683a51edaf63a29f02e8637d8da37713844503
+  languageName: node
+  linkType: hard
+
 "@npmcli/fs@npm:^2.1.0":
   version: 2.1.1
   resolution: "@npmcli/fs@npm:2.1.1"
@@ -1524,6 +1657,13 @@ __metadata:
     mkdirp: "npm:^1.0.4"
     rimraf: "npm:^3.0.2"
   checksum: 10/1388777b507b0c592d53f41b9d182e1a8de7763bc625fc07999b8edbc22325f074e5b3ec90af79c89d6987fdb2325bc66d59f483258543c14a43661621f841b0
+  languageName: node
+  linkType: hard
+
+"@oomfware/eval@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "@oomfware/eval@npm:0.1.0"
+  checksum: 10/4730e73e99d9e00495cc8fb3b2f7f0b5e04bc211f17358905557490f898f98f8669ff42a17c735a623acfdd80d720c3852a47a0859c2936798c05d3ea655522f
   languageName: node
   linkType: hard
 
@@ -3378,6 +3518,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"esm-env@npm:^1.2.2":
+  version: 1.2.2
+  resolution: "esm-env@npm:1.2.2"
+  checksum: 10/caf5f3cc2bc7107494585b4e38835787f48ef77b670aeb2d765a5b6b64c41102d20bbdd34bda32474291b6b8d819d4d02ce92570a0886baca6cef70f5fe689f3
+  languageName: node
+  linkType: hard
+
 "estree-walker@npm:^3.0.3":
   version: 3.0.3
   resolution: "estree-walker@npm:3.0.3"
@@ -4148,6 +4295,15 @@ __metadata:
   bin:
     nanoid: bin/nanoid.cjs
   checksum: 10/b19641487fc25325189175226a4b9fcc8da39989c6a39fd35921802158d6b1725d59d8454a4e30643d2bb4837382cac11ee129417282678a67f8394b31c228d9
+  languageName: node
+  linkType: hard
+
+"nanoid@npm:^6.0.1":
+  version: 6.0.2
+  resolution: "nanoid@npm:6.0.2"
+  bin:
+    nanoid: bin/nanoid.js
+  checksum: 10/c555e99171c0988195d71ba22a7acd96f18c767b4a1db5c2a3d75ebf9c302a269fcda3c22e2d6022f3e5a345dcf7188a36f88c6d5fffc2828c68a1b7f9996daf
   languageName: node
   linkType: hard
 
@@ -5162,6 +5318,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"unicode-segmenter@npm:^0.17.0":
+  version: 0.17.3
+  resolution: "unicode-segmenter@npm:0.17.3"
+  checksum: 10/49b23ec4dac218a89eb61a53de0e9620c9c49429e1ea8389e9ac25ac289d9c255ff25b519110aee038d88c9dd1d7f7a0361eda70bfc63d70a95d91df89c1fa72
+  languageName: node
+  linkType: hard
+
 "unique-filename@npm:^1.1.1":
   version: 1.1.1
   resolution: "unique-filename@npm:1.1.1"
@@ -5196,7 +5359,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"valibot@npm:^1.5.0":
+"valibot@npm:^1.4.2, valibot@npm:^1.5.0":
   version: 1.5.0
   resolution: "valibot@npm:1.5.0"
   peerDependencies:
@@ -5542,6 +5705,10 @@ __metadata:
   resolution: "worbik@workspace:."
   dependencies:
     "@ariakit/react": "npm:^0.4.42"
+    "@atcute/crypto": "npm:^2.4.4"
+    "@atcute/identity-resolver": "npm:^2.0.3"
+    "@atcute/lexicons": "npm:^2.1.1"
+    "@atcute/xrpc-server": "npm:^2.1.0"
     "@fontsource-variable/montserrat": "npm:^5.3.0"
     "@saeris/colors": "npm:^0.1.2"
     "@saeris/configs": "npm:1.6.1"

@@ -1,11 +1,15 @@
+import type { Size } from "../../utils/sizes";
 import { PuzzleState } from "../PuzzleState";
 import { MAX_MOVES, replay } from "../replay";
 
 /**
  * A 3×2 puzzle whose solution is `abc` over `def`. From where it starts,
  * rotating the first row right and the second row right solves it.
+ *
+ * That is smaller than any real puzzle, which keeps every state in these
+ * tests short enough to be read at a glance.
  */
-const width = 3;
+const width = 3 as Size;
 const challenge = `bcaefd`;
 const solution = `abcdef`;
 const solved = [`bcaefd`, `abcefd`, `abcdef`];
@@ -39,9 +43,9 @@ describe(`replay`, () => {
 
   it(`counts a move that leaves the board as it was`, () => {
     // Rotating a row of identical letters changes nothing, but it is still a move that was made
-    expect(replay(3, `aaabca`, `aaaabc`, [`aaabca`, `aaabca`, `aaaabc`])).toBe(
-      2
-    );
+    expect(
+      replay(width, `aaabca`, `aaaabc`, [`aaabca`, `aaabca`, `aaaabc`])
+    ).toBe(2);
   });
 
   it(`ignores the case that hints are marked with`, () => {

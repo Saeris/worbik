@@ -1997,7 +1997,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:26.6.6":
+"@types/node@npm:*, @types/node@npm:26.6.6, @types/node@npm:>=20.0.0":
   version: 26.6.6
   resolution: "@types/node@npm:26.6.6"
   dependencies:
@@ -2021,6 +2021,22 @@ __metadata:
   dependencies:
     csstype: "npm:^3.2.2"
   checksum: 10/2f4589222fd9c512e1ef78e65f334ade8777400add8ec0803fcc3a044761679b7984ba8410a890af24255383c3251a568bb692b60acfa22397ba0a64b2e032bf
+  languageName: node
+  linkType: hard
+
+"@types/whatwg-mimetype@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "@types/whatwg-mimetype@npm:3.0.2"
+  checksum: 10/609607beeaa8b50b9e00541d8f571880d651b26b6b006103370099aba00784037de54433627c9fe775a5558e3d1fc09c2a48f54c8af91988e9bebeaf6a698eeb
+  languageName: node
+  linkType: hard
+
+"@types/ws@npm:^8.18.1":
+  version: 8.18.2
+  resolution: "@types/ws@npm:8.18.2"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10/7d87483731222387ba7d49a752b7eca6c29baeb3439d9c0a2ebe57b06bad0ce868cd850f4794c81aa93a90b2a35d7673c9b0362e7b940aace446144c17a894c2
   languageName: node
   linkType: hard
 
@@ -2645,6 +2661,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"buffer-image-size@npm:^0.6.4":
+  version: 0.6.4
+  resolution: "buffer-image-size@npm:0.6.4"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10/82d4ca9bc8e71c9c0cbc74191d3613100d0a20dd21da018c6f373d7dc88ec4a9225eebe06c44a982de074f695402e81ab8a8daa40afce36b915042fa9fb32c52
+  languageName: node
+  linkType: hard
+
 "cacache@npm:^16.1.0":
   version: 16.1.1
   resolution: "cacache@npm:16.1.1"
@@ -3046,6 +3071,13 @@ __metadata:
   dependencies:
     iconv-lite: "npm:^0.6.2"
   checksum: 10/bb98632f8ffa823996e508ce6a58ffcf5856330fde839ae42c9e1f436cc3b5cc651d4aeae72222916545428e54fd0f6aa8862fd8d25bdbcc4589f1e3f3715e7f
+  languageName: node
+  linkType: hard
+
+"entities@npm:^7.0.1":
+  version: 7.0.1
+  resolution: "entities@npm:7.0.1"
+  checksum: 10/3c0c58d869c45148463e96d21dee2d1b801bd3fe4cf47aa470cd26dfe81d59e9e0a9be92ae083fa02fa441283c883a471486e94538dcfb8544428aa80a55271b
   languageName: node
   linkType: hard
 
@@ -3495,6 +3527,21 @@ __metadata:
   version: 4.2.10
   resolution: "graceful-fs@npm:4.2.10"
   checksum: 10/0c83c52b62c68a944dcfb9d66b0f9f10f7d6e3d081e8067b9bfdc9e5f3a8896584d576036f82915773189eec1eba599397fc620e75c03c0610fb3d67c6713c1a
+  languageName: node
+  linkType: hard
+
+"happy-dom@npm:^21.0.4":
+  version: 21.0.4
+  resolution: "happy-dom@npm:21.0.4"
+  dependencies:
+    "@types/node": "npm:>=20.0.0"
+    "@types/whatwg-mimetype": "npm:^3.0.2"
+    "@types/ws": "npm:^8.18.1"
+    buffer-image-size: "npm:^0.6.4"
+    entities: "npm:^7.0.1"
+    whatwg-mimetype: "npm:^3.0.0"
+    ws: "npm:^8.21.0"
+  checksum: 10/708a07432283cab0a29a10571b06cf27c0e30a933bf5f7fe948e18f78ce3875127b09fbed9aa7c6c5d23b06f4dad824eb73bc7a0cbe356febf5f66efb36aabce
   languageName: node
   linkType: hard
 
@@ -5454,6 +5501,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"whatwg-mimetype@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "whatwg-mimetype@npm:3.0.0"
+  checksum: 10/96f9f628c663c2ae05412c185ca81b3df54bcb921ab52fe9ebc0081c1720f25d770665401eb2338ab7f48c71568133845638e18a81ed52ab5d4dcef7d22b40ef
+  languageName: node
+  linkType: hard
+
 "which@npm:^2.0.2":
   version: 2.0.2
   resolution: "which@npm:2.0.2"
@@ -5498,6 +5552,7 @@ __metadata:
     class-variance-authority: "npm:^0.7.1"
     colorjs.io: "npm:^0.7.1"
     date-fns: "npm:^4.4.0"
+    happy-dom: "npm:^21.0.4"
     hono: "npm:^4.13.16"
     invokers-polyfill: "npm:^1.0.4"
     react: "npm:^19.3.1"
@@ -5588,7 +5643,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:^8.22.0":
+"ws@npm:^8.21.0, ws@npm:^8.22.0":
   version: 8.22.1
   resolution: "ws@npm:8.22.1"
   peerDependencies:

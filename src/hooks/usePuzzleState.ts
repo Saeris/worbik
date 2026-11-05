@@ -24,6 +24,18 @@ const useMoves = (state: PuzzleState): PuzzleState["moves"] =>
     () => state.moves
   );
 
+/**
+ * Hints are revealed by the server some time after the move that earned
+ * them, at which point nothing else about the puzzle changes. They need a
+ * subscription of their own, or else they won't appear until the next move.
+ */
+const useHints = (state: PuzzleState): string =>
+  useSyncExternalStore(
+    state.subscribe,
+    () => state.hints.flat().join(``),
+    () => state.hints.flat().join(``)
+  );
+
 const useWin = (state: PuzzleState): PuzzleState["win"] =>
   useSyncExternalStore(
     state.subscribe,
@@ -47,6 +59,8 @@ export const usePuzzle = (
   const state = useMemo(() => new PuzzleState(init), [init]);
   const moves = useMoves(state);
   const win = useWin(state);
+
+  useHints(state);
 
   useEffect(() => {
     if (typeof window !== `undefined` && restore) {

@@ -36,32 +36,77 @@
   }
 }
 
-.group {
-  display: flex;
-  justify-content: space-around;
-  gap: var(--spacing-2);
-  width: 100%;
-}
-
-.radio {
+.schemes {
   display: flex;
   align-items: center;
-  gap: 1ch;
-  color: var(--fg);
+  gap: var(--spacing-1);
+  inline-size: fit-content;
+  padding: var(--spacing-1);
+  border: 1px solid var(--bd);
+  border-radius: 100vmax;
+}
+
+.scheme {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  border-radius: 100vmax;
+  color: var(--muted);
   cursor: pointer;
 
-  /* Shows which color scheme the system setting currently resolves to */
-  &:has([value="system"])::after {
-    content: "(light)";
-    color: var(--muted);
+  /*
+   * The radio itself is invisible, but still covers its option so that it
+   * remains clickable, focusable, and operable with the arrow keys
+   */
+  input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: inherit;
+  }
 
-    @media (prefers-color-scheme: dark) {
-      content: "(dark)";
+  svg {
+    inline-size: var(--spacing-6);
+    block-size: var(--spacing-6);
+  }
+
+  /* Each option has an outlined icon, and a filled one for when it's selected */
+  svg:last-of-type {
+    display: none;
+  }
+
+  &:has(:checked) {
+    background: var(--bd);
+    color: var(--fg);
+
+    svg:first-of-type {
+      display: none;
+    }
+
+    svg:last-of-type {
+      display: block;
     }
   }
 
-  &:hover,
-  &:focus {
-    color: var(--hover);
+  &:has(:focus-visible) {
+    outline: 2px solid var(--fg);
+    outline-offset: 2px;
+  }
+
+  &:active {
+    scale: 0.95;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      color: var(--fg);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: scale 160ms ease-out;
   }
 }

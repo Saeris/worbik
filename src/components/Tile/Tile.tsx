@@ -6,8 +6,8 @@ import styles from "./Tile.module.css";
 const variants = cva(styles.tile, {
   variants: {
     variant: {
-      hint: styles.hint,
-      correct: styles.correct
+      correct: styles.correct,
+      solved: styles.solved
     }
   }
 });
@@ -16,14 +16,16 @@ export interface TileProps {
   x: number;
   y: number;
   char: string;
+  /** The letter that belongs in this position, once it has been found */
   hint?: string;
-  correct?: boolean;
+  /** Whether every letter in this tile's row is in its correct position */
+  solved?: boolean;
   disabled?: boolean;
   rotate?: (rowOrCol: number, dir: `down` | `left` | `right` | `up`) => void;
 }
 
 export const Tile: React.FC<TileProps> = memo(
-  ({ x, y, char, hint, correct, disabled, rotate }) => {
+  ({ x, y, char, hint, solved, disabled, rotate }) => {
     const handleKeypress: React.KeyboardEventHandler<HTMLButtonElement> =
       useCallback(
         (e) => {
@@ -46,10 +48,10 @@ export const Tile: React.FC<TileProps> = memo(
         [rotate, x, y]
       );
 
-    const variant = correct
-      ? `correct`
+    const variant = solved
+      ? `solved`
       : char.toUpperCase() === hint
-        ? `hint`
+        ? `correct`
         : null;
 
     return (

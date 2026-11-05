@@ -1,0 +1,64 @@
+.page {
+  display: grid;
+  gap: var(--spacing-6);
+  padding: var(--spacing-6);
+  color: var(--fg);
+
+  header {
+    display: grid;
+    gap: var(--spacing-2);
+    max-inline-size: 60ch;
+  }
+}
+
+/* The filters only need to be in the document to be referenced, not to be seen */
+.filters {
+  position: absolute;
+  inline-size: 0;
+  block-size: 0;
+}
+
+.schemes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+}
+
+/* The theme's colors resolve against whichever scheme their element is using */
+.scheme {
+  display: grid;
+  background: var(--bg);
+  color: var(--fg);
+
+  &[data-scheme="light"] {
+    color-scheme: light;
+  }
+
+  &[data-scheme="dark"] {
+    color-scheme: dark;
+  }
+}
+
+/* Each view carries its own background, so that the page is simulated along with the tiles */
+.view {
+  display: grid;
+  justify-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-6);
+  background: var(--bg);
+
+  figcaption {
+    font-size: var(--font-size-3);
+    text-transform: capitalize;
+  }
+}
+
+.board {
+  display: grid;
+  gap: var(--spacing-1);
+  inline-size: min(100%, 280px);
+}
+
+.row {
+  display: flex;
+  gap: var(--spacing-1);
+}

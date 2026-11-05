@@ -1,6 +1,14 @@
 import { memo } from "react";
 import { Link } from "@void/react";
-import { PiGearThin } from "react-icons/pi";
+import {
+  PiGearThin,
+  PiMoonStars,
+  PiMoonStarsFill,
+  PiSun,
+  PiSunFill,
+  PiYinYang,
+  PiYinYangFill
+} from "react-icons/pi";
 import { sizes } from "#utils";
 import { Modal } from "../Modal";
 import styles from "./Config.module.css";
@@ -11,6 +19,17 @@ const STORAGE_KEY = `theme`;
 const schemes = [`system`, `light`, `dark`] as const;
 
 type Scheme = (typeof schemes)[number];
+
+/** How each scheme is presented: an outlined icon, and a filled one for when it's the selected scheme */
+const options = {
+  system: {
+    label: `Match system`,
+    Icon: PiYinYang,
+    SelectedIcon: PiYinYangFill
+  },
+  light: { label: `Light`, Icon: PiSun, SelectedIcon: PiSunFill },
+  dark: { label: `Dark`, Icon: PiMoonStars, SelectedIcon: PiMoonStarsFill }
+} as const satisfies Record<Scheme, unknown>;
 
 /** Reads the color scheme the player last chose, which is `system` unless they've overridden it */
 const getScheme = (): Scheme => {
@@ -97,20 +116,25 @@ export const Config: React.FC = memo(() => (
       ref={syncScheme}
       role="radiogroup"
       aria-labelledby="color-scheme"
-      className={styles.group}
+      className={styles.schemes}
     >
-      {schemes.map((scheme) => (
-        <label key={scheme} className={styles.radio}>
-          <input
-            type="radio"
-            name="color-scheme"
-            value={scheme}
-            defaultChecked={scheme === `system`}
-            onChange={changeScheme}
-          />
-          {scheme}
-        </label>
-      ))}
+      {schemes.map((scheme) => {
+        const { label, Icon, SelectedIcon } = options[scheme];
+        return (
+          <label key={scheme} className={styles.scheme} title={label}>
+            <input
+              type="radio"
+              name="color-scheme"
+              value={scheme}
+              defaultChecked={scheme === `system`}
+              onChange={changeScheme}
+              aria-label={label}
+            />
+            <Icon aria-hidden />
+            <SelectedIcon aria-hidden />
+          </label>
+        );
+      })}
     </div>
     <h1 className={styles.header}>Board Size</h1>
     <article className={styles.frame}>

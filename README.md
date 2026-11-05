@@ -39,6 +39,10 @@ yarn dev
 | `yarn build`  | Build for production                       |
 | `yarn deploy` | Deploy to Cloudflare                       |
 
+### Reviewing the palette
+
+While `yarn dev` is running, `/palette` shows a board with a tile in every state, in both color schemes, as it appears with typical vision, under each color vision deficiency, and in grayscale. The page only exists in development. The same guarantees are enforced by `src/theme/__tests__/palette.spec.ts`, which reads the colors straight out of `src/theme/theme.css`.
+
 ### How daily puzzles work
 
 Each puzzle is derived on demand from its ID (the puzzle's date and size) and the `PUZZLE_SECRET`, the first time it is requested, and is then stored in Workers KV for three days. A new day's puzzles become available at 10:00 UTC. Solutions never leave the server: the browser sends its guesses to `/api/check`, which reports the letters that are in the right position.

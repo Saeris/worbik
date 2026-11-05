@@ -53,7 +53,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({ state }) => {
                 y={y}
                 char={char}
                 hint={state.getHintAt(x, y)}
-                correct={state.isRowCorrect(x)}
+                solved={state.isRowCorrect(x)}
                 disabled={state.win}
                 rotate={state.rotate}
               />

@@ -43,14 +43,22 @@
   }
 }
 
-.hint {
-  background: var(--yellow-bg);
-  box-shadow: 0px var(--spacing-0) 0px 0px var(--yellow-bd);
-  color: var(--yellow-fg);
+/* The letter is in its correct position */
+.correct {
+  background: var(--correct-bg);
+  box-shadow: 0px var(--spacing-0) 0px 0px var(--correct-bd);
+  color: var(--correct-fg);
 }
 
-.correct {
-  background: var(--green-bg);
-  box-shadow: 0px var(--spacing-0) 0px 0px var(--green-bd);
-  color: var(--green-fg);
+/* Every letter in the row is in its correct position */
+.solved {
+  background: var(--solved-bg);
+  box-shadow: 0px var(--spacing-0) 0px 0px var(--solved-bd);
+  color: var(--solved-fg);
+  /*
+   * A solid fill swallows strokes as thin as the other states use, most of
+   * all where they're dark on light. The heavier weight is also a second way
+   * to recognize a solved tile, which doesn't depend on seeing color at all.
+   */
+  font-weight: 400;
 }

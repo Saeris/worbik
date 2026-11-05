@@ -2767,6 +2767,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"colorjs.io@npm:^0.7.1":
+  version: 0.7.1
+  resolution: "colorjs.io@npm:0.7.1"
+  checksum: 10/6a2beec20fbce9f4b7c4f1915e7444eb90a3957b735f1d56feab0bac2d16d8be03d3eee19487d9461e1d2db060c2e64f47c3d7029d203b11818a36758842b386
+  languageName: node
+  linkType: hard
+
 "concat-map@npm:0.0.1":
   version: 0.0.1
   resolution: "concat-map@npm:0.0.1"
@@ -5489,6 +5496,7 @@ __metadata:
     "@types/react-dom": "npm:19.3.0"
     "@void/react": "npm:1.5.0"
     class-variance-authority: "npm:^0.7.1"
+    colorjs.io: "npm:^0.7.1"
     date-fns: "npm:^4.4.0"
     hono: "npm:^4.13.16"
     invokers-polyfill: "npm:^1.0.4"

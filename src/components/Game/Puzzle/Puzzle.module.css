@@ -1,34 +1,72 @@
+/*
+ * The board takes up whatever room the page has left over, and sizes its
+ * tiles to be as large as will fit that room in both directions. A board
+ * can have more rows than it has columns, so its width alone isn't enough
+ * to go by: tiles sized to fill the width of a tall board would push its
+ * bottom rows off of the page.
+ */
 .container {
-  --items: 5;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4ch;
-  width: 100%;
-  max-width: calc(
-    var(--spacing-16) + calc(var(--items) * var(--spacing-20)) +
-      calc(calc(var(--items) + 1) * var(--spacing-1))
+  --columns: 5;
+  --rows: 5;
+  /*
+   * The buttons around the tiles are as long as a tile, and two fifths as
+   * thick. So a board is as wide as its columns of tiles, plus two buttons
+   * that each take up this fraction of a tile, and likewise for its height.
+   */
+  --arrow-ratio: 0.4;
+  --column-gap: var(--spacing-1);
+  /* Rows are spaced a little further apart, to leave room for the edge beneath each tile */
+  --row-gap: calc(var(--spacing-1) + var(--spacing-0));
+  --tile-min: var(--spacing-8);
+  --tile-max: var(--spacing-20);
+
+  flex: 1 1 auto;
+  display: grid;
+  place-items: center;
+  inline-size: 100%;
+  /* Below this the page scrolls, rather than squeezing tiles beyond their smallest size */
+  min-block-size: calc(
+    (var(--rows) + 2 * var(--arrow-ratio)) * var(--tile-min) +
+      (var(--rows) + 1) * var(--row-gap)
   );
-  max-height: calc(
-    var(--spacing-16) + calc(var(--items) * var(--spacing-20)) +
-      calc(calc(var(--items) + 1) * calc(var(--spacing-1) + var(--spacing-0)))
-  );
-  font-size: var(--font-size-6);
+  /* Lets the tiles be sized relative to the room that the board has, with `cqi` and `cqb` units */
+  container-type: size;
 }
 
 .grid {
+  /*
+   * A board that is too tall for the page can be scrolled, but one that is
+   * too wide would have its buttons cut off. So tiles never get smaller than
+   * their minimum for the sake of height, but always give way to width.
+   */
+  --tile: min(
+    (100cqi - (var(--columns) + 1) * var(--column-gap)) /
+      (var(--columns) + 2 * var(--arrow-ratio)),
+    clamp(
+      var(--tile-min),
+      (100cqb - (var(--rows) + 1) * var(--row-gap)) /
+        (var(--rows) + 2 * var(--arrow-ratio)),
+      var(--tile-max)
+    )
+  );
+  /* The thickness of the buttons that surround the tiles */
+  --arrow: calc(var(--tile) * var(--arrow-ratio));
+
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: calc(var(--spacing-1) + var(--spacing-0));
-  width: 100%;
+  gap: var(--row-gap);
+  /* Tiles share the width of their row equally, so the width of the board is what sets their size */
+  inline-size: calc(
+    (var(--columns) + 2 * var(--arrow-ratio)) * var(--tile) +
+      (var(--columns) + 1) * var(--column-gap)
+  );
   touch-action: manipulation;
 
   > .row:first-child,
   > .row:last-child {
-    max-height: var(--spacing-8);
-    padding: 0px 36px;
+    padding-inline: calc(var(--arrow) + var(--column-gap));
   }
 }
 
@@ -36,7 +74,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: var(--spacing-1);
-  max-height: var(--spacing-20);
-  width: 100%;
+  gap: var(--column-gap);
+  inline-size: 100%;
 }

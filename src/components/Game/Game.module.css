@@ -5,7 +5,13 @@
   align-items: center;
   gap: 4ch;
   padding: var(--spacing-4);
-  height: 100%;
+  /* Narrow screens give up some of their padding, to leave more room for the board */
+  padding-inline: clamp(var(--spacing-2), 8vw - 24px, var(--spacing-4));
+  /*
+   * Fills the page, but never shrinks to fit it. When a board can't be made
+   * small enough the page scrolls instead, which keeps the title reachable.
+   */
+  flex: 1 0 auto;
   color: var(--fg);
   font-size: var(--font-size-6);
 

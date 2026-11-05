@@ -22,7 +22,12 @@ export const Puzzle: React.FC<PuzzleProps> = ({ state }) => {
   return (
     <Composite
       store={grid}
-      style={{ "--items": state.initial.width } as React.CSSProperties}
+      style={
+        {
+          "--columns": state.initial.width,
+          "--rows": state.initial.height
+        } as React.CSSProperties
+      }
       className={styles.container}
     >
       <CompositeGroup className={styles.grid}>

@@ -8,7 +8,7 @@ import {
 import { Tile } from "#components/Tile";
 import { Direction } from "#components/Direction";
 import { range } from "#utils";
-import type { usePuzzle } from "#hooks";
+import { useSwipe, type usePuzzle } from "#hooks";
 import styles from "./Puzzle.module.css";
 
 export interface PuzzleProps {
@@ -18,6 +18,7 @@ export interface PuzzleProps {
 export const Puzzle: React.FC<PuzzleProps> = ({ state }) => {
   const grid = useCompositeStore();
   const repeat = range(state.initial.width);
+  const swipe = useSwipe(state.rotate);
 
   return (
     <Composite
@@ -30,7 +31,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({ state }) => {
       }
       className={styles.container}
     >
-      <CompositeGroup className={styles.grid}>
+      <CompositeGroup className={styles.grid} {...swipe}>
         <CompositeRow className={styles.row}>
           {repeat.map((y) => (
             <Direction

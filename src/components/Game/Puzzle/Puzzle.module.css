@@ -62,7 +62,8 @@
     (var(--columns) + 2 * var(--arrow-ratio)) * var(--tile) +
       (var(--columns) + 1) * var(--column-gap)
   );
-  touch-action: manipulation;
+  /* A touch that moves across the board is a swipe, and not an attempt to scroll or zoom the page */
+  touch-action: none;
 
   > .row:first-child,
   > .row:last-child {

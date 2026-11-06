@@ -1,8 +1,8 @@
 import type { PuzzleStateInit } from "#state";
 import { usePuzzle } from "#hooks";
 import { Puzzle } from "./Puzzle";
-import { Guide } from "../Guide";
-import { Config } from "../Config";
+import { Menu } from "../Menu";
+import { SizePicker } from "../SizePicker";
 import styles from "./Game.module.css";
 
 export interface GameProps {
@@ -13,21 +13,27 @@ export interface GameProps {
 
 export const Game: React.FC<GameProps> = ({ puzzleID, init, persist }) => {
   const state = usePuzzle(puzzleID, init, persist);
-
-  const winMessage = (): string =>
-    state.moves <= state.target
-      ? ` Wow! You won in only ${state.moves} moves! You're a wizard at this!`
-      : `Congratulations, you won in ${state.moves} moves! Can you do better?`;
+  const { width, height } = state.initial;
+  const moves = state.moves === 1 ? `move` : `moves`;
 
   return (
     <main className={styles.main}>
-      <header className={styles.title}>
-        <h1>Worbik</h1>
-        <Config />
-        <Guide width={state.initial.width} height={state.initial.height} />
-      </header>
-      <Puzzle state={state} />
-      {state.win ? <p>{winMessage()}</p> : <p>{`Moves: ${state.moves}`}</p>}
+      <h1 className={styles.mark}>Worbik</h1>
+      <SizePicker className={styles.size} width={width} height={height} />
+      <Menu className={styles.menu} width={width} height={height} />
+      {/* The target is only revealed by a win: seeing it while playing discourages those who are behind it */}
+      {state.win ? (
+        <p className={styles.result}>
+          <strong>{`Solved in ${state.moves} ${moves}`}</strong>
+          {`The target was ${state.target}.`}
+        </p>
+      ) : (
+        <p className={styles.status}>
+          <strong>{state.moves}</strong>
+          {` ${moves}`}
+        </p>
+      )}
+      <Puzzle className={styles.board} state={state} />
     </main>
   );
 };

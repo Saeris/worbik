@@ -1,0 +1,61 @@
+.open {
+  display: grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  border-radius: var(--spacing-0);
+  color: var(--fg);
+
+  svg {
+    inline-size: var(--spacing-6);
+    block-size: var(--spacing-6);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: var(--neutral-bg);
+    }
+  }
+}
+
+.items {
+  padding: 0;
+  border-block-start: 1px solid var(--bd);
+  list-style: none;
+
+  li {
+    border-block-end: 1px solid var(--bd);
+  }
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    /* A button is as wide as its contents by default, which would leave most of its row untappable */
+    inline-size: 100%;
+    box-sizing: border-box;
+    block-size: 56px;
+    font-size: var(--font-size-3);
+    font-weight: 500;
+
+    svg {
+      flex: none;
+      inline-size: var(--spacing-6);
+      block-size: var(--spacing-6);
+    }
+
+    /* The arrow that ends each row */
+    svg:last-child {
+      inline-size: var(--spacing-4);
+      block-size: var(--spacing-4);
+      margin-inline-start: auto;
+      color: var(--muted);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        background: var(--neutral-bg);
+      }
+    }
+  }
+}

@@ -1,8 +1,7 @@
-import { useId } from "react";
 import { PiXThin } from "react-icons/pi";
 import styles from "./Modal.module.css";
 
-// The dialog is opened and closed declaratively using Invoker Commands,
+// A dialog is opened and closed declaratively using Invoker Commands,
 // which are polyfilled only for the browsers that don't yet support them
 if (
   typeof HTMLButtonElement !== `undefined` &&
@@ -33,56 +32,40 @@ const lightDismiss: React.MouseEventHandler<HTMLDialogElement> = ({
 };
 
 export interface ModalProps {
-  /** The contents of the button which opens the dialog */
-  readonly label: React.ReactNode;
-  /** An accessible name for the button which opens the dialog */
-  readonly "aria-label": string;
+  /**
+   * Identifies the dialog to the button that opens it, which is any button
+   * that has `command="show-modal"` and this as its `commandfor`
+   */
+  readonly id: string;
   /** The heading displayed at the top of the dialog */
   readonly title: string;
   readonly children: React.ReactNode;
 }
 
-export const Modal: React.FC<ModalProps> = ({
-  label,
-  title,
-  children,
-  ...props
-}) => {
-  const id = useId();
+export const Modal: React.FC<ModalProps> = ({ id, title, children }) => {
   const titleId = `${id}-title`;
 
   return (
-    <>
-      <button
-        type="button"
-        className={styles.open}
-        command="show-modal"
-        commandfor={id}
-        aria-label={props[`aria-label`]}
-      >
-        {label}
-      </button>
-      {/* oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events -- keyboard users dismiss the dialog with the Escape key */}
-      <dialog
-        id={id}
-        className={styles.container}
-        closedby="any"
-        aria-labelledby={titleId}
-        onClick={lightDismiss}
-      >
-        <header className={styles.header}>
-          <h1 id={titleId}>{title}</h1>
-          <button
-            type="button"
-            command="close"
-            commandfor={id}
-            aria-label="Close"
-          >
-            <PiXThin />
-          </button>
-        </header>
-        {children}
-      </dialog>
-    </>
+    // oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events -- keyboard users dismiss the dialog with the Escape key
+    <dialog
+      id={id}
+      className={styles.container}
+      closedby="any"
+      aria-labelledby={titleId}
+      onClick={lightDismiss}
+    >
+      <header className={styles.header}>
+        <h1 id={titleId}>{title}</h1>
+        <button
+          type="button"
+          command="close"
+          commandfor={id}
+          aria-label="Close"
+        >
+          <PiXThin />
+        </button>
+      </header>
+      {children}
+    </dialog>
   );
 };

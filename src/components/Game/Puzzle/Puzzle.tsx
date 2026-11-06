@@ -5,6 +5,7 @@ import {
   CompositeRow,
   useCompositeStore
 } from "@ariakit/react";
+import { cx } from "class-variance-authority";
 import { Tile } from "#components/Tile";
 import { Direction } from "#components/Direction";
 import { range } from "#utils";
@@ -13,9 +14,10 @@ import styles from "./Puzzle.module.css";
 
 export interface PuzzleProps {
   readonly state: ReturnType<typeof usePuzzle>;
+  readonly className?: string;
 }
 
-export const Puzzle: React.FC<PuzzleProps> = ({ state }) => {
+export const Puzzle: React.FC<PuzzleProps> = ({ state, className }) => {
   const grid = useCompositeStore();
   const repeat = range(state.initial.width);
   const swipe = useSwipe(state.rotate);
@@ -29,7 +31,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({ state }) => {
           "--rows": state.initial.height
         } as React.CSSProperties
       }
-      className={styles.container}
+      className={cx(styles.container, className)}
     >
       <CompositeGroup className={styles.grid} {...swipe}>
         <CompositeRow className={styles.row}>

@@ -1,7 +1,5 @@
 import { memo } from "react";
-import { Link } from "@void/react";
 import {
-  PiGearThin,
   PiMoonStars,
   PiMoonStarsFill,
   PiSun,
@@ -9,7 +7,6 @@ import {
   PiYinYang,
   PiYinYangFill
 } from "react-icons/pi";
-import { sizes } from "#utils";
 import { Modal } from "../Modal";
 import styles from "./Config.module.css";
 
@@ -92,23 +89,13 @@ const syncScheme = (group: HTMLDivElement): (() => void) => {
   };
 };
 
-const SizeButtons: React.FC = memo(() => (
-  <>
-    {sizes.map(([width, height]) => {
-      const size = `${width}×${height}`;
-      return (
-        <Link key={size} className={styles.size} href={`/${width}x${height}`}>
-          {size}
-        </Link>
-      );
-    })}
-  </>
-));
+export interface ConfigProps {
+  /** Identifies the dialog to the button that opens it */
+  id: string;
+}
 
-SizeButtons.displayName = `SizeButtons`;
-
-export const Config: React.FC = memo(() => (
-  <Modal label={<PiGearThin />} aria-label="Config" title="Settings:">
+export const Config: React.FC<ConfigProps> = memo(({ id }) => (
+  <Modal id={id} title="Settings:">
     <h1 id="color-scheme" className={styles.header}>
       Theme Mode
     </h1>
@@ -136,10 +123,6 @@ export const Config: React.FC = memo(() => (
         );
       })}
     </div>
-    <h1 className={styles.header}>Board Size</h1>
-    <article className={styles.frame}>
-      <SizeButtons />
-    </article>
   </Modal>
 ));
 

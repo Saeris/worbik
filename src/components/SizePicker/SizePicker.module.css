@@ -1,0 +1,62 @@
+.open {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  block-size: 44px;
+  padding-inline: var(--spacing-3) var(--spacing-2);
+  border: 1px solid var(--bd);
+  border-radius: var(--spacing-0);
+  background: var(--bg);
+  box-shadow: 0px var(--spacing-0) 0px 0px var(--bd);
+  color: var(--fg);
+  font-size: var(--font-size-3);
+  font-weight: 500;
+
+  svg {
+    inline-size: var(--spacing-4);
+    block-size: var(--spacing-4);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      box-shadow: var(--hover-ring);
+    }
+  }
+}
+
+.heading {
+  font-size: var(--font-size-6);
+  font-weight: 500;
+  line-height: var(--font-height-6);
+}
+
+.sizes {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-2);
+}
+
+.size {
+  display: grid;
+  place-items: center;
+  block-size: 56px;
+  border: 1px solid var(--bd);
+  border-radius: var(--spacing-0);
+  background: var(--bg);
+  box-shadow: 0px var(--spacing-0) 0px 0px var(--bd);
+  color: var(--fg);
+  font-size: var(--font-size-3);
+  font-weight: 500;
+
+  /* The size of the board that is being played */
+  &[aria-current] {
+    border-color: var(--fg);
+    box-shadow: 0px var(--spacing-0) 0px 0px var(--fg);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      box-shadow: var(--hover-ring);
+    }
+  }
+}

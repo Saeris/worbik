@@ -1,6 +1,5 @@
 import { memo } from "react";
 import type { Size } from "#utils";
-import { PiInfoThin } from "react-icons/pi";
 import { Modal } from "../Modal";
 import { Tile } from "../Tile";
 import styles from "./Guide.module.css";
@@ -13,12 +12,14 @@ const numbers = {
 } as const;
 
 export interface GuideProps {
+  /** Identifies the dialog to the button that opens it */
+  id: string;
   width: Size;
   height: Size;
 }
 
-export const Guide: React.FC<GuideProps> = memo(({ width, height }) => (
-  <Modal label={<PiInfoThin />} aria-label="How to Play" title="How To Play:">
+export const Guide: React.FC<GuideProps> = memo(({ id, width, height }) => (
+  <Modal id={id} title="How To Play:">
     <p>
       {`Hidden in this puzzle are `}
       <strong>{`${String(numbers[height])} words`}</strong>

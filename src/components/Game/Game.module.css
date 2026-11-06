@@ -1,38 +1,113 @@
+/*
+ * Everything that can be pressed, other than the board, is kept in a bar
+ * along the top, well clear of the board. A thumb that misses a tile or
+ * overshoots a swipe then has nothing nearby to land on by mistake. The
+ * count of moves is the only thing near the board, and it can't be pressed.
+ */
 .main {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  display: grid;
+  grid-template:
+    "mark size menu" auto
+    "status status status" auto
+    "board board board" 1fr
+    / 1fr auto auto;
   align-items: center;
-  gap: 4ch;
-  padding: var(--spacing-4);
+  gap: var(--spacing-6) var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4) var(--spacing-4);
   /* Narrow screens give up some of their padding, to leave more room for the board */
   padding-inline: clamp(var(--spacing-2), 8vw - 24px, var(--spacing-4));
   /*
    * Fills the page, but never shrinks to fit it. When a board can't be made
-   * small enough the page scrolls instead, which keeps the title reachable.
+   * small enough the page scrolls instead, which keeps the bar reachable.
    */
   flex: 1 0 auto;
   color: var(--fg);
-  font-size: var(--font-size-6);
 
-  > p {
-    max-width: 30ch;
-    font-weight: 300;
-    text-align: center;
+  /*
+   * A phone on its side is too short to stack these. The board stays in
+   * the middle, and the rest moves to the corners at either side of it,
+   * which is where the thumbs of the hands that hold the phone already are.
+   */
+  @media (orientation: landscape) and (max-height: 540px) {
+    --side: clamp(120px, 18vw, 200px);
+
+    grid-template:
+      "mark board menu" auto
+      ". board ." 1fr
+      "size board status" auto
+      / var(--side) minmax(0, 1fr) var(--side);
+    column-gap: var(--spacing-4);
+    padding: var(--spacing-2) max(var(--spacing-4), env(safe-area-inset-right))
+      var(--spacing-4) max(var(--spacing-4), env(safe-area-inset-left));
   }
 }
 
-.title {
-  display: inline-flex;
-  gap: 0.5ch;
-  align-items: baseline;
-  font-size: var(--font-size-8);
+.mark {
+  grid-area: mark;
+  font-size: var(--font-size-6);
+  line-height: 44px;
+}
 
-  > h1 {
-    font-size: inherit;
+.size {
+  grid-area: size;
+  justify-self: start;
+}
+
+.menu {
+  grid-area: menu;
+  justify-self: end;
+}
+
+.board {
+  grid-area: board;
+  /* The board sizes its tiles to the room that it's given, so it has to be given all of it */
+  align-self: stretch;
+}
+
+.status,
+.result {
+  grid-area: status;
+  justify-self: center;
+  /* As tall as the taller of the two, so that the board doesn't move when one gives way to the other */
+  min-block-size: var(--font-height-9);
+  color: var(--muted);
+  font-size: var(--font-size-3);
+  font-weight: 300;
+  text-align: center;
+
+  strong {
+    color: var(--fg);
   }
 
-  > button {
+  @media (orientation: landscape) and (max-height: 540px) {
+    justify-self: end;
+    text-align: end;
+  }
+}
+
+.status {
+  /* The count is larger than the text beside it, and would otherwise make its line a little taller than this */
+  block-size: var(--font-height-9);
+  line-height: var(--font-height-9);
+
+  strong {
+    font-size: var(--font-size-8);
+    line-height: 1;
+    font-weight: 300;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: var(--font-size-2);
+  line-height: var(--font-height-3);
+
+  strong {
     font-size: var(--font-size-5);
+    font-weight: 500;
+    line-height: var(--font-height-5);
   }
 }

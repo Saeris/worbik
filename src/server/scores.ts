@@ -86,6 +86,32 @@ export const submitGame = async (
   return recordScore(puzzleID, { ...player, moves });
 };
 
+/**
+ * The score that a player posted for a puzzle, or `null` if they haven't.
+ *
+ * The player is found by their identity, or by the handle that they had
+ * when they posted the score.
+ */
+export const getScore = async (
+  puzzle: string,
+  player: string
+): Promise<Score | null> => {
+  const found = await db
+    .select(columns)
+    .from(scores)
+    .where(
+      and(
+        eq(scores.puzzle, puzzle),
+        player.startsWith(`did:`)
+          ? eq(scores.did, player)
+          : eq(scores.handle, player.toLowerCase())
+      )
+    )
+    .limit(1);
+
+  return found.at(0) ?? null;
+};
+
 /** The best scores on a puzzle: those with the fewest moves, and the earliest of any that tie */
 export const getLeaderboard = async (
   puzzle: string,

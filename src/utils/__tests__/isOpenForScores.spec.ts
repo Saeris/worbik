@@ -17,15 +17,18 @@ describe(`isOpenForScores`, () => {
     ).toBe(true);
   });
 
-  it(`stays open past the end of the puzzle's day`, () => {
-    // A game left open in a tab overnight is finished on the next day, and should still count
-    expect(isOpenForScores(puzzle, after(36 * 60 * 60 * 1000))).toBe(true);
+  it(`stays open for a short while after the puzzle's day ends`, () => {
+    // A game that was under way when the day ended shouldn't be thrown away for finishing minutes late
+    const day = 24 * 60 * 60 * 1000;
+
+    expect(isOpenForScores(puzzle, after(day + 30 * 60 * 1000))).toBe(true);
     expect(isOpenForScores(puzzle, after(SCORING_WINDOW - 1))).toBe(true);
   });
 
-  it(`closes once a puzzle's answer has had time to get around`, () => {
-    // Puzzles are kept for good, so without this an old leaderboard could be topped at any time
+  it(`closes to solves that are made on a later day`, () => {
+    // A leaderboard ranks the players of that day, and a streak is only kept by playing each day's puzzle on its day
     expect(isOpenForScores(puzzle, after(SCORING_WINDOW))).toBe(false);
+    expect(isOpenForScores(puzzle, after(36 * 60 * 60 * 1000))).toBe(false);
     expect(isOpenForScores(puzzle, new Date(`2027-03-02T10:00:00Z`))).toBe(
       false
     );

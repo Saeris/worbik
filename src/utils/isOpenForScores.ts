@@ -7,11 +7,13 @@ import { ROLLOVER_HOUR_UTC } from "./getPuzzleID";
  *
  * A leaderboard ranks the players who solved a puzzle while it was the
  * day's puzzle. Puzzles are kept for good and can be played at any time,
- * but by then their answers have had time to get around. This is longer
- * than the day itself so that a game which was left open in a browser tab
- * overnight can still be finished and posted.
+ * but a solve made on a later day doesn't count. This is the day itself
+ * plus an hour's grace, so that a game which was under way when the day
+ * ended, or a score that was held up by a lost connection, can still be
+ * posted. A browser's clock can't be trusted to say when a puzzle was
+ * solved, so the time that a score arrives is what gets checked.
  */
-export const SCORING_WINDOW = 3 * 24 * 60 * 60 * 1000;
+export const SCORING_WINDOW = (24 + 1) * 60 * 60 * 1000;
 
 /** Whether a solve of the puzzle with the given ID can still earn a place on its leaderboard */
 export const isOpenForScores = (

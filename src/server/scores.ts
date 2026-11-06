@@ -51,7 +51,7 @@ export const recordScore = async (
  * its score is the number of moves that the replay counted, rather than one
  * that the player claims.
  *
- * Only a recent puzzle can be scored. Older ones can still be played, but
+ * Only the day's puzzle can be scored. Older ones can still be played, but
  * their leaderboards have closed.
  */
 export const submitGame = async (

@@ -3,10 +3,9 @@ import { cx } from "class-variance-authority";
 import type { PuzzleStateInit } from "#state";
 import { usePuzzle, useScore } from "#hooks";
 import { Puzzle } from "./Puzzle";
-import { Leaderboard } from "../Leaderboard";
+import { Drawer, type View } from "../Drawer";
 import { Menu } from "../Menu";
 import { Result } from "../Result";
-import { SignIn } from "../SignIn";
 import { SizePicker } from "../SizePicker";
 import styles from "./Game.module.css";
 
@@ -20,15 +19,15 @@ export const Game: React.FC<GameProps> = ({ puzzleID, init, persist }) => {
   const state = usePuzzle(puzzleID, init, persist);
   const score = useScore(puzzleID, state.win, state.history);
   const { width, height } = state.initial;
-  // The leaderboard is only loaded once it's asked for, so it has to be told when that is
-  const [ranking, setRanking] = useState(false);
+  // What the drawer is showing over the game, if it's open. The game stays as it is underneath.
+  const [view, setView] = useState<View | null>(null);
 
-  const showRanking = useCallback(() => {
-    setRanking(true);
+  const showLeaderboard = useCallback(() => {
+    setView(`leaderboard`);
   }, []);
 
-  const hideRanking = useCallback(() => {
-    setRanking(false);
+  const showSignIn = useCallback(() => {
+    setView(`sign-in`);
   }, []);
 
   return (
@@ -40,12 +39,7 @@ export const Game: React.FC<GameProps> = ({ puzzleID, init, persist }) => {
         width={width}
         height={height}
       />
-      <Menu
-        className={styles.menu}
-        width={width}
-        height={height}
-        onLeaderboard={showRanking}
-      />
+      <Menu className={styles.menu} open={view !== null} onOpen={setView} />
       {state.win ? (
         <Result
           className={styles.result}
@@ -57,7 +51,8 @@ export const Game: React.FC<GameProps> = ({ puzzleID, init, persist }) => {
           status={score.status}
           scores={score.scores}
           retry={score.retry}
-          onLeaderboard={showRanking}
+          onLeaderboard={showLeaderboard}
+          onSignIn={showSignIn}
         />
       ) : (
         <p className={styles.status}>
@@ -66,13 +61,13 @@ export const Game: React.FC<GameProps> = ({ puzzleID, init, persist }) => {
         </p>
       )}
       <Puzzle className={styles.board} state={state} />
-      <SignIn title={state.win ? `Post your score` : `Sign in`} />
-      <Leaderboard
-        open={ranking}
-        onClose={hideRanking}
+      <Drawer
+        view={view}
+        onView={setView}
         puzzleID={puzzleID}
         width={width}
         height={height}
+        solved={state.win}
       />
     </main>
   );

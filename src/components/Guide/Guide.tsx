@@ -1,6 +1,5 @@
 import { memo } from "react";
 import type { Size } from "#utils";
-import { Modal } from "../Modal";
 import { Tile } from "../Tile";
 import styles from "./Guide.module.css";
 
@@ -12,14 +11,12 @@ const numbers = {
 } as const;
 
 export interface GuideProps {
-  /** Identifies the dialog to the button that opens it */
-  id: string;
   width: Size;
   height: Size;
 }
 
-export const Guide: React.FC<GuideProps> = memo(({ id, width, height }) => (
-  <Modal id={id} title="How To Play:">
+export const Guide: React.FC<GuideProps> = memo(({ width, height }) => (
+  <div className={styles.guide}>
     <p>
       {`Hidden in this puzzle are `}
       <strong>{`${String(numbers[height])} words`}</strong>
@@ -46,7 +43,7 @@ export const Guide: React.FC<GuideProps> = memo(({ id, width, height }) => (
       <Tile x={0} y={0} char="K" hint="K" solved disabled />
     </div>
     <p>{`When you complete a row, all of the tiles will turn green. Get all of the letters in the correct position to win!`}</p>
-  </Modal>
+  </div>
 ));
 
 Guide.displayName = `Guide`;

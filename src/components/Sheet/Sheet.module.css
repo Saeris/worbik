@@ -114,3 +114,50 @@
     background-color: var(--bd);
   }
 }
+
+/*
+ * A large screen has no edge within reach to pull a sheet up from, and a
+ * sheet along the bottom of one is a long way from what opened it. There,
+ * the same contents are shown as a dialog in the middle of the screen.
+ */
+@media (min-width: 768px) and (min-height: 541px) {
+  .scroller {
+    flex-direction: column;
+    padding: var(--spacing-4);
+    scroll-snap-type: none;
+  }
+
+  .away {
+    display: none;
+  }
+
+  .rest {
+    margin-block: auto;
+  }
+
+  .sheet {
+    max-block-size: min(85dvh, 720px);
+    padding: var(--spacing-5);
+    border-radius: var(--spacing-2);
+    box-shadow: 0 var(--spacing-4) var(--spacing-10) rgb(0 0 0 / 25%);
+    translate: none;
+    opacity: 0;
+    scale: 0.98;
+
+    &[data-enter] {
+      opacity: 1;
+      scale: 1;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition:
+        opacity 160ms ease-out,
+        scale 160ms ease-out;
+    }
+
+    /* There is nothing to swipe, so no handle to hint at it */
+    &::before {
+      display: none;
+    }
+  }
+}

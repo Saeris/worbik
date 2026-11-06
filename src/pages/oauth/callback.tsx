@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@void/react";
-import { setPlayer } from "#auth/player";
+import { rememberAccount, setPlayer } from "#auth/player";
 import styles from "./callback.module.css";
 
 /**
@@ -14,6 +14,7 @@ const signIn = async (): Promise<string> => {
   const { completeSignIn } = await import(`#auth/oauth`);
   const { player, from } = await completeSignIn();
   setPlayer(player);
+  rememberAccount(player);
   return from;
 };
 

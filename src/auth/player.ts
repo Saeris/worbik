@@ -81,3 +81,55 @@ export const subscribeToPlayer = (listener: () => void): (() => void) => {
     window.removeEventListener(`storage`, listener);
   };
 };
+
+const ACCOUNTS_KEY = `worbik:accounts`;
+
+/** How many of the accounts that have signed in on this device are remembered */
+const MAX_ACCOUNTS = 5;
+
+const accountsSchema = v.array(
+  v.object({
+    did: v.custom<Did>((value) => typeof value === `string` && isDid(value)),
+    handle: v.string()
+  })
+);
+
+/** An account that has signed in on this device before, which is offered when signing in again */
+export type Account = v.InferOutput<typeof accountsSchema>[number];
+
+/** The accounts that have signed in on this device, latest first */
+export const getAccounts = (): Account[] => {
+  try {
+    return v.parse(
+      accountsSchema,
+      JSON.parse(localStorage.getItem(ACCOUNTS_KEY) ?? `[]`)
+    );
+  } catch {
+    // Nothing is offered when storage is unavailable, or holds something else
+    return [];
+  }
+};
+
+/**
+ * Remembers an account that has signed in, so that its handle doesn't have
+ * to be typed out the next time. Signing out doesn't forget it: that is
+ * exactly when it's useful.
+ */
+export const rememberAccount = ({ did, handle }: Player): void => {
+  // An account without a handle has nothing to offer in a field for handles
+  if (!handle) return;
+
+  try {
+    localStorage.setItem(
+      ACCOUNTS_KEY,
+      JSON.stringify(
+        [
+          { did, handle },
+          ...getAccounts().filter((account) => account.did !== did)
+        ].slice(0, MAX_ACCOUNTS)
+      )
+    );
+  } catch {
+    // The handle can always be typed again
+  }
+};

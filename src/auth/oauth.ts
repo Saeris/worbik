@@ -84,10 +84,10 @@ let configured = false;
 const configure = (): void => {
   if (configured) return;
 
-  // During development a player can only be sent back to an IP address, and what is kept for their return isn't shared with `localhost`
+  // During development a player can only be sent back to an IP address, and what is kept for their return isn't shared with `localhost`. The page moves itself there as it loads, so this is only reached if that was prevented.
   if (location.hostname === `localhost`) {
-    throw new Error(
-      `Signing in doesn't work from "localhost". Open this page at 127.0.0.1 instead.`
+    throw new SignInError(
+      `Signing in doesn’t work from “localhost”. Open this page at 127.0.0.1 instead.`
     );
   }
 

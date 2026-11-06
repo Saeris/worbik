@@ -1,11 +1,83 @@
+.signIn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  font-size: var(--font-size-3);
+  font-weight: 300;
+  text-align: start;
+}
+
 .form {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2);
+}
 
-  label {
-    font-size: var(--font-size-2);
+.label {
+  font-size: var(--font-size-2);
+  font-weight: 500;
+}
+
+/* The accounts that are suggested for what has been typed */
+.suggestions {
+  /* Above the drawer or the sheet that the field is in */
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  max-block-size: min(var(--popover-available-height, 320px), 320px);
+  padding: var(--spacing-1);
+  border: 1px solid var(--bd);
+  border-radius: var(--spacing-1);
+  background: var(--bg);
+  box-shadow: 0 var(--spacing-2) var(--spacing-6) rgb(0 0 0 / 20%);
+  color: var(--fg);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  font-family: var(--font-body);
+  font-size: var(--font-size-2);
+
+  [role="group"] > :first-child {
+    padding: var(--spacing-1) var(--spacing-2);
+    color: var(--muted);
+    font-size: var(--font-size-1);
     font-weight: 500;
+  }
+
+  [role="option"] {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    min-block-size: 44px;
+    padding-inline: var(--spacing-2);
+    border-radius: var(--spacing-0);
+    cursor: default;
+
+    /* The suggestion that the arrow keys or the pointer are on */
+    &[data-active-item] {
+      background: var(--neutral-bg);
+    }
+  }
+
+  img,
+  [role="option"] > span:first-child {
+    flex: none;
+    inline-size: var(--spacing-6);
+    block-size: var(--spacing-6);
+    border-radius: 50%;
+    background: var(--neutral-bg);
+    object-fit: cover;
+  }
+
+  [role="option"] > span:last-child {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  small {
+    color: var(--muted);
+    font-size: inherit;
   }
 }
 

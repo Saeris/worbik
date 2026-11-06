@@ -9,7 +9,6 @@ import {
 } from "react-icons/pi";
 import { setPlayer } from "#auth/player";
 import { usePlayer } from "#hooks";
-import { Modal } from "../Modal";
 import styles from "./Config.module.css";
 
 // The same key and values that were used by `next-themes`, so returning players keep their choice
@@ -98,12 +97,7 @@ const endSession = async (did: string): Promise<void> => {
   await signOut(did);
 };
 
-export interface ConfigProps {
-  /** Identifies the dialog to the button that opens it */
-  id: string;
-}
-
-export const Config: React.FC<ConfigProps> = memo(({ id }) => {
+export const Config: React.FC = memo(() => {
   const player = usePlayer();
 
   const leave = useCallback(() => {
@@ -114,7 +108,7 @@ export const Config: React.FC<ConfigProps> = memo(({ id }) => {
   }, [player]);
 
   return (
-    <Modal id={id} title="Settings:">
+    <div className={styles.config}>
       <h1 id="color-scheme" className={styles.header}>
         Theme Mode
       </h1>
@@ -158,7 +152,7 @@ export const Config: React.FC<ConfigProps> = memo(({ id }) => {
           </div>
         </>
       )}
-    </Modal>
+    </div>
   );
 });
 

@@ -37,6 +37,10 @@ export type SheetProps = DialogProps;
  * and `DialogDismiss`. Like those, it needs either a `store` or a
  * `DialogProvider` above it.
  *
+ * That is on a phone. A large screen has no edge within reach to pull a
+ * sheet up from, so there the same contents are a dialog in the middle of
+ * the screen, which is a matter of styling alone.
+ *
  * The swipe isn't tracked by any script. The sheet sits in a scroller that
  * snaps to two positions: one with the sheet on screen, and one with it
  * scrolled off of the bottom edge. So the browser moves the sheet with the

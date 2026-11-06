@@ -22,11 +22,6 @@ body {
   box-shadow: var(--focus-gap);
 }
 
-/* Prevent the page from scrolling behind an open modal */
-html:has(dialog:modal) {
-  overflow: hidden;
-}
-
 /* Resets */
 
 /* Remove default margins */

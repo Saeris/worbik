@@ -1,0 +1,227 @@
+/*
+ * On a phone, a drawer that covers the screen, and slides in from the edge
+ * that its button is on.
+ */
+.drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--fg);
+  overflow: clip;
+  font-family: var(--font-body);
+  font-size: var(--font-size-3);
+  font-weight: 300;
+  translate: 100% 0;
+
+  &[data-enter] {
+    translate: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: translate 280ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+}
+
+/* Nothing shows through a drawer that covers the screen, so this is only seen behind the dialog of a large screen */
+.backdrop {
+  display: none;
+}
+
+/* The menu and the screen that it leads to sit side by side, and the pair slides over to show the one or the other */
+.track {
+  flex: 1;
+  display: flex;
+  min-block-size: 0;
+
+  @media (prefers-reduced-motion: no-preference) {
+    .pane {
+      transition: translate 280ms cubic-bezier(0.32, 0.72, 0, 1);
+    }
+  }
+
+  &[data-shifted] .pane {
+    translate: -100% 0;
+  }
+}
+
+.pane {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  inline-size: 100%;
+  min-block-size: 0;
+}
+
+.header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  min-block-size: 60px;
+  /* Clear of a notch or a camera cutout, along whichever edges the phone has them */
+  padding: max(var(--spacing-2), env(safe-area-inset-top))
+    max(var(--spacing-3), env(safe-area-inset-right)) var(--spacing-2)
+    max(var(--spacing-4), env(safe-area-inset-left));
+  border-block-end: 1px solid var(--bd);
+
+  h2 {
+    flex: 1;
+    font-size: var(--font-size-5);
+    font-weight: 500;
+    /* Focus is moved here when the screen changes, for those who can't see that it has. It doesn't need to be shown. */
+    outline: none;
+    box-shadow: none;
+  }
+
+  button {
+    flex: none;
+    display: grid;
+    place-items: center;
+    inline-size: 44px;
+    block-size: 44px;
+    border-radius: var(--spacing-0);
+
+    svg {
+      inline-size: var(--spacing-6);
+      block-size: var(--spacing-6);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        background: var(--neutral-bg);
+      }
+    }
+  }
+
+  /* The way back sits out at the edge, so that the title beside it lines up with what is below */
+  button:first-child {
+    margin-inline-start: calc(-1 * var(--spacing-3));
+  }
+}
+
+.body {
+  flex: 1;
+  min-block-size: 0;
+  padding: var(--spacing-4) max(var(--spacing-4), env(safe-area-inset-right))
+    max(var(--spacing-6), env(safe-area-inset-bottom))
+    max(var(--spacing-4), env(safe-area-inset-left));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  line-height: 1.4;
+}
+
+.items {
+  flex: 1;
+  min-block-size: 0;
+  padding: 0 max(var(--spacing-4), env(safe-area-inset-right)) 0
+    max(var(--spacing-4), env(safe-area-inset-left));
+  overflow-y: auto;
+  list-style: none;
+
+  li {
+    border-block-end: 1px solid var(--bd);
+  }
+
+  button,
+  a {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    /* A button is as wide as its contents by default, which would leave most of its row untappable */
+    inline-size: 100%;
+    box-sizing: border-box;
+    block-size: 60px;
+    color: var(--fg);
+    font-size: var(--font-size-3);
+    font-weight: 500;
+
+    svg {
+      flex: none;
+      inline-size: var(--spacing-6);
+      block-size: var(--spacing-6);
+    }
+
+    /* The arrow that ends each row */
+    svg:last-child {
+      inline-size: var(--spacing-4);
+      block-size: var(--spacing-4);
+      margin-inline-start: auto;
+      color: var(--muted);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        background: var(--neutral-bg);
+      }
+    }
+  }
+}
+
+/*
+ * On a large screen, a dialog in the middle of it. There is room there for
+ * the game to stay in view around it, and each screen is opened straight
+ * from the bar, so there is no menu to slide over from.
+ */
+@media (min-width: 768px) and (min-height: 541px) {
+  .drawer {
+    inset: 0;
+    margin: auto;
+    inline-size: min(100% - var(--spacing-8), 480px);
+    block-size: fit-content;
+    max-block-size: min(85dvh, 720px);
+    border-radius: var(--spacing-2);
+    box-shadow: 0 var(--spacing-4) var(--spacing-10) rgb(0 0 0 / 25%);
+    translate: none;
+    opacity: 0;
+    scale: 0.98;
+
+    &[data-enter] {
+      opacity: 1;
+      scale: 1;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition:
+        opacity 160ms ease-out,
+        scale 160ms ease-out;
+    }
+  }
+
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    display: block;
+    background: rgb(0 0 0 / 15%);
+    opacity: 0;
+    transition: opacity 160ms ease-out;
+
+    &[data-enter] {
+      opacity: 1;
+    }
+  }
+
+  /* Only the one that's showing takes up any room, so that the dialog is as tall as it and no taller */
+  .track[data-shifted] .pane {
+    translate: none;
+  }
+
+  .pane[inert] {
+    display: none;
+  }
+
+  .header {
+    padding-inline: var(--spacing-5) var(--spacing-3);
+  }
+
+  .body {
+    padding: var(--spacing-5);
+  }
+
+  .items {
+    padding-inline: var(--spacing-5);
+  }
+}

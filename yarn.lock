@@ -3882,13 +3882,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"invokers-polyfill@npm:^1.0.4":
-  version: 1.0.4
-  resolution: "invokers-polyfill@npm:1.0.4"
-  checksum: 10/c6d500454146dd9c712880c726c28022e0b9452a888abce1078ab91a63323c624b7f792a4594e15cd2b8c1593e89b560ca29474d863f503c07903532c8d3865a
-  languageName: node
-  linkType: hard
-
 "ip@npm:^2.0.0":
   version: 2.0.0
   resolution: "ip@npm:2.0.0"
@@ -5794,7 +5787,6 @@ __metadata:
     date-fns: "npm:^4.4.0"
     happy-dom: "npm:^21.0.4"
     hono: "npm:^4.13.16"
-    invokers-polyfill: "npm:^1.0.4"
     react: "npm:^19.3.1"
     react-dom: "npm:^19.3.1"
     react-icons: "npm:^5.7.0"

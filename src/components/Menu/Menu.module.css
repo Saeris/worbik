@@ -51,11 +51,6 @@
       }
     }
   }
-
-  /* The icons are what make a row of the sheet easy to find, and add nothing to a word in a bar */
-  svg {
-    display: none;
-  }
 }
 
 @media (min-width: 768px) and (min-height: 541px) {
@@ -65,49 +60,5 @@
 
   .links {
     display: block;
-  }
-}
-
-.items {
-  padding: 0;
-  border-block-start: 1px solid var(--bd);
-  list-style: none;
-
-  li {
-    border-block-end: 1px solid var(--bd);
-  }
-
-  button,
-  a {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-3);
-    /* A button is as wide as its contents by default, which would leave most of its row untappable */
-    inline-size: 100%;
-    box-sizing: border-box;
-    block-size: 56px;
-    color: var(--fg);
-    font-size: var(--font-size-3);
-    font-weight: 500;
-
-    svg {
-      flex: none;
-      inline-size: var(--spacing-6);
-      block-size: var(--spacing-6);
-    }
-
-    /* The arrow that ends each row */
-    svg:last-child:not(:first-child) {
-      inline-size: var(--spacing-4);
-      block-size: var(--spacing-4);
-      margin-inline-start: auto;
-      color: var(--muted);
-    }
-
-    @media (hover: hover) and (pointer: fine) {
-      &:hover {
-        background: var(--neutral-bg);
-      }
-    }
   }
 }

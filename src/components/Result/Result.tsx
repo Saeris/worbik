@@ -4,10 +4,8 @@ import { usePlayer, type RankedScore, type ScoreStatus } from "#hooks";
 import type { Size } from "#utils";
 import { getNeighbors } from "#utils/getNeighbors";
 import { ordinal } from "#utils/ordinal";
-import { LEADERBOARD } from "../Leaderboard";
 import { Scores } from "../Scores";
 import { Share } from "../Share";
-import { SIGN_IN } from "../SignIn";
 import styles from "./Result.module.css";
 
 export interface ResultProps {
@@ -25,8 +23,10 @@ export interface ResultProps {
   scores: readonly RankedScore[] | null;
   /** Tries again to post a solve that couldn't be posted */
   retry: () => void;
-  /** Called when the leaderboard is opened, so that it can be loaded */
+  /** Called to see the whole leaderboard */
   onLeaderboard: () => void;
+  /** Called when a player asks to sign in, which is how a score gets posted */
+  onSignIn: () => void;
   className?: string;
 }
 
@@ -46,6 +46,7 @@ export const Result: React.FC<ResultProps> = memo(
     scores,
     retry,
     onLeaderboard,
+    onSignIn,
     className
   }) => {
     const you = usePlayer()?.did;
@@ -55,10 +56,7 @@ export const Result: React.FC<ResultProps> = memo(
     const mine = scores?.[place - 1];
     // Sharing is the thing to do next unless there is something that needs doing first
     const waiting =
-      status === `signed-out` ||
-      status === `expired` ||
-      status === `failed` ||
-      status === `closed`;
+      status === `expired` || status === `failed` || status === `closed`;
 
     return (
       <section className={cx(styles.result, className)} aria-label="Result">
@@ -96,23 +94,8 @@ export const Result: React.FC<ResultProps> = memo(
           </p>
         )}
         <div className={styles.actions}>
-          {status === `signed-out` && (
-            <button
-              type="button"
-              className={styles.action}
-              command="show-modal"
-              commandfor={SIGN_IN}
-            >
-              Post my score
-            </button>
-          )}
           {status === `expired` && (
-            <button
-              type="button"
-              className={styles.action}
-              command="show-modal"
-              commandfor={SIGN_IN}
-            >
+            <button type="button" className={styles.action} onClick={onSignIn}>
               Sign in again
             </button>
           )}
@@ -131,6 +114,8 @@ export const Result: React.FC<ResultProps> = memo(
             className={waiting ? styles.other : styles.action}
             puzzleID={puzzleID}
             moves={moves}
+            // Posting a score is offered alongside sharing it, to a player who has yet to say who they are
+            onSignIn={status === `signed-out` ? onSignIn : undefined}
             // A link can only show a score that is on the leaderboard, under the name that it's listed by there
             player={
               status === `posted` && mine
@@ -145,12 +130,7 @@ export const Result: React.FC<ResultProps> = memo(
               <h3>
                 {status === `closed` ? `${size} scores` : `Today’s ${size}`}
               </h3>
-              <button
-                type="button"
-                command="show-modal"
-                commandfor={LEADERBOARD}
-                onClick={onLeaderboard}
-              >
+              <button type="button" onClick={onLeaderboard}>
                 {`See all ${scores?.length}`}
               </button>
             </header>

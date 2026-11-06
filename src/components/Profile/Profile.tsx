@@ -14,7 +14,7 @@ import { getPuzzleID, getPuzzleStart } from "#utils";
 import { getMonthLength, getWeeks, toDayKey } from "#utils/calendar";
 import { ordinal } from "#utils/ordinal";
 import { getStreaks } from "#utils/streak";
-import { SIGN_IN, SignIn } from "../SignIn";
+import { SignIn } from "../SignIn";
 import styles from "./Profile.module.css";
 
 /** What a player has done, as the server tells it */
@@ -468,9 +468,7 @@ export const Profile: React.FC = () => {
             Your streak and your results are made of the scores that you post,
             so they need an account to belong to. You can play without one.
           </p>
-          <button type="button" command="show-modal" commandfor={SIGN_IN}>
-            Sign in
-          </button>
+          <SignIn />
         </div>
       ) : history === undefined ? (
         <p className={styles.empty}>Loading…</p>
@@ -481,7 +479,6 @@ export const Profile: React.FC = () => {
       ) : (
         <Details player={player} history={history} />
       )}
-      <SignIn />
     </main>
   );
 };

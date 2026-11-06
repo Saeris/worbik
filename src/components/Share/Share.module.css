@@ -70,7 +70,8 @@
 }
 
 .button,
-.primary {
+.primary,
+.post {
   flex: 1;
   display: grid;
   place-items: center;
@@ -91,10 +92,16 @@
   }
 }
 
-.primary {
+.primary,
+.post {
   border-color: var(--fg);
   background: var(--fg);
   box-shadow: 0px var(--spacing-0) 0px 0px
     color-mix(in oklch, var(--fg) 70%, var(--bg));
   color: var(--bg);
+}
+
+/* Posting the score stands apart from the ways of sharing the link, on a row of its own */
+.post {
+  flex: none;
 }

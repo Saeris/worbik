@@ -21,6 +21,12 @@ export interface ShareProps {
    * score has been posted, as a shared link can't show a score until then.
    */
   player?: string;
+  /**
+   * Called when the player asks to post their score, which begins with
+   * signing in. Only given while that is what stands between the score and
+   * the leaderboard.
+   */
+  onSignIn?: () => void;
   className?: string;
 }
 
@@ -41,6 +47,7 @@ const Contents: React.FC<ContentsProps> = ({
   puzzleID,
   moves,
   player,
+  onSignIn,
   onShared
 }) => {
   const [copied, setCopied] = useState(false);
@@ -51,23 +58,37 @@ const Contents: React.FC<ContentsProps> = ({
   const card = `/api/card?${new URLSearchParams({ puzzle: puzzleID, ...(player && { player }) }).toString()}`;
   const text = `Worbik ${size} · ${dayFormat.format(new Date(getPuzzleStart(puzzleID)))} · ${moves} ${moves === 1 ? `move` : `moves`}`;
 
-  const share = useCallback(async () => {
-    try {
-      await navigator.share({ text, url });
-      onShared();
-    } catch {
-      // Deciding against sharing after all is no fault, and leaves the sheet open to try another way
-    }
+  const share = useCallback(() => {
+    const hand = async (): Promise<void> => {
+      try {
+        await navigator.share({ text, url });
+        onShared();
+      } catch {
+        // Deciding against sharing after all is no fault, and leaves the sheet open to try another way
+      }
+    };
+
+    void hand();
   }, [text, url, onShared]);
 
-  const copy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-    } catch {
-      // The link is shown in full above the button, to be copied by hand where this isn't allowed
-    }
+  const copy = useCallback(() => {
+    const write = async (): Promise<void> => {
+      try {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+      } catch {
+        // The link is shown in full above the button, to be copied by hand where this isn't allowed
+      }
+    };
+
+    void write();
   }, [url]);
+
+  const post = useCallback(() => {
+    // Signing in takes the place of this, rather than piling up on top of it
+    onShared();
+    onSignIn?.();
+  }, [onShared, onSignIn]);
 
   return (
     <>
@@ -96,17 +117,26 @@ const Contents: React.FC<ContentsProps> = ({
       </p>
       {!player && (
         <p className={styles.note}>
-          The card only shows a score once it’s posted to the leaderboard.
+          {onSignIn
+            ? `Post your score to put it on the leaderboard, and on the card that your link shows. Or share the link as it is.`
+            : `The card only shows a score that is on the leaderboard.`}
         </p>
+      )}
+      {onSignIn && (
+        <button type="button" className={styles.post} onClick={post}>
+          Post my score
+        </button>
       )}
       <div className={styles.actions}>
         {`share` in navigator && (
-          // oxlint-disable-next-line typescript/no-misused-promises -- nothing waits on what becomes of sharing
-          <button type="button" className={styles.primary} onClick={share}>
+          <button
+            type="button"
+            className={onSignIn ? styles.button : styles.primary}
+            onClick={share}
+          >
             Share…
           </button>
         )}
-        {/* oxlint-disable-next-line typescript/no-misused-promises -- nothing waits on what becomes of copying */}
         <button type="button" className={styles.button} onClick={copy}>
           <span aria-live="polite">{copied ? `Copied` : `Copy link`}</span>
         </button>

@@ -46,6 +46,68 @@ export const Menu: React.FC<MenuProps> = memo(
       onLeaderboard();
     }, [menu, onLeaderboard]);
 
+    // The same items are a list in a sheet on a small screen, and a row of links in the bar on a large one
+    const items = (
+      <>
+        <li>
+          {player ? (
+            <Link href="/profile" onClick={menu.hide}>
+              <PiUserThin aria-hidden />
+              {player.handle ? `@${player.handle}` : `Profile`}
+              <PiCaretRightThin aria-hidden />
+            </Link>
+          ) : (
+            <button
+              type="button"
+              command="show-modal"
+              commandfor={SIGN_IN}
+              onClick={menu.hide}
+            >
+              <PiUserThin aria-hidden />
+              Sign in
+              <PiCaretRightThin aria-hidden />
+            </button>
+          )}
+        </li>
+        <li>
+          <button
+            type="button"
+            command="show-modal"
+            commandfor={LEADERBOARD}
+            onClick={showLeaderboard}
+          >
+            <PiTrophyThin aria-hidden />
+            Leaderboard
+            <PiCaretRightThin aria-hidden />
+          </button>
+        </li>
+        <li>
+          <button
+            type="button"
+            command="show-modal"
+            commandfor={guide}
+            onClick={menu.hide}
+          >
+            <PiInfoThin aria-hidden />
+            How to play
+            <PiCaretRightThin aria-hidden />
+          </button>
+        </li>
+        <li>
+          <button
+            type="button"
+            command="show-modal"
+            commandfor={settings}
+            onClick={menu.hide}
+          >
+            <PiGearThin aria-hidden />
+            Settings
+            <PiCaretRightThin aria-hidden />
+          </button>
+        </li>
+      </>
+    );
+
     return (
       <>
         <DialogDisclosure
@@ -55,65 +117,11 @@ export const Menu: React.FC<MenuProps> = memo(
         >
           <PiListThin aria-hidden />
         </DialogDisclosure>
+        <nav className={cx(styles.links, className)} aria-label="Menu">
+          <ul>{items}</ul>
+        </nav>
         <Sheet store={menu} aria-label="Menu">
-          <ul className={styles.items}>
-            <li>
-              {player ? (
-                <Link href="/profile" onClick={menu.hide}>
-                  <PiUserThin aria-hidden />
-                  {player.handle ? `@${player.handle}` : `Profile`}
-                  <PiCaretRightThin aria-hidden />
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  command="show-modal"
-                  commandfor={SIGN_IN}
-                  onClick={menu.hide}
-                >
-                  <PiUserThin aria-hidden />
-                  Sign in
-                  <PiCaretRightThin aria-hidden />
-                </button>
-              )}
-            </li>
-            <li>
-              <button
-                type="button"
-                command="show-modal"
-                commandfor={LEADERBOARD}
-                onClick={showLeaderboard}
-              >
-                <PiTrophyThin aria-hidden />
-                Leaderboard
-                <PiCaretRightThin aria-hidden />
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                command="show-modal"
-                commandfor={guide}
-                onClick={menu.hide}
-              >
-                <PiInfoThin aria-hidden />
-                How to play
-                <PiCaretRightThin aria-hidden />
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                command="show-modal"
-                commandfor={settings}
-                onClick={menu.hide}
-              >
-                <PiGearThin aria-hidden />
-                Settings
-                <PiCaretRightThin aria-hidden />
-              </button>
-            </li>
-          </ul>
+          <ul className={styles.items}>{items}</ul>
         </Sheet>
         <Guide id={guide} width={width} height={height} />
         <Config id={settings} />

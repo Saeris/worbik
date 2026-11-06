@@ -51,7 +51,16 @@ While `yarn dev` is running, `/palette` shows a board with a tile in every state
 
 Each puzzle is derived on demand from its ID (the puzzle's date and size) and the `PUZZLE_SECRET`, the first time it is requested, and is then stored in Workers KV for good. A puzzle's leaderboard takes new scores for the day that it is the day's puzzle, plus an hour's grace. A new day's puzzles become available at 10:00 UTC. Solutions never leave the server: the browser sends its guesses to `/api/check`, which reports the letters that are in the right position.
 
-Before the first deploy, set the production secret with `yarn void secret put PUZZLE_SECRET`.
+### Deploying
+
+Void deploys the app to a Cloudflare Worker, creating what it needs on the way: the KV namespace that holds puzzles and the D1 database that holds scores, with the migrations in `src/db/migrations` applied. Everything fits within the Workers Free plan.
+
+1. Connect the project to the Cloudflare account, once: `yarn void connect --platform cloudflare`.
+2. Set the production secret: `yarn void secret put PUZZLE_SECRET`. Use a long random value. Puzzles are derived from it, so changing it later changes every puzzle that hasn't been stored yet.
+3. Deploy: `yarn void deploy`. The first deploy writes the IDs of the resources it created to `void.lock.json`, which should be committed.
+4. Add the domain: `yarn void domain add worbik.saeris.io`. Cloudflare has to be the DNS provider for the zone, and it creates the record and the certificate itself.
+
+Signing in works at whichever address the app is served from, as the document that describes the app to a player's server is written for that address. A player's sign-in is tied to the address they signed in at, so moving domains signs everyone out.
 
 ### How streaks work
 

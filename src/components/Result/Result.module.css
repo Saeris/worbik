@@ -46,11 +46,17 @@
   }
 }
 
-.action {
+.actions {
+  display: flex;
+  gap: var(--spacing-3);
+}
+
+.action,
+.other {
+  flex: 1;
   display: grid;
   place-items: center;
   box-sizing: border-box;
-  inline-size: 100%;
   block-size: 48px;
   border: 1px solid var(--fg);
   border-radius: var(--spacing-0);
@@ -66,6 +72,14 @@
       box-shadow: var(--hover-ring);
     }
   }
+}
+
+/* What can also be done, beside the thing that most wants doing */
+.other {
+  border-color: var(--bd);
+  background: var(--bg);
+  box-shadow: 0px var(--spacing-0) 0px 0px var(--bd);
+  color: var(--fg);
 }
 
 .ranking {

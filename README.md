@@ -49,6 +49,14 @@ Each puzzle is derived on demand from its ID (the puzzle's date and size) and th
 
 Before the first deploy, set the production secret with `yarn void secret put PUZZLE_SECRET`.
 
+### How sharing works
+
+A solve is shared as a link: `/s/<date>/<size>`, with the player's handle on the end once their score is on the leaderboard. Opening one starts the puzzle of that size that is being played today. Pasting one shows a card, drawn by `/api/card`, with the puzzle's stamp and the player's score. The score on a card is always looked up, never taken from the link, so a link can't claim a score that wasn't posted. Neither the card nor the link gives away the solution or the target.
+
+A puzzle's stamp is a mosaic in the shape of its board, whose color and pattern come from a hash of its scrambled letters. It is the same for everyone who plays that puzzle.
+
+The card is drawn without any image library, to stay within the ten milliseconds of processor time that a Worker gets on Cloudflare's free plan: flat shapes in sixteen colors, with letters that were drawn ahead of time. While `yarn dev` is running, `/glyphs` draws those letters from the game's font. Save what it shows as `src/server/card/glyphs.json` whenever the wording of the card or the font changes.
+
 ### How signing in works
 
 Worbik has no accounts of its own. A player signs in with their [Atmosphere](https://atproto.com) account, on the server that hosts it, and only to earn a place on a leaderboard: the game itself never asks. Worbik asks that server for two things: to say who the player is, and to vouch for them when they submit a score. It can't read or write anything in their account.

@@ -49,6 +49,7 @@ export const Game: React.FC<GameProps> = ({ puzzleID, init, persist }) => {
       {state.win ? (
         <Result
           className={styles.result}
+          puzzleID={puzzleID}
           width={width}
           height={height}
           moves={state.moves}

@@ -6,10 +6,13 @@ import { getNeighbors } from "#utils/getNeighbors";
 import { ordinal } from "#utils/ordinal";
 import { LEADERBOARD } from "../Leaderboard";
 import { Scores } from "../Scores";
+import { Share } from "../Share";
 import { SIGN_IN } from "../SignIn";
 import styles from "./Result.module.css";
 
 export interface ResultProps {
+  /** The ID of the puzzle that was solved */
+  puzzleID: string;
   width: Size;
   height: Size;
   /** How many moves the puzzle was solved in */
@@ -34,6 +37,7 @@ export interface ResultProps {
  */
 export const Result: React.FC<ResultProps> = memo(
   ({
+    puzzleID,
     width,
     height,
     moves,
@@ -48,6 +52,13 @@ export const Result: React.FC<ResultProps> = memo(
     const size = `${width}×${height}`;
     const { rows, from } = getNeighbors(scores ?? [], ({ did }) => did === you);
     const place = (scores ?? []).findIndex(({ did }) => did === you) + 1;
+    const mine = scores?.[place - 1];
+    // Sharing is the thing to do next unless there is something that needs doing first
+    const waiting =
+      status === `signed-out` ||
+      status === `expired` ||
+      status === `failed` ||
+      status === `closed`;
 
     return (
       <section className={cx(styles.result, className)} aria-label="Result">
@@ -84,37 +95,50 @@ export const Result: React.FC<ResultProps> = memo(
             device.
           </p>
         )}
-        {status === `signed-out` && (
-          <button
-            type="button"
-            className={styles.action}
-            command="show-modal"
-            commandfor={SIGN_IN}
-          >
-            Post my score
-          </button>
-        )}
-        {status === `expired` && (
-          <button
-            type="button"
-            className={styles.action}
-            command="show-modal"
-            commandfor={SIGN_IN}
-          >
-            Sign in again
-          </button>
-        )}
-        {status === `failed` && (
-          <button type="button" className={styles.action} onClick={retry}>
-            Try again
-          </button>
-        )}
-        {status === `closed` && (
-          // A plain link, so that the page is loaded afresh with whichever puzzle is now the day's
-          <a className={styles.action} href={`/${width}x${height}`}>
-            {`Play today’s ${size}`}
-          </a>
-        )}
+        <div className={styles.actions}>
+          {status === `signed-out` && (
+            <button
+              type="button"
+              className={styles.action}
+              command="show-modal"
+              commandfor={SIGN_IN}
+            >
+              Post my score
+            </button>
+          )}
+          {status === `expired` && (
+            <button
+              type="button"
+              className={styles.action}
+              command="show-modal"
+              commandfor={SIGN_IN}
+            >
+              Sign in again
+            </button>
+          )}
+          {status === `failed` && (
+            <button type="button" className={styles.action} onClick={retry}>
+              Try again
+            </button>
+          )}
+          {status === `closed` && (
+            // A plain link, so that the page is loaded afresh with whichever puzzle is now the day's
+            <a className={styles.action} href={`/${width}x${height}`}>
+              {`Play today’s ${size}`}
+            </a>
+          )}
+          <Share
+            className={waiting ? styles.other : styles.action}
+            puzzleID={puzzleID}
+            moves={moves}
+            // A link can only show a score that is on the leaderboard, under the name that it's listed by there
+            player={
+              status === `posted` && mine
+                ? (mine.handle ?? mine.did)
+                : undefined
+            }
+          />
+        </div>
         {rows.length > 0 && (
           <div className={styles.ranking}>
             <header>

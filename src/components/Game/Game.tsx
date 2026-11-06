@@ -34,7 +34,12 @@ export const Game: React.FC<GameProps> = ({ puzzleID, init, persist }) => {
   return (
     <main className={cx(styles.main, state.win && styles.solved)}>
       <h1 className={styles.mark}>Worbik</h1>
-      <SizePicker className={styles.size} width={width} height={height} />
+      <SizePicker
+        className={styles.size}
+        puzzleID={puzzleID}
+        width={width}
+        height={height}
+      />
       <Menu
         className={styles.menu}
         width={width}

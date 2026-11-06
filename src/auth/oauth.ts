@@ -54,6 +54,12 @@ const signInState = v.object({
 /** What the server that hosts a player's account answers with, when asked to vouch for them */
 const proof = v.object({ token: v.string() });
 
+/** How that server explains itself when it won't */
+const refusal = v.object({
+  error: v.string(),
+  message: v.optional(v.string())
+});
+
 const didDocuments = new CompositeDidDocumentResolver({
   methods: {
     plc: new PlcDidDocumentResolver(),
@@ -231,7 +237,12 @@ export const getProof = async (did: string): Promise<string> => {
   );
 
   if (!response.ok) {
-    throw new Error(`The player's server declined to vouch for them`);
+    // What the server said, which is the only clue to why it said no
+    const said = v.safeParse(refusal, await response.json().catch(() => null));
+
+    throw new Error(
+      `Your account’s server declined to vouch for you (${response.status}${said.success ? `, ${said.output.error}: ${said.output.message ?? ``}` : ``})`
+    );
   }
 
   return v.parse(proof, await response.json()).token;

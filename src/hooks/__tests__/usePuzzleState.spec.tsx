@@ -136,3 +136,52 @@ describe(`usePuzzle`, () => {
     expect(container.textContent).toBe(`ABC|   `);
   });
 });
+
+describe(`restoring a saved game`, () => {
+  let root: Root;
+  let container: HTMLElement;
+
+  /** The same board, but one that keeps its game on the device */
+  const Saved: React.FC = () => {
+    // oxlint-disable-next-line react/globals -- hands the hook's result to the tests, which then read it
+    puzzle = usePuzzle(`03-02-2026_3x2`, init, true);
+
+    return <output>{puzzle.moves}</output>;
+  };
+
+  const render = async (): Promise<void> => {
+    container = document.body.appendChild(document.createElement(`div`));
+    root = createRoot(container);
+    await act(async () => {
+      root.render(<Saved />);
+    });
+  };
+
+  beforeEach(() => {
+    vi.stubGlobal(`IS_REACT_ACT_ENVIRONMENT`, true);
+  });
+
+  afterEach(async () => {
+    await act(async () => {
+      root.unmount();
+    });
+    container.remove();
+    localStorage.clear();
+    vi.unstubAllGlobals();
+  });
+
+  it(`picks up a game of this puzzle where it was left`, async () => {
+    localStorage.setItem(`03-02-2026_3x2`, `3|bcaefd,abcefd|ABC   `);
+    await render();
+
+    expect(puzzle.moves).toBe(1);
+  });
+
+  it(`leaves a game of a puzzle that has since been remade`, async () => {
+    // Its moves were made on a different board, and a score made of them would be turned away
+    localStorage.setItem(`03-02-2026_3x2`, `3|zzzzzz,abcefd|ABC   `);
+    await render();
+
+    expect(puzzle.moves).toBe(0);
+  });
+});

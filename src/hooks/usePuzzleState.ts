@@ -65,7 +65,11 @@ export const usePuzzle = (
   useEffect(() => {
     if (typeof window !== `undefined` && restore) {
       const previousSession = localStorage.getItem(puzzleID);
-      if (previousSession) {
+      // A saved game is only of this puzzle if it began where this puzzle does. One that didn't is of a puzzle that has since been remade, which happens in development.
+      if (
+        previousSession?.split(`|`)[1]?.split(`,`)[0] ===
+        state.initial.toString().toLowerCase()
+      ) {
         state.restore(previousSession.split(`|`) as PuzzleState["snapshot"]);
       }
       // purge puzzles older than yesterday, utc-0 + 32hrs

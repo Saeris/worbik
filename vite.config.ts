@@ -9,16 +9,6 @@ export default defineConfig({
   lint: mergeLint(lint, react, {
     overrides: [
       {
-        // Invoker Commands aren't yet known to the React plugin
-        files: [`**/*.tsx`],
-        rules: {
-          "react/no-unknown-property": [
-            `error`,
-            { ignore: [`command`, `commandfor`] }
-          ]
-        }
-      },
-      {
         // Void's file-based conventions rely on default exports
         files: [`src/pages/**`, `src/env.ts`],
         rules: { "import/no-default-export": `off` }
@@ -28,6 +18,10 @@ export default defineConfig({
   fmt: {
     ...fmt,
     ignorePatterns: [...(fmt.ignorePatterns ?? []), `void.lock.json`]
+  },
+  server: {
+    // Signing in sends a player back to where they came from, and the protocol won't send anyone to `localhost`
+    host: `127.0.0.1`
   },
   test: {
     name: `worbik`,

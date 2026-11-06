@@ -51,6 +51,10 @@ export default defineConfig({
     ],
     script: [
       {
+        // Signing in can't return a player to `localhost`, so during development the game is always played at the address that it can
+        innerHTML: `if(location.hostname==="localhost")location.replace(location.href.replace("//localhost","//127.0.0.1"))`
+      },
+      {
         // Applies the color scheme chosen in the settings before first paint, to avoid a flash of the wrong theme
         innerHTML: `try{const t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}`
       }

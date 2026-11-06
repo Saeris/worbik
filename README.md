@@ -67,4 +67,4 @@ Worbik has no accounts of its own. A player signs in with their [Atmosphere](htt
 
 Signing in happens in the browser. The server that hosts the player's account learns about Worbik from `/oauth/client-metadata.json`, which describes the app at whichever address it is served from.
 
-To sign in during development, run `yarn dev --host 127.0.0.1` and open the app at `http://127.0.0.1:5173`. The protocol doesn't allow a player to be sent back to `localhost`.
+During development the app is served at `http://127.0.0.1:5173`, and moves itself there if it's opened at `localhost`. The protocol doesn't allow a player to be sent back to `localhost` after signing in, and what a browser stores for one address isn't shared with the other.

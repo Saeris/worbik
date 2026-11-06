@@ -39,10 +39,17 @@ export interface ModalProps {
   readonly id: string;
   /** The heading displayed at the top of the dialog */
   readonly title: string;
+  /** Called when the dialog is closed, however that came about */
+  readonly onClose?: () => void;
   readonly children: React.ReactNode;
 }
 
-export const Modal: React.FC<ModalProps> = ({ id, title, children }) => {
+export const Modal: React.FC<ModalProps> = ({
+  id,
+  title,
+  onClose,
+  children
+}) => {
   const titleId = `${id}-title`;
 
   return (
@@ -53,6 +60,7 @@ export const Modal: React.FC<ModalProps> = ({ id, title, children }) => {
       closedby="any"
       aria-labelledby={titleId}
       onClick={lightDismiss}
+      onClose={onClose}
     >
       <header className={styles.header}>
         <h1 id={titleId}>{title}</h1>

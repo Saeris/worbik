@@ -15,16 +15,39 @@ import { ROLLOVER_HOUR_UTC } from "./getPuzzleID";
  */
 export const SCORING_WINDOW = (24 + 1) * 60 * 60 * 1000;
 
+/** How long a puzzle is the day's puzzle for, in milliseconds */
+export const PUZZLE_DAY = 24 * 60 * 60 * 1000;
+
+/** The moment that the puzzle with the given ID became the day's puzzle, which isn't a number for an ID that isn't a puzzle's */
+export const getPuzzleStart = (puzzleID: string): number => {
+  const [month, day, year] = (dateKeyRegex.exec(puzzleID)?.groups?.date ?? ``)
+    .split(`-`)
+    .map(Number);
+
+  return Date.UTC(year, month - 1, day, ROLLOVER_HOUR_UTC);
+};
+
 /** Whether a solve of the puzzle with the given ID can still earn a place on its leaderboard */
 export const isOpenForScores = (
   puzzleID: string,
   now: Date = new Date()
-): boolean => {
-  const [month, day, year] = (dateKeyRegex.exec(puzzleID)?.groups?.date ?? ``)
-    .split(`-`)
-    .map(Number);
-  const began = Date.UTC(year, month - 1, day, ROLLOVER_HOUR_UTC);
-
+): boolean =>
   // An ID that isn't a puzzle's has no day to have begun on, and is never open
-  return now.getTime() - began < SCORING_WINDOW;
+  now.getTime() - getPuzzleStart(puzzleID) < SCORING_WINDOW;
+
+/**
+ * Whether the puzzle with the given ID was the day's puzzle at the given
+ * moment.
+ *
+ * This is the rule that a player's device goes by: it only reports a solve
+ * that was made during the puzzle's own day. The hour's grace beyond that
+ * is for the report to arrive in, and isn't more time to solve the puzzle.
+ */
+export const isPuzzleDay = (
+  puzzleID: string,
+  at: Date = new Date()
+): boolean => {
+  const elapsed = at.getTime() - getPuzzleStart(puzzleID);
+
+  return elapsed >= 0 && elapsed < PUZZLE_DAY;
 };

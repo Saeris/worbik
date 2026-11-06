@@ -1,0 +1,59 @@
+.scores {
+  padding: 0;
+  border-block-start: 1px solid var(--bd);
+  list-style: none;
+  font-size: var(--font-size-2);
+  text-align: start;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    block-size: 40px;
+    padding-inline: var(--spacing-2);
+    border-block-end: 1px solid var(--bd);
+  }
+
+  /* The score of the player who is looking */
+  li[aria-current] {
+    background: var(--neutral-bg);
+    font-weight: 500;
+  }
+
+  em {
+    flex: none;
+    padding: 1px var(--spacing-1);
+    border: 1px solid currentColor;
+    border-radius: var(--spacing-0);
+    font-size: var(--font-size-1);
+    font-style: normal;
+    line-height: var(--font-height-1);
+  }
+}
+
+.place {
+  flex: none;
+  /* Wide enough for a place of three digits, so that the names beside them line up */
+  min-inline-size: 3ch;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.who {
+  flex: 1;
+  min-inline-size: 0;
+  overflow: hidden;
+  font-weight: 300;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  [aria-current] & {
+    font-weight: 500;
+  }
+}
+
+.moves {
+  flex: none;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}

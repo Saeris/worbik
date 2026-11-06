@@ -1,4 +1,4 @@
-import { memo, useId } from "react";
+import { memo, useCallback, useId } from "react";
 import { DialogDisclosure, useDialogStore } from "@ariakit/react";
 import { cx } from "class-variance-authority";
 import {
@@ -6,12 +6,14 @@ import {
   PiGearThin,
   PiInfoThin,
   PiListThin,
+  PiTrophyThin,
   PiUserThin
 } from "react-icons/pi";
 import { usePlayer } from "#hooks";
 import type { Size } from "#utils";
 import { Config } from "../Config";
 import { Guide } from "../Guide";
+import { LEADERBOARD } from "../Leaderboard";
 import { Sheet } from "../Sheet";
 import { SIGN_IN } from "../SignIn";
 import styles from "./Menu.module.css";
@@ -21,6 +23,8 @@ export interface MenuProps {
   width: Size;
   /** The height of the board that is being played, which the guide describes */
   height: Size;
+  /** Called when the leaderboard is opened, so that it can be loaded */
+  onLeaderboard: () => void;
   className?: string;
 }
 
@@ -29,12 +33,17 @@ export interface MenuProps {
  * puzzle has the screen to itself
  */
 export const Menu: React.FC<MenuProps> = memo(
-  ({ width, height, className }) => {
+  ({ width, height, onLeaderboard, className }) => {
     const menu = useDialogStore();
     const player = usePlayer();
     const id = useId();
     const guide = `${id}-guide`;
     const settings = `${id}-settings`;
+
+    const showLeaderboard = useCallback(() => {
+      menu.hide();
+      onLeaderboard();
+    }, [menu, onLeaderboard]);
 
     return (
       <>
@@ -65,6 +74,18 @@ export const Menu: React.FC<MenuProps> = memo(
                   <PiCaretRightThin aria-hidden />
                 </button>
               )}
+            </li>
+            <li>
+              <button
+                type="button"
+                command="show-modal"
+                commandfor={LEADERBOARD}
+                onClick={showLeaderboard}
+              >
+                <PiTrophyThin aria-hidden />
+                Leaderboard
+                <PiCaretRightThin aria-hidden />
+              </button>
             </li>
             <li>
               <button

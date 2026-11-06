@@ -49,7 +49,7 @@ export const usePuzzle = (
   persist: boolean = true
 ): Pick<
   PuzzleState,
-  "getHintAt" | "isRowCorrect" | "moves" | "target" | "win"
+  "getHintAt" | "history" | "isRowCorrect" | "moves" | "target" | "win"
 > & {
   initial: Grid;
   current: Grid;
@@ -114,6 +114,7 @@ export const usePuzzle = (
     win,
     rotate,
     target: state.target,
+    history: state.history,
     getHintAt: state.getHintAt,
     isRowCorrect: state.isRowCorrect
   };

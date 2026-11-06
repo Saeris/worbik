@@ -5,6 +5,9 @@
  * count of moves is the only thing near the board, and it can't be pressed.
  */
 .main {
+  /* How much of a sideways phone's width is set aside at either end of the board */
+  --side: clamp(120px, 18vw, 200px);
+
   display: grid;
   grid-template:
     "mark size menu" auto
@@ -23,14 +26,22 @@
   flex: 1 0 auto;
   color: var(--fg);
 
+  /* Once the puzzle is solved there is no more need to stay clear of the board, and the result takes the room beneath it */
+  &.solved {
+    grid-template:
+      "mark size menu" auto
+      "board board board" 1fr
+      "result result result" auto
+      / 1fr auto auto;
+    row-gap: var(--spacing-4);
+  }
+
   /*
    * A phone on its side is too short to stack these. The board stays in
    * the middle, and the rest moves to the corners at either side of it,
    * which is where the thumbs of the hands that hold the phone already are.
    */
   @media (orientation: landscape) and (max-height: 540px) {
-    --side: clamp(120px, 18vw, 200px);
-
     grid-template:
       "mark board menu" auto
       ". board ." 1fr
@@ -39,6 +50,15 @@
     column-gap: var(--spacing-4);
     padding: var(--spacing-2) max(var(--spacing-4), env(safe-area-inset-right))
       var(--spacing-4) max(var(--spacing-4), env(safe-area-inset-left));
+
+    /* The board moves over to one side, and the result takes the other */
+    &.solved {
+      grid-template:
+        "board mark size menu" auto
+        "board result result result" 1fr
+        / minmax(0, 1fr) minmax(0, 1fr) auto auto;
+      row-gap: var(--spacing-2);
+    }
   }
 }
 
@@ -64,50 +84,34 @@
   align-self: stretch;
 }
 
-.status,
-.result {
+.status {
   grid-area: status;
   justify-self: center;
-  /* As tall as the taller of the two, so that the board doesn't move when one gives way to the other */
-  min-block-size: var(--font-height-9);
+  /* The count is larger than the text beside it, and would otherwise make its line a little taller than this */
+  block-size: var(--font-height-9);
   color: var(--muted);
   font-size: var(--font-size-3);
   font-weight: 300;
-  text-align: center;
-
-  strong {
-    color: var(--fg);
-  }
-
-  @media (orientation: landscape) and (max-height: 540px) {
-    justify-self: end;
-    text-align: end;
-  }
-}
-
-.status {
-  /* The count is larger than the text beside it, and would otherwise make its line a little taller than this */
-  block-size: var(--font-height-9);
   line-height: var(--font-height-9);
 
   strong {
+    color: var(--fg);
     font-size: var(--font-size-8);
     line-height: 1;
     font-weight: 300;
     font-variant-numeric: tabular-nums;
   }
+
+  @media (orientation: landscape) and (max-height: 540px) {
+    justify-self: end;
+  }
 }
 
 .result {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  font-size: var(--font-size-2);
-  line-height: var(--font-height-3);
+  grid-area: result;
+  justify-self: center;
 
-  strong {
-    font-size: var(--font-size-5);
-    font-weight: 500;
-    line-height: var(--font-height-5);
+  @media (orientation: landscape) and (max-height: 540px) {
+    align-self: start;
   }
 }

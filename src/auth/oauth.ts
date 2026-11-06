@@ -106,6 +106,9 @@ const configure = (): void => {
 /** A reason that signing in couldn't begin, in words that are meant for the player */
 export class SignInError extends Error {}
 
+/** Thrown when a player's sign-in turns out to have run out, or to have been withdrawn */
+export class SignedOutError extends Error {}
+
 /**
  * Sends the player to the server that hosts their account, to approve
  * signing in. They are found by their handle, or sent to Bluesky's server
@@ -204,15 +207,22 @@ export const completeSignIn = async (): Promise<{
  * which says who they are, addressed to Worbik, that is good for submitting
  * a score and nothing else, for about a minute.
  *
- * Throws if the player is no longer signed in.
+ * Throws a `SignedOutError` if the player is no longer signed in.
  */
 export const getProof = async (did: string): Promise<string> => {
-  if (!isDid(did)) throw new Error(`Not signed in`);
+  if (!isDid(did)) throw new SignedOutError();
 
   configure();
 
-  // Renews the player's session first, if it has run out
-  const agent = new OAuthUserAgent(await getSession(did));
+  let agent: OAuthUserAgent;
+
+  try {
+    // Renews the player's session first, if it has run out
+    agent = new OAuthUserAgent(await getSession(did));
+  } catch {
+    throw new SignedOutError();
+  }
+
   const response = await agent.handle(
     `/xrpc/com.atproto.server.getServiceAuth?${new URLSearchParams({
       aud: serviceDid(location.origin),

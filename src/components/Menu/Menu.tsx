@@ -1,5 +1,6 @@
 import { memo, useCallback, useId } from "react";
 import { DialogDisclosure, useDialogStore } from "@ariakit/react";
+import { Link } from "@void/react";
 import { cx } from "class-variance-authority";
 import {
   PiCaretRightThin,
@@ -58,10 +59,11 @@ export const Menu: React.FC<MenuProps> = memo(
           <ul className={styles.items}>
             <li>
               {player ? (
-                <p>
+                <Link href="/profile" onClick={menu.hide}>
                   <PiUserThin aria-hidden />
-                  {player.handle ? `@${player.handle}` : `Signed in`}
-                </p>
+                  {player.handle ? `@${player.handle}` : `Profile`}
+                  <PiCaretRightThin aria-hidden />
+                </Link>
               ) : (
                 <button
                   type="button"

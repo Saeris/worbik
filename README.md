@@ -49,6 +49,10 @@ Each puzzle is derived on demand from its ID (the puzzle's date and size) and th
 
 Before the first deploy, set the production secret with `yarn void secret put PUZZLE_SECRET`.
 
+### How streaks work
+
+A player's profile is made of the scores that they have posted, so only a player who has signed in has one. A day counts towards a streak once any one of its puzzles is solved and posted. A streak that reached yesterday is still going, and ends once a whole day passes without a solve. A day is a puzzle's day, which begins at 10:00 UTC for everyone.
+
 ### How sharing works
 
 A solve is shared as a link: `/s/<date>/<size>`, with the player's handle on the end once their score is on the leaderboard. Opening one starts the puzzle of that size that is being played today. Pasting one shows a card, drawn by `/api/card`, with the puzzle's stamp and the player's score. The score on a card is always looked up, never taken from the link, so a link can't claim a score that wasn't posted. Neither the card nor the link gives away the solution or the target.

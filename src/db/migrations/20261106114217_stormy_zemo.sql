@@ -1,0 +1,1 @@
+CREATE INDEX `scores_player` ON `scores` (`did`,`created_at`);

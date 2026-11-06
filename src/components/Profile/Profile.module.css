@@ -1,0 +1,412 @@
+.main {
+  /*
+   * The shades that a day is given by how much was played on it, from the
+   * color of a solved tile. They are mixed in a space that has no notion of
+   * hue, as the page's color is a faint blue that would otherwise pull the
+   * lighter shades towards teal.
+   */
+  --played-1: color-mix(in oklab, var(--solved-bg) 30%, var(--bg));
+  --played-2: color-mix(in oklab, var(--solved-bg) 65%, var(--bg));
+  --played-3: var(--solved-bg);
+
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  inline-size: min(100%, 480px);
+  margin-inline: auto;
+  padding: var(--spacing-2) var(--spacing-4) var(--spacing-6);
+  color: var(--fg);
+  font-size: var(--font-size-2);
+  font-weight: 300;
+}
+
+.bar {
+  display: grid;
+  /* The title is centered on the page, not in what is left over beside the way back */
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  block-size: 44px;
+
+  a {
+    display: grid;
+    place-items: center;
+    inline-size: 44px;
+    block-size: 44px;
+    margin-inline-start: calc(-1 * var(--spacing-2));
+    border-radius: var(--spacing-0);
+    color: var(--fg);
+
+    svg {
+      inline-size: var(--spacing-6);
+      block-size: var(--spacing-6);
+    }
+  }
+
+  h1 {
+    font-size: var(--font-size-4);
+    font-weight: 500;
+    text-align: center;
+  }
+}
+
+.person {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+
+  span {
+    flex: none;
+    display: grid;
+    place-items: center;
+    inline-size: 48px;
+    block-size: 48px;
+    border-radius: 50%;
+    background: var(--fg);
+    color: var(--bg);
+    font-size: var(--font-size-5);
+    font-weight: 500;
+  }
+
+  strong {
+    min-inline-size: 0;
+    overflow: hidden;
+    font-size: var(--font-size-4);
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--bd);
+  border-radius: var(--spacing-0);
+
+  div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-0);
+    padding-block: var(--spacing-2);
+
+    & + div {
+      border-inline-start: 1px solid var(--bd);
+    }
+  }
+
+  dd {
+    font-size: var(--font-size-6);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  dt {
+    color: var(--muted);
+    font-size: var(--font-size-1);
+  }
+}
+
+.views {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  border: 1px solid var(--bd);
+  border-radius: var(--spacing-0);
+
+  label {
+    position: relative;
+    display: grid;
+    place-items: center;
+    block-size: 40px;
+    font-weight: 500;
+    cursor: pointer;
+
+    /* The radio itself is invisible, but covers its option so that it's still what is clicked and focused */
+    input {
+      position: absolute;
+      inset: 0;
+      margin: 0;
+      opacity: 0;
+      cursor: inherit;
+    }
+
+    &:has(:checked) {
+      background: var(--fg);
+      color: var(--bg);
+    }
+
+    &:has(:focus-visible) {
+      outline: var(--focus-outline);
+      outline-offset: var(--focus-offset);
+      box-shadow: var(--focus-gap);
+    }
+  }
+}
+
+.stepper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  p {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: var(--font-size-3);
+    font-weight: 500;
+  }
+
+  small {
+    color: var(--muted);
+    font-size: var(--font-size-1);
+    font-weight: 300;
+  }
+
+  button {
+    display: grid;
+    place-items: center;
+    inline-size: 44px;
+    block-size: 44px;
+    border-radius: var(--spacing-0);
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+
+    svg {
+      inline-size: var(--spacing-4);
+      block-size: var(--spacing-4);
+    }
+  }
+}
+
+.month {
+  inline-size: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  text-align: center;
+
+  th {
+    block-size: var(--spacing-5);
+    color: var(--muted);
+    font-size: var(--font-size-1);
+    font-weight: 500;
+  }
+
+  td {
+    position: relative;
+    block-size: 40px;
+    padding: 0;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* The day's number, in a circle that is filled once the day has been played */
+  td span {
+    position: relative;
+    /* Above the band that joins it to its neighbors */
+    z-index: 1;
+    display: inline-grid;
+    place-items: center;
+    inline-size: 32px;
+    block-size: 32px;
+    border-radius: 50%;
+  }
+
+  /* How many puzzles were solved that day, which the fill only shows as "some" */
+  td small {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  td[data-later] {
+    opacity: 0.4;
+  }
+
+  td[data-played] span {
+    background: var(--played-3);
+    color: var(--solved-fg);
+    font-weight: 500;
+  }
+
+  /* A band that reaches to the neighboring day, on whichever sides were also played */
+  td[data-before]::before,
+  td[data-after]::after {
+    content: "";
+    position: absolute;
+    inset-block: var(--spacing-1);
+    inline-size: 50%;
+    background: var(--played-1);
+  }
+
+  td[data-before]::before {
+    inset-inline-start: 0;
+  }
+
+  td[data-after]::after {
+    inset-inline-end: 0;
+  }
+
+  td[aria-current] span {
+    outline: 2px solid var(--fg);
+    outline-offset: 2px;
+  }
+}
+
+.year {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  justify-content: space-between;
+  gap: var(--spacing-3) var(--spacing-2);
+
+  figure {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+    margin: 0;
+    font-size: var(--font-size-1);
+    font-weight: 500;
+  }
+
+  figure > div {
+    display: grid;
+    grid-template-columns: repeat(7, 10px);
+    grid-auto-rows: 10px;
+    gap: 2px;
+    align-content: start;
+    /* As tall as a month of six weeks, so that the rows of months line up */
+    min-block-size: 70px;
+  }
+}
+
+.year i,
+.legend i {
+  border-radius: 1px;
+  background: var(--neutral-bg);
+
+  &[data-level="1"] {
+    background: var(--played-1);
+  }
+
+  &[data-level="2"] {
+    background: var(--played-2);
+  }
+
+  &[data-level="3"] {
+    background: var(--played-3);
+  }
+
+  /* A day that hasn't come yet is only outlined */
+  &[data-later] {
+    background: none;
+    box-shadow: inset 0 0 0 1px var(--neutral-bg);
+  }
+}
+
+.legend {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--spacing-1);
+  color: var(--muted);
+  font-size: var(--font-size-1);
+
+  i {
+    inline-size: 10px;
+    block-size: 10px;
+  }
+}
+
+.recent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+
+  h2 {
+    font-size: var(--font-size-3);
+    font-weight: 500;
+  }
+
+  ol {
+    padding: 0;
+    border-block-start: 1px solid var(--bd);
+    list-style: none;
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    block-size: 40px;
+    padding-inline: var(--spacing-2);
+    border-block-end: 1px solid var(--bd);
+    font-variant-numeric: tabular-nums;
+  }
+
+  li span:first-child {
+    flex: 1;
+  }
+
+  li span:nth-child(2) {
+    font-weight: 500;
+  }
+
+  li span:last-child {
+    min-inline-size: 5ch;
+    color: var(--muted);
+    text-align: end;
+  }
+}
+
+.nudge {
+  color: var(--muted);
+  font-size: var(--font-size-1);
+  line-height: var(--font-height-2);
+}
+
+.empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-3);
+  font-size: var(--font-size-3);
+  text-align: center;
+
+  strong {
+    font-size: var(--font-size-5);
+    font-weight: 500;
+  }
+
+  p {
+    max-inline-size: 36ch;
+  }
+
+  button {
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    inline-size: min(100%, 240px);
+    block-size: 48px;
+    border: 1px solid var(--fg);
+    border-radius: var(--spacing-0);
+    background: var(--fg);
+    box-shadow: 0px var(--spacing-0) 0px 0px
+      color-mix(in oklch, var(--fg) 70%, var(--bg));
+    color: var(--bg);
+    font-weight: 500;
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        box-shadow: var(--hover-ring);
+      }
+    }
+  }
+}

@@ -23,6 +23,8 @@ export const scores = sqliteTable(
   (table) => [
     primaryKey({ columns: [table.puzzle, table.did] }),
     // Ranks the scores of a puzzle: fewest moves first, and the earliest of those that tie
-    index(`scores_ranking`).on(table.puzzle, table.moves, table.createdAt)
+    index(`scores_ranking`).on(table.puzzle, table.moves, table.createdAt),
+    // Finds everything that one player has scored, latest first, for their profile
+    index(`scores_player`).on(table.did, table.createdAt)
   ]
 );

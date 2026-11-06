@@ -73,7 +73,8 @@ const create = async (
 
   const puzzle = generate(
     config,
-    await seededRandom(`${env.PUZZLE_SECRET}:${id}`)
+    await seededRandom(`${env.PUZZLE_SECRET}:${id}`),
+    env.PUZZLE_SCRAMBLE
   ).toChallenge();
 
   try {
@@ -84,6 +85,17 @@ const create = async (
   }
 
   return puzzle;
+};
+
+/**
+ * Forgets a puzzle, so that it's made afresh the next time it's asked for.
+ *
+ * Only for development. A puzzle that is kept is what makes its scores mean
+ * something, so nothing in the game itself ever does this.
+ */
+export const forgetPuzzle = async (id: string): Promise<void> => {
+  remembered.delete(id);
+  await puzzles.delete(id);
 };
 
 /**

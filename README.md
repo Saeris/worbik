@@ -39,6 +39,10 @@ yarn dev
 | `yarn build`  | Build for production                       |
 | `yarn deploy` | Deploy to Cloudflare                       |
 
+### Testing with puzzles that take one move
+
+Set `PUZZLE_SCRAMBLE=1` in `.env` to have new puzzles scrambled with a single move. Puzzles that were already made are kept, so forget today's with `curl -X POST http://127.0.0.1:5173/api/dev/reset`, which also removes any local scores on them, and clear the site's storage in the browser, which otherwise restores its saved game of the old puzzle. The route only exists on the dev server.
+
 ### Reviewing the palette
 
 While `yarn dev` is running, `/palette` shows a board with a tile in every state, in both color schemes, as it appears with typical vision, under each color vision deficiency, and in grayscale. It also shows tiles at every size from 32px to 80px, for checking that a tile's letter and its hint never touch. The page only exists in development. The same guarantees are enforced by `src/theme/__tests__/palette.spec.ts`, which reads the colors straight out of `src/theme/theme.css`.

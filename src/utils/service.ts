@@ -9,9 +9,21 @@ import { scope } from "@atcute/oauth-types";
  */
 export const SUBMIT_SCORE: Nsid = `gg.saeris.worbik.temp.submitScore`;
 
-/** The identity of this service, which is the did:web of wherever it is served from */
-export const serviceDid = (origin: string): Did<"web"> =>
-  `did:web:${new URL(origin).host.replaceAll(`:`, `%3A`)}`;
+/**
+ * The identity of this service, which is the did:web of wherever it is
+ * served from.
+ *
+ * A did:web may only name a port for `localhost`. During development the
+ * game is served at 127.0.0.1, which signing in needs, so its identity says
+ * `localhost` instead: the two are the same machine, and a player's server
+ * would turn away anything else.
+ */
+export const serviceDid = (origin: string): Did<"web"> => {
+  const { hostname, port } = new URL(origin);
+  const host = hostname === `127.0.0.1` ? `localhost` : hostname;
+
+  return `did:web:${host}${port ? `%3A${port}` : ``}`;
+};
 
 /**
  * Everything that Worbik asks of a player's account when they sign in.

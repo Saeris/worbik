@@ -2,11 +2,9 @@ import { serviceDid } from "../service";
 
 describe(`serviceDid`, () => {
   it(`is the did:web of where the game is served from`, () => {
-    expect(serviceDid(`https://worbik.saeris.gg`)).toBe(
-      `did:web:worbik.saeris.gg`
-    );
-    expect(serviceDid(`https://worbik.saeris.gg/api/scores`)).toBe(
-      `did:web:worbik.saeris.gg`
+    expect(serviceDid(`https://worbik.com`)).toBe(`did:web:worbik.com`);
+    expect(serviceDid(`https://worbik.com/api/scores`)).toBe(
+      `did:web:worbik.com`
     );
   });
 

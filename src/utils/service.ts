@@ -4,10 +4,11 @@ import { scope } from "@atcute/oauth-types";
 /**
  * The one thing that a player's proof of identity may be used for.
  *
- * Under `temp` because none of this is settled: these names are placeholders
- * until Worbik's lexicons are published under a domain of their own.
+ * Named under worbik.com, which is where Worbik's lexicons will be
+ * published. Changing this changes what players sign in for, so anyone
+ * signed in under the old name has to sign in again.
  */
-export const SUBMIT_SCORE: Nsid = `gg.saeris.worbik.temp.submitScore`;
+export const SUBMIT_SCORE: Nsid = `com.worbik.submitScore`;
 
 /**
  * The identity of this service, which is the did:web of wherever it is

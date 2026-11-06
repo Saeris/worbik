@@ -20,7 +20,7 @@ export default defineConfig({
       },
       { property: `og:title`, content: `Worbik` },
       { property: `og:description`, content: `Word Puzzle Mini-Game` },
-      { property: `og:url`, content: `https://worbik.saeris.io` },
+      { property: `og:url`, content: `https://worbik.com` },
       { property: `og:site_name`, content: `Worbik` },
       { property: `og:locale`, content: `en-US` },
       { property: `og:type`, content: `website` },

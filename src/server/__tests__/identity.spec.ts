@@ -119,7 +119,7 @@ describe(`verifyPlayer`, () => {
 
   it(`rejects a proof that was issued for a different purpose`, async () => {
     const repurposed = await proof({
-      lxm: `gg.saeris.worbik.temp.somethingElse`
+      lxm: `com.worbik.somethingElse`
     });
 
     await expect(

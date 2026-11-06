@@ -2,6 +2,7 @@ import type { PuzzleStateInit } from "#state";
 import { usePuzzle } from "#hooks";
 import { Puzzle } from "./Puzzle";
 import { Menu } from "../Menu";
+import { SignIn } from "../SignIn";
 import { SizePicker } from "../SizePicker";
 import styles from "./Game.module.css";
 
@@ -34,6 +35,7 @@ export const Game: React.FC<GameProps> = ({ puzzleID, init, persist }) => {
         </p>
       )}
       <Puzzle className={styles.board} state={state} />
+      <SignIn />
     </main>
   );
 };

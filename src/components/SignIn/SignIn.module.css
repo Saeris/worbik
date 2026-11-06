@@ -1,0 +1,133 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+
+  label {
+    font-size: var(--font-size-2);
+    font-weight: 500;
+  }
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  block-size: 48px;
+  padding-inline: var(--spacing-3);
+  border: 1px solid var(--fg);
+  border-radius: var(--spacing-0);
+  font-size: var(--font-size-3);
+
+  span {
+    color: var(--muted);
+  }
+
+  input {
+    flex: 1;
+    min-inline-size: 0;
+    block-size: 100%;
+    padding: 0;
+    border: none;
+    outline: none;
+    background: none;
+    color: inherit;
+    /* Anything smaller makes iOS zoom in on the field when it's focused */
+    font-size: max(var(--font-size-3), 16px);
+  }
+
+  /* The field stands in for the input within it, which has no edges of its own to show focus on */
+  &:has(input:focus-visible) {
+    outline: var(--focus-outline);
+    outline-offset: var(--focus-offset);
+    box-shadow: var(--focus-gap);
+  }
+
+  /* Overrides the ring that every focused control is given, as the field already shows it */
+  & input:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+}
+
+.note {
+  color: var(--muted);
+  font-size: var(--font-size-1);
+  line-height: var(--font-height-2);
+
+  a {
+    color: var(--fg);
+    text-decoration: underline;
+  }
+}
+
+.button,
+.primary {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  inline-size: 100%;
+  block-size: 48px;
+  border: 1px solid var(--bd);
+  border-radius: var(--spacing-0);
+  background: var(--bg);
+  box-shadow: 0px var(--spacing-0) 0px 0px var(--bd);
+  color: var(--fg);
+  font-size: var(--font-size-3);
+  font-weight: 500;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover:not(:disabled) {
+      box-shadow: var(--hover-ring);
+    }
+  }
+}
+
+.primary {
+  margin-block-start: var(--spacing-2);
+  border-color: var(--fg);
+  background: var(--fg);
+  box-shadow: 0px var(--spacing-0) 0px 0px
+    color-mix(in oklch, var(--fg) 70%, var(--bg));
+  color: var(--bg);
+}
+
+.or {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  color: var(--muted);
+  font-size: var(--font-size-1);
+
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    block-size: 1px;
+    background: var(--bd);
+  }
+}
+
+.error {
+  color: var(--fg);
+  font-size: var(--font-size-2);
+  font-weight: 500;
+}
+
+.aside {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  padding-block-start: var(--spacing-3);
+  border-block-start: 1px solid var(--bd);
+
+  strong {
+    font-size: var(--font-size-2);
+    font-weight: 500;
+  }
+}

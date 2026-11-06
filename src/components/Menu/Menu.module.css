@@ -27,7 +27,8 @@
     border-block-end: 1px solid var(--bd);
   }
 
-  button {
+  button,
+  p {
     display: flex;
     align-items: center;
     gap: var(--spacing-3);
@@ -45,7 +46,7 @@
     }
 
     /* The arrow that ends each row */
-    svg:last-child {
+    svg:last-child:not(:first-child) {
       inline-size: var(--spacing-4);
       block-size: var(--spacing-4);
       margin-inline-start: auto;

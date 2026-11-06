@@ -5,12 +5,15 @@ import {
   PiCaretRightThin,
   PiGearThin,
   PiInfoThin,
-  PiListThin
+  PiListThin,
+  PiUserThin
 } from "react-icons/pi";
+import { usePlayer } from "#hooks";
 import type { Size } from "#utils";
 import { Config } from "../Config";
 import { Guide } from "../Guide";
 import { Sheet } from "../Sheet";
+import { SIGN_IN } from "../SignIn";
 import styles from "./Menu.module.css";
 
 export interface MenuProps {
@@ -28,6 +31,7 @@ export interface MenuProps {
 export const Menu: React.FC<MenuProps> = memo(
   ({ width, height, className }) => {
     const menu = useDialogStore();
+    const player = usePlayer();
     const id = useId();
     const guide = `${id}-guide`;
     const settings = `${id}-settings`;
@@ -43,6 +47,25 @@ export const Menu: React.FC<MenuProps> = memo(
         </DialogDisclosure>
         <Sheet store={menu} aria-label="Menu">
           <ul className={styles.items}>
+            <li>
+              {player ? (
+                <p>
+                  <PiUserThin aria-hidden />
+                  {player.handle ? `@${player.handle}` : `Signed in`}
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  command="show-modal"
+                  commandfor={SIGN_IN}
+                  onClick={menu.hide}
+                >
+                  <PiUserThin aria-hidden />
+                  Sign in
+                  <PiCaretRightThin aria-hidden />
+                </button>
+              )}
+            </li>
             <li>
               <button
                 type="button"

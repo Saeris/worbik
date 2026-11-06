@@ -48,3 +48,11 @@ While `yarn dev` is running, `/palette` shows a board with a tile in every state
 Each puzzle is derived on demand from its ID (the puzzle's date and size) and the `PUZZLE_SECRET`, the first time it is requested, and is then stored in Workers KV for good. A puzzle's leaderboard takes new scores for the day that it is the day's puzzle, plus an hour's grace. A new day's puzzles become available at 10:00 UTC. Solutions never leave the server: the browser sends its guesses to `/api/check`, which reports the letters that are in the right position.
 
 Before the first deploy, set the production secret with `yarn void secret put PUZZLE_SECRET`.
+
+### How signing in works
+
+Worbik has no accounts of its own. A player signs in with their [Atmosphere](https://atproto.com) account, on the server that hosts it, and only to earn a place on a leaderboard: the game itself never asks. Worbik asks that server for two things: to say who the player is, and to vouch for them when they submit a score. It can't read or write anything in their account.
+
+Signing in happens in the browser. The server that hosts the player's account learns about Worbik from `/oauth/client-metadata.json`, which describes the app at whichever address it is served from.
+
+To sign in during development, run `yarn dev --host 127.0.0.1` and open the app at `http://127.0.0.1:5173`. The protocol doesn't allow a player to be sent back to `localhost`.

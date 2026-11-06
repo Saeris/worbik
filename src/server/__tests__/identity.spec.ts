@@ -6,6 +6,7 @@ import type {
 import type { Did } from "@atcute/lexicons";
 import { createServiceJwt } from "@atcute/xrpc-server/auth";
 import {
+  resolveDid,
   resolveHandle,
   serviceDid,
   SUBMIT_SCORE,
@@ -190,5 +191,32 @@ describe(`resolveHandle`, () => {
         handleResolver: handlesOf({})
       })
     ).resolves.toBeNull();
+  });
+});
+
+describe(`resolveDid`, () => {
+  const handleResolver = handlesOf({ "alice.test": alice });
+
+  it(`finds the player who goes by a handle`, async () => {
+    await expect(resolveDid(`alice.test`, { handleResolver })).resolves.toBe(
+      alice
+    );
+  });
+
+  it(`finds nobody for a handle that no account goes by`, async () => {
+    // Signing in reports this to the player as a handle to check, rather than as a fault
+    await expect(
+      resolveDid(`nobody.test`, { handleResolver })
+    ).resolves.toBeNull();
+  });
+
+  it(`doesn't look up anything that isn't a handle`, async () => {
+    // Whatever is typed into the sign-in box ends up here, and only a handle is worth a lookup
+    const resolve = vi.fn<HandleResolver["resolve"]>();
+
+    await expect(
+      resolveDid(`not a handle`, { handleResolver: { resolve } })
+    ).resolves.toBeNull();
+    expect(resolve).not.toHaveBeenCalled();
   });
 });

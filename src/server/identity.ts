@@ -8,27 +8,18 @@ import {
   type DidDocumentResolver,
   type HandleResolver
 } from "@atcute/identity-resolver";
-import type { Did, Nsid } from "@atcute/lexicons";
-import { isHandle } from "@atcute/lexicons/syntax";
+import type { Did } from "@atcute/lexicons";
+import { isHandle, type AtprotoDid } from "@atcute/lexicons/syntax";
 import { ServiceJwtVerifier } from "@atcute/xrpc-server/auth";
+import { serviceDid, SUBMIT_SCORE } from "#utils/service";
 
-/**
- * The one thing that a player's proof of identity may be used for.
- *
- * Under `temp` because none of this is settled: these names are placeholders
- * until Worbik's lexicons are published under a domain of their own.
- */
-export const SUBMIT_SCORE: Nsid = `gg.saeris.worbik.temp.submitScore`;
+export { serviceDid, SUBMIT_SCORE };
 
 /**
  * The longest that a proof may be valid for: five minutes, plus room for
  * the clock of the server that issued it running ahead of this one's.
  */
 const MAX_TOKEN_SECONDS = 5 * 60 + 30;
-
-/** The identity of this service, which is the did:web of wherever it is served from */
-export const serviceDid = (origin: string): Did<"web"> =>
-  `did:web:${new URL(origin).host.replaceAll(`:`, `%3A`)}`;
 
 const didDocuments: DidDocumentResolver = new CompositeDidDocumentResolver({
   methods: {
@@ -80,6 +71,26 @@ export const verifyPlayer = async (
   });
 
   return issuer;
+};
+
+/**
+ * Looks up the identity of the player who goes by the given handle, or
+ * `null` if there is no such player.
+ *
+ * A browser can't look this up for itself, as it has no way to query DNS,
+ * which is where most handles point to their owner from.
+ */
+export const resolveDid = async (
+  handle: string,
+  { handleResolver = handles }: Resolvers = {}
+): Promise<AtprotoDid | null> => {
+  if (!isHandle(handle)) return null;
+
+  try {
+    return await handleResolver.resolve(handle);
+  } catch {
+    return null;
+  }
 };
 
 /**

@@ -109,6 +109,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@atcute/client@npm:^5.1.2":
+  version: 5.1.2
+  resolution: "@atcute/client@npm:5.1.2"
+  dependencies:
+    "@atcute/identity": "npm:^2.0.2"
+    "@atcute/lexicons": "npm:^2.1.0"
+  peerDependencies:
+    "@atcute/lexicons": ^2.0.0
+  checksum: 10/096f7ffa13e4a41ecedf8594029b000e839432423bd5cd748f7ee39fbd201b164f55115cebb451eef9cb6e1e3ec7f10ae711e278c323265cd09bd4439884e6a7
+  languageName: node
+  linkType: hard
+
 "@atcute/crypto@npm:^2.4.4":
   version: 2.4.4
   resolution: "@atcute/crypto@npm:2.4.4"
@@ -120,7 +132,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@atcute/identity-resolver@npm:^2.0.3":
+"@atcute/identity-resolver@npm:^2.0.2, @atcute/identity-resolver@npm:^2.0.3":
   version: 2.0.3
   resolution: "@atcute/identity-resolver@npm:2.0.3"
   dependencies:
@@ -134,7 +146,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@atcute/identity@npm:^2.0.2":
+"@atcute/identity@npm:^2.0.1, @atcute/identity@npm:^2.0.2":
   version: 2.0.2
   resolution: "@atcute/identity@npm:2.0.2"
   dependencies:
@@ -146,7 +158,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@atcute/lexicons@npm:^2.0.3, @atcute/lexicons@npm:^2.1.1":
+"@atcute/lexicons@npm:^2.0.2, @atcute/lexicons@npm:^2.0.3, @atcute/lexicons@npm:^2.1.0, @atcute/lexicons@npm:^2.1.1":
   version: 2.1.1
   resolution: "@atcute/lexicons@npm:2.1.1"
   dependencies:
@@ -159,7 +171,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@atcute/multibase@npm:^1.2.5":
+"@atcute/multibase@npm:^1.2.4, @atcute/multibase@npm:^1.2.5":
   version: 1.2.5
   resolution: "@atcute/multibase@npm:1.2.5"
   dependencies:
@@ -168,7 +180,57 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@atcute/uint8array@npm:^1.1.5, @atcute/uint8array@npm:^1.2.0":
+"@atcute/oauth-browser-client@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "@atcute/oauth-browser-client@npm:5.1.0"
+  dependencies:
+    "@atcute/client": "npm:^5.1.2"
+    "@atcute/identity-resolver": "npm:^2.0.2"
+    "@atcute/lexicons": "npm:^2.1.1"
+    "@atcute/oauth-crypto": "npm:^1.0.1"
+    "@atcute/oauth-types": "npm:^1.0.1"
+    nanoid: "npm:^6.0.1"
+  peerDependencies:
+    "@atcute/identity-resolver": ^2.0.0
+    "@atcute/lexicons": ^2.0.0
+  checksum: 10/ca17b3a2e8da7d1c98db4dfaec35ecac034f45785950c5ba3af38f8cda6d7954cd4fe86e24e1b2a11b8c67a46a52e840cee22baf78a6d54c0faffceb552688eb
+  languageName: node
+  linkType: hard
+
+"@atcute/oauth-crypto@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@atcute/oauth-crypto@npm:1.0.1"
+  dependencies:
+    "@atcute/multibase": "npm:^1.2.4"
+    "@atcute/uint8array": "npm:^1.1.3"
+    nanoid: "npm:^5.1.16"
+    valibot: "npm:^1.4.1"
+  checksum: 10/c715476fa3a645bebbe15aa678f9ca7ebb879c96cbf420c9b7bd2b2af4f534ac4c5098a9e9b46b62e0fdcec7b8dee4e1763b648b6c9538fbad92626e11b9f1d3
+  languageName: node
+  linkType: hard
+
+"@atcute/oauth-keyset@npm:^0.1.2":
+  version: 0.1.3
+  resolution: "@atcute/oauth-keyset@npm:0.1.3"
+  dependencies:
+    "@atcute/oauth-crypto": "npm:^1.0.1"
+  checksum: 10/4531b88ae0488d950702d5ea03bacaedb619df4171c78577d7629da31ec8a64646dbdb868a3a5ead2de7eebffccf2be661e784aa7619a4429241e8d0fc88ffe9
+  languageName: node
+  linkType: hard
+
+"@atcute/oauth-types@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@atcute/oauth-types@npm:1.0.1"
+  dependencies:
+    "@atcute/identity": "npm:^2.0.1"
+    "@atcute/lexicons": "npm:^2.0.2"
+    "@atcute/oauth-keyset": "npm:^0.1.2"
+    valibot: "npm:^1.4.1"
+  checksum: 10/8c65971c177e26c3ba732e34ba3ee9f4d8cad0e4a2b9ed04aa7d3fb6e5842a2f4dcb6084beebb766e4b78e6c1d647dad165164fba27ba3d33cd2bc1f77ec0084
+  languageName: node
+  linkType: hard
+
+"@atcute/uint8array@npm:^1.1.3, @atcute/uint8array@npm:^1.1.5, @atcute/uint8array@npm:^1.2.0":
   version: 1.2.1
   resolution: "@atcute/uint8array@npm:1.2.1"
   checksum: 10/692e201874d0135b089d5d62d806bb413cd6ce3a1fe51c5e8e5336256bb11d4df52e8edebeff659916c0c54db33319c23bb5eda007e2415619270daa5e1d89c9
@@ -4298,6 +4360,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nanoid@npm:^5.1.16":
+  version: 5.1.16
+  resolution: "nanoid@npm:5.1.16"
+  bin:
+    nanoid: bin/nanoid.js
+  checksum: 10/b1e702e2b7072e74ac2ae880907d0a291853a36617ec5c3d27d81ab04965ebc0d4d0f707cf9220928cf93d5370b1f561c930efee853dc9c1a3facaefdf1a42ee
+  languageName: node
+  linkType: hard
+
 "nanoid@npm:^6.0.1":
   version: 6.0.2
   resolution: "nanoid@npm:6.0.2"
@@ -5359,7 +5430,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"valibot@npm:^1.4.2, valibot@npm:^1.5.0":
+"valibot@npm:^1.4.1, valibot@npm:^1.4.2, valibot@npm:^1.5.0":
   version: 1.5.0
   resolution: "valibot@npm:1.5.0"
   peerDependencies:
@@ -5708,6 +5779,8 @@ __metadata:
     "@atcute/crypto": "npm:^2.4.4"
     "@atcute/identity-resolver": "npm:^2.0.3"
     "@atcute/lexicons": "npm:^2.1.1"
+    "@atcute/oauth-browser-client": "npm:^5.1.0"
+    "@atcute/oauth-types": "npm:^1.0.1"
     "@atcute/xrpc-server": "npm:^2.1.0"
     "@fontsource-variable/montserrat": "npm:^5.3.0"
     "@saeris/colors": "npm:^0.1.2"

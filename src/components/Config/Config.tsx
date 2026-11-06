@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import {
   PiMoonStars,
   PiMoonStarsFill,
@@ -7,6 +7,8 @@ import {
   PiYinYang,
   PiYinYangFill
 } from "react-icons/pi";
+import { setPlayer } from "#auth/player";
+import { usePlayer } from "#hooks";
 import { Modal } from "../Modal";
 import styles from "./Config.module.css";
 
@@ -89,41 +91,75 @@ const syncScheme = (group: HTMLDivElement): (() => void) => {
   };
 };
 
+/** Tells the server that hosts a player's account that they have signed out of Worbik */
+const endSession = async (did: string): Promise<void> => {
+  // Only fetched by those who have signed in
+  const { signOut } = await import(`#auth/oauth`);
+  await signOut(did);
+};
+
 export interface ConfigProps {
   /** Identifies the dialog to the button that opens it */
   id: string;
 }
 
-export const Config: React.FC<ConfigProps> = memo(({ id }) => (
-  <Modal id={id} title="Settings:">
-    <h1 id="color-scheme" className={styles.header}>
-      Theme Mode
-    </h1>
-    <div
-      ref={syncScheme}
-      role="radiogroup"
-      aria-labelledby="color-scheme"
-      className={styles.schemes}
-    >
-      {schemes.map((scheme) => {
-        const { label, Icon, SelectedIcon } = options[scheme];
-        return (
-          <label key={scheme} className={styles.scheme} title={label}>
-            <input
-              type="radio"
-              name="color-scheme"
-              value={scheme}
-              defaultChecked={scheme === `system`}
-              onChange={changeScheme}
-              aria-label={label}
-            />
-            <Icon aria-hidden />
-            <SelectedIcon aria-hidden />
-          </label>
-        );
-      })}
-    </div>
-  </Modal>
-));
+export const Config: React.FC<ConfigProps> = memo(({ id }) => {
+  const player = usePlayer();
+
+  const leave = useCallback(() => {
+    if (!player) return;
+    // Forgotten here straight away, whether or not the player's server can be told
+    setPlayer(null);
+    void endSession(player.did);
+  }, [player]);
+
+  return (
+    <Modal id={id} title="Settings:">
+      <h1 id="color-scheme" className={styles.header}>
+        Theme Mode
+      </h1>
+      <div
+        ref={syncScheme}
+        role="radiogroup"
+        aria-labelledby="color-scheme"
+        className={styles.schemes}
+      >
+        {schemes.map((scheme) => {
+          const { label, Icon, SelectedIcon } = options[scheme];
+          return (
+            <label key={scheme} className={styles.scheme} title={label}>
+              <input
+                type="radio"
+                name="color-scheme"
+                value={scheme}
+                defaultChecked={scheme === `system`}
+                onChange={changeScheme}
+                aria-label={label}
+              />
+              <Icon aria-hidden />
+              <SelectedIcon aria-hidden />
+            </label>
+          );
+        })}
+      </div>
+      {player && (
+        <>
+          <h1 className={styles.header}>Account</h1>
+          <div className={styles.account}>
+            <p>
+              Signed in as
+              <strong>
+                {player.handle ? `@${player.handle}` : player.did}
+              </strong>
+            </p>
+            <button type="button" onClick={leave}>
+              Sign out
+            </button>
+          </div>
+        </>
+      )}
+    </Modal>
+  );
+});
 
 Config.displayName = `Config`;

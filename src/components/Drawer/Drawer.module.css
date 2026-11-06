@@ -125,8 +125,7 @@
     border-block-end: 1px solid var(--bd);
   }
 
-  button,
-  a {
+  button {
     display: flex;
     align-items: center;
     gap: var(--spacing-3);

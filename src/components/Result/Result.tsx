@@ -21,6 +21,10 @@ export interface ResultProps {
   status: ScoreStatus | null;
   /** The puzzle's leaderboard, once it has loaded */
   scores: readonly RankedScore[] | null;
+  /** Why the solve couldn't be posted, in the words of whatever turned it away */
+  detail: string | null;
+  /** Whether a solve that couldn't be posted is being posted again */
+  retrying: boolean;
   /** Tries again to post a solve that couldn't be posted */
   retry: () => void;
   /** Called to see the whole leaderboard */
@@ -44,6 +48,8 @@ export const Result: React.FC<ResultProps> = memo(
     target,
     status,
     scores,
+    detail,
+    retrying,
     retry,
     onLeaderboard,
     onSignIn,
@@ -54,9 +60,11 @@ export const Result: React.FC<ResultProps> = memo(
     const { rows, from } = getNeighbors(scores ?? [], ({ did }) => did === you);
     const place = (scores ?? []).findIndex(({ did }) => did === you) + 1;
     const mine = scores?.[place - 1];
+    // A failure stays on show while the solve is being posted again, so that nothing moves while it is
+    const shown = retrying ? `failed` : status;
     // Sharing is the thing to do next unless there is something that needs doing first
     const waiting =
-      status === `expired` || status === `failed` || status === `closed`;
+      shown === `expired` || shown === `failed` || shown === `closed`;
 
     return (
       <section className={cx(styles.result, className)} aria-label="Result">
@@ -79,14 +87,15 @@ export const Result: React.FC<ResultProps> = memo(
             <p>{`The target was ${target}.`}</p>
           )}
         </div>
-        {status === `failed` && (
+        {shown === `failed` && (
           <p role="alert" className={styles.alert}>
             <strong>Couldn’t post your score</strong>
             Your solve is saved on this device. Try again before this puzzle’s
             day ends, and it will still count.
+            {detail && <small>{detail}</small>}
           </p>
         )}
-        {status === `expired` && (
+        {shown === `expired` && (
           <p role="alert" className={styles.alert}>
             <strong>Your sign-in has run out</strong>
             Sign in again to post your score. Your solve is saved on this
@@ -94,17 +103,22 @@ export const Result: React.FC<ResultProps> = memo(
           </p>
         )}
         <div className={styles.actions}>
-          {status === `expired` && (
+          {shown === `expired` && (
             <button type="button" className={styles.action} onClick={onSignIn}>
               Sign in again
             </button>
           )}
-          {status === `failed` && (
-            <button type="button" className={styles.action} onClick={retry}>
-              Try again
+          {shown === `failed` && (
+            <button
+              type="button"
+              className={styles.action}
+              disabled={retrying}
+              onClick={retry}
+            >
+              {retrying ? `Trying again…` : `Try again`}
             </button>
           )}
-          {status === `closed` && (
+          {shown === `closed` && (
             // A plain link, so that the page is loaded afresh with whichever puzzle is now the day's
             <a className={styles.action} href={`/${width}x${height}`}>
               {`Play today’s ${size}`}

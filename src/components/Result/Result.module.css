@@ -44,6 +44,15 @@
     display: block;
     font-weight: 500;
   }
+
+  /* What turned the score away said, for whoever is working out why */
+  small {
+    display: block;
+    margin-block-start: var(--spacing-1);
+    color: var(--muted);
+    font-size: var(--font-size-1);
+    overflow-wrap: anywhere;
+  }
 }
 
 .actions {
@@ -67,8 +76,13 @@
   font-size: var(--font-size-3);
   font-weight: 500;
 
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
   @media (hover: hover) and (pointer: fine) {
-    &:hover {
+    &:hover:not(:disabled) {
       box-shadow: var(--hover-ring);
     }
   }

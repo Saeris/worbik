@@ -1,4 +1,4 @@
-.main {
+.profile {
   /*
    * The shades that a day is given by how much was played on it, from the
    * color of a solved tile. They are mixed in a space that has no notion of
@@ -9,45 +9,12 @@
   --played-2: color-mix(in oklab, var(--solved-bg) 65%, var(--bg));
   --played-3: var(--solved-bg);
 
-  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-4);
-  inline-size: min(100%, 480px);
-  margin-inline: auto;
-  padding: var(--spacing-2) var(--spacing-4) var(--spacing-6);
   color: var(--fg);
   font-size: var(--font-size-2);
   font-weight: 300;
-}
-
-.bar {
-  display: grid;
-  /* The title is centered on the page, not in what is left over beside the way back */
-  grid-template-columns: 44px 1fr 44px;
-  align-items: center;
-  block-size: 44px;
-
-  a {
-    display: grid;
-    place-items: center;
-    inline-size: 44px;
-    block-size: 44px;
-    margin-inline-start: calc(-1 * var(--spacing-2));
-    border-radius: var(--spacing-0);
-    color: var(--fg);
-
-    svg {
-      inline-size: var(--spacing-6);
-      block-size: var(--spacing-6);
-    }
-  }
-
-  h1 {
-    font-size: var(--font-size-4);
-    font-weight: 500;
-    text-align: center;
-  }
 }
 
 .person {
@@ -371,7 +338,6 @@
 }
 
 .empty {
-  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;

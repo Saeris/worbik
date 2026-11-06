@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useState,
-  useSyncExternalStore
-} from "react";
-import { Link } from "@void/react";
+import { useCallback, useEffect, useId, useState } from "react";
 import { PiCaretLeftThin, PiCaretRightThin } from "react-icons/pi";
 import { fetch } from "void/client";
 import type { Player } from "#auth/player";
@@ -14,7 +7,6 @@ import { getPuzzleID, getPuzzleStart } from "#utils";
 import { getMonthLength, getWeeks, toDayKey } from "#utils/calendar";
 import { ordinal } from "#utils/ordinal";
 import { getStreaks } from "#utils/streak";
-import { SignIn } from "../SignIn";
 import styles from "./Profile.module.css";
 
 /** What a player has done, as the server tells it */
@@ -435,10 +427,10 @@ const useHistory = (did: string | undefined): History | null | undefined => {
   return loaded && loaded.did === did ? loaded.history : undefined;
 };
 
-/** Whether the page is running in a browser yet never changes once it is, so there is nothing to listen for */
-const never = (): (() => void) => () => {};
-const inBrowser = (): boolean => true;
-const onServer = (): boolean => false;
+export interface ProfileProps {
+  /** Called when a player who isn't signed in asks to be */
+  onSignIn: () => void;
+}
 
 /**
  * A player's own record: their streak, the days that they played on, and
@@ -447,28 +439,22 @@ const onServer = (): boolean => false;
  * It's made of the scores that they have posted, so there is one only for
  * a player who has signed in.
  */
-export const Profile: React.FC = () => {
+export const Profile: React.FC<ProfileProps> = ({ onSignIn }) => {
   const player = usePlayer();
   const history = useHistory(player?.did);
-  // The page is first drawn by the server, which can't know who the player is. Nothing is said about them until the browser has had its say.
-  const ready = useSyncExternalStore(never, inBrowser, onServer);
 
   return (
-    <main className={styles.main}>
-      <header className={styles.bar}>
-        <Link href="/" aria-label="Back to the puzzle">
-          <PiCaretLeftThin aria-hidden />
-        </Link>
-        <h1>Profile</h1>
-      </header>
-      {!ready ? null : !player ? (
+    <div className={styles.profile}>
+      {!player ? (
         <div className={styles.empty}>
           <strong>Sign in to keep a streak</strong>
           <p>
             Your streak and your results are made of the scores that you post,
             so they need an account to belong to. You can play without one.
           </p>
-          <SignIn />
+          <button type="button" onClick={onSignIn}>
+            Sign in
+          </button>
         </div>
       ) : history === undefined ? (
         <p className={styles.empty}>Loading…</p>
@@ -479,6 +465,6 @@ export const Profile: React.FC = () => {
       ) : (
         <Details player={player} history={history} />
       )}
-    </main>
+    </div>
   );
 };

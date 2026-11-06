@@ -202,6 +202,8 @@ describe(`useScore`, () => {
     await render(true);
 
     expect(score.status).toBe(`failed`);
+    // What went wrong is kept, for whoever has to work out why
+    expect(score.detail).toBe(`The server answered 500`);
 
     await act(async () => {
       score.retry();

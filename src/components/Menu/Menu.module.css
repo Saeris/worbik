@@ -36,8 +36,7 @@
     list-style: none;
   }
 
-  button,
-  a {
+  button {
     display: block;
     color: var(--fg);
     font-size: var(--font-size-3);

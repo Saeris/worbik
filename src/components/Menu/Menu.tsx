@@ -1,5 +1,4 @@
 import { memo, useCallback } from "react";
-import { Link } from "@void/react";
 import { cx } from "class-variance-authority";
 import { PiListThin } from "react-icons/pi";
 import { usePlayer } from "#hooks";
@@ -32,6 +31,7 @@ export const Menu: React.FC<MenuProps> = memo(({ open, onOpen, className }) => {
         view === `menu` ||
         view === `guide` ||
         view === `leaderboard` ||
+        view === `profile` ||
         view === `settings` ||
         view === `sign-in`
       ) {
@@ -58,9 +58,9 @@ export const Menu: React.FC<MenuProps> = memo(({ open, onOpen, className }) => {
         <ul>
           <li>
             {player ? (
-              <Link href="/profile">
+              <button type="button" data-view="profile" onClick={show}>
                 {player.handle ? `@${player.handle}` : `Profile`}
-              </Link>
+              </button>
             ) : (
               <button type="button" data-view="sign-in" onClick={show}>
                 Sign in

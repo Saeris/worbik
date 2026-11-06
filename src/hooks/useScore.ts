@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import * as v from "valibot";
 import { fetch, FetchError } from "void/client";
 import { isOpenForScores, isPuzzleDay } from "#utils";
 import { markPosted, recordSolve } from "#utils/solves";
@@ -34,6 +35,10 @@ export interface Score {
   readonly status: ScoreStatus | null;
   /** The puzzle's leaderboard, once it has loaded */
   readonly scores: readonly RankedScore[] | null;
+  /** Why the solve couldn't be posted, in the words of whatever turned it away, for working out what went wrong */
+  readonly detail: string | null;
+  /** Whether a solve that couldn't be posted is being posted again */
+  readonly retrying: boolean;
   /** Tries again to post a solve that couldn't be posted */
   readonly retry: () => void;
 }
@@ -84,15 +89,33 @@ const post = async (
   }
 };
 
-/** Why a solve couldn't be posted, in terms of what the player can do about it */
-const explain = async (cause: unknown): Promise<ScoreStatus> => {
+/** What an answer from the server says for itself, if it says anything */
+const message = v.object({ message: v.string() });
+
+/**
+ * Why a solve couldn't be posted: in terms of what the player can do about
+ * it, and in the words of whatever turned it away.
+ */
+const explain = async (
+  cause: unknown
+): Promise<{ status: ScoreStatus; detail: string | null }> => {
   const { SignedOutError } = await import(`#auth/oauth`);
 
-  if (cause instanceof SignedOutError) return `expired`;
-  // The server is the judge of when a puzzle's day has ended, whatever this device's clock says
-  if (cause instanceof FetchError && cause.status === 403) return `closed`;
+  if (cause instanceof SignedOutError)
+    return { status: `expired`, detail: null };
 
-  return `failed`;
+  if (cause instanceof FetchError) {
+    const said = v.safeParse(message, cause.data);
+    const detail = `The server answered ${cause.status}${said.success ? `: ${said.output.message}` : ``}`;
+
+    // The server is the judge of when a puzzle's day has ended, whatever this device's clock says
+    return { status: cause.status === 403 ? `closed` : `failed`, detail };
+  }
+
+  return {
+    status: `failed`,
+    detail: cause instanceof Error ? cause.message : String(cause)
+  };
 };
 
 /**
@@ -111,6 +134,7 @@ export const useScore = (
 ): Score => {
   const did = usePlayer()?.did;
   const [status, setStatus] = useState<ScoreStatus | null>(null);
+  const [detail, setDetail] = useState<string | null>(null);
   const [scores, setScores] = useState<readonly RankedScore[] | null>(null);
   const [attempt, setAttempt] = useState(0);
 
@@ -149,7 +173,10 @@ export const useScore = (
         } catch (cause) {
           const reason = await explain(cause);
 
-          if (!isStale()) setStatus(reason);
+          if (isStale()) return;
+          console.error(`Couldn't post the score`, cause);
+          setDetail(reason.detail);
+          setStatus(reason.status);
         }
       } else {
         setStatus(`signed-out`);
@@ -167,5 +194,11 @@ export const useScore = (
     setAttempt((count) => count + 1);
   }, []);
 
-  return { status, scores, retry };
+  return {
+    status,
+    scores,
+    detail,
+    retrying: status === `posting` && attempt > 0,
+    retry
+  };
 };

@@ -65,14 +65,19 @@
 }
 
 .actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--spacing-3);
+
+  /* The device's own way of sharing, when there is one, takes a row to itself above the rest */
+  > button:first-child:nth-last-child(3) {
+    grid-column: 1 / -1;
+  }
 }
 
 .button,
 .primary,
 .post {
-  flex: 1;
   display: grid;
   place-items: center;
   box-sizing: border-box;
@@ -103,5 +108,5 @@
 
 /* Posting the score stands apart from the ways of sharing the link, on a row of its own */
 .post {
-  flex: none;
+  inline-size: 100%;
 }

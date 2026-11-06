@@ -1,4 +1,4 @@
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import {
   DialogDisclosure,
   DialogDismiss,
@@ -30,6 +30,16 @@ export interface ShareProps {
   className?: string;
 }
 
+/** Where a post is written on Bluesky, with its words filled in. The player posts it from there, so Worbik needs no leave to write to their account. */
+const COMPOSE = `https://bsky.app/intent/compose`;
+
+/**
+ * The screens that have the device's own way of sharing within reach. A
+ * desktop has one too, but it's a window of apps that nobody expects from
+ * a web page, so there the ways of sharing are spelled out instead.
+ */
+const HANDHELD = `not ((min-width: 768px) and (min-height: 541px))`;
+
 const dayFormat = new Intl.DateTimeFormat(`en-US`, {
   month: `short`,
   day: `numeric`,
@@ -57,6 +67,12 @@ const Contents: React.FC<ContentsProps> = ({
   const url = `${location.origin}${path}`;
   const card = `/api/card?${new URLSearchParams({ puzzle: puzzleID, ...(player && { player }) }).toString()}`;
   const text = `Worbik ${size} · ${dayFormat.format(new Date(getPuzzleStart(puzzleID)))} · ${moves} ${moves === 1 ? `move` : `moves`}`;
+  const compose = `${COMPOSE}?${new URLSearchParams({ text: `${text}\n${url}` }).toString()}`;
+  // Read once this is on screen, which is after the page has reached a browser
+  const handheld = useMemo(
+    () => `share` in navigator && matchMedia(HANDHELD).matches,
+    []
+  );
 
   const share = useCallback(() => {
     const hand = async (): Promise<void> => {
@@ -128,7 +144,7 @@ const Contents: React.FC<ContentsProps> = ({
         </button>
       )}
       <div className={styles.actions}>
-        {`share` in navigator && (
+        {handheld && (
           <button
             type="button"
             className={onSignIn ? styles.button : styles.primary}
@@ -137,6 +153,14 @@ const Contents: React.FC<ContentsProps> = ({
             Share…
           </button>
         )}
+        <a
+          className={onSignIn || handheld ? styles.button : styles.primary}
+          href={compose}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Post on Bluesky
+        </a>
         <button type="button" className={styles.button} onClick={copy}>
           <span aria-live="polite">{copied ? `Copied` : `Copy link`}</span>
         </button>

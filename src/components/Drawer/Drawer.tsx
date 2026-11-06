@@ -1,6 +1,5 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { Dialog, DialogDismiss, useDialogStore } from "@ariakit/react";
-import { Link } from "@void/react";
 import {
   PiCaretLeftThin,
   PiCaretRightThin,
@@ -15,11 +14,17 @@ import type { Size } from "#utils";
 import { Config } from "../Config";
 import { Guide } from "../Guide";
 import { Leaderboard } from "../Leaderboard";
+import { Profile } from "../Profile";
 import { SignIn } from "../SignIn";
 import styles from "./Drawer.module.css";
 
 /** Each of the screens that the drawer can show, other than the menu that leads to them */
-export type Screen = `guide` | `leaderboard` | `settings` | `sign-in`;
+export type Screen =
+  | `guide`
+  | `leaderboard`
+  | `profile`
+  | `settings`
+  | `sign-in`;
 
 /** What the drawer is showing: the menu, or one of its screens */
 export type View = Screen | `menu`;
@@ -73,6 +78,7 @@ export const Drawer: React.FC<DrawerProps> = memo(
     const titles = {
       "sign-in": solved ? `Post your score` : `Sign in`,
       leaderboard: `Leaderboard`,
+      profile: `Profile`,
       guide: `How to play`,
       settings: `Settings`
     } satisfies Record<Screen, string>;
@@ -81,10 +87,6 @@ export const Drawer: React.FC<DrawerProps> = memo(
     useEffect(() => {
       if (view) heading.current?.focus();
     }, [view]);
-
-    const close = useCallback(() => {
-      onView(null);
-    }, [onView]);
 
     const back = useCallback(() => {
       onView(`menu`);
@@ -101,6 +103,7 @@ export const Drawer: React.FC<DrawerProps> = memo(
         if (
           next === `guide` ||
           next === `leaderboard` ||
+          next === `profile` ||
           next === `settings` ||
           next === `sign-in`
         ) {
@@ -136,11 +139,11 @@ export const Drawer: React.FC<DrawerProps> = memo(
               <ul className={styles.items}>
                 <li>
                   {player ? (
-                    <Link href="/profile" onClick={close}>
+                    <button type="button" data-screen="profile" onClick={show}>
                       <PiUserThin aria-hidden />
                       {player.handle ? `@${player.handle}` : `Profile`}
                       <PiCaretRightThin aria-hidden />
-                    </Link>
+                    </button>
                   ) : (
                     <button type="button" data-screen="sign-in" onClick={show}>
                       <PiUserThin aria-hidden />
@@ -205,6 +208,7 @@ export const Drawer: React.FC<DrawerProps> = memo(
                   onSignIn={signIn}
                 />
               )}
+              {screen === `profile` && <Profile onSignIn={signIn} />}
               {screen === `guide` && <Guide width={width} height={height} />}
               {screen === `settings` && <Config />}
             </div>

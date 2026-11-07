@@ -97,12 +97,15 @@ export class PuzzleState {
     this.#initialized = true;
   }
 
-  static compare = (guess: string, solution: string): string =>
-    guess
+  static compare = (guess: string, solution: string): string => {
+    const goal = solution.toLowerCase();
+
+    return guess
       .toLowerCase()
       .split(``)
-      .map((c, i) => (solution.charAt(i) === c ? c.toUpperCase() : c))
+      .map((c, i) => (goal.charAt(i) === c ? c.toUpperCase() : c))
       .join(``);
+  };
 
   #update = (): this => {
     if (this.#initialized) {

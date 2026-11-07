@@ -118,7 +118,10 @@ export const resolveHandle = async (
 
     if (!handle || !isHandle(handle)) return null;
 
-    return (await handleResolver.resolve(handle)) === did ? handle : null;
+    // Handles aren't case sensitive, and a player is looked up by theirs in lowercase
+    return (await handleResolver.resolve(handle)) === did
+      ? handle.toLowerCase()
+      : null;
   } catch {
     // A handle is only for show, so not being able to look one up is no reason to turn a score away
     return null;

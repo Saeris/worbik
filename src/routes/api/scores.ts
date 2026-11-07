@@ -4,6 +4,7 @@ import { defineHandler } from "void";
 import { resolveHandle, SUBMIT_SCORE, verifyPlayer } from "#server/identity";
 import { getLeaderboard, submitGame } from "#server/scores";
 import { MAX_MOVES } from "#state";
+import { MAX_TILES } from "#utils/sizes";
 
 /** A game that is being submitted for a score */
 export const game = v.object({
@@ -11,7 +12,7 @@ export const game = v.object({
   puzzle: v.string(),
   /** Every state that the board went through, from how the puzzle began to its solution */
   history: v.pipe(
-    v.array(v.pipe(v.string(), v.maxLength(64))),
+    v.array(v.pipe(v.string(), v.maxLength(MAX_TILES))),
     v.minLength(2),
     v.maxLength(MAX_MOVES + 1)
   )

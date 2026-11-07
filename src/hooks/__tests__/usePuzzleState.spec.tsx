@@ -501,6 +501,39 @@ describe(`staying in step with the server`, () => {
     expect(sizes).toStrictEqual([MAX_GUESSES, 20]);
   });
 
+  it(`follows a game that's further along in another tab`, async () => {
+    // Whichever tab falls behind would otherwise overwrite the other's moves the next time that it saved
+    await open();
+    await act(async () => {
+      window.dispatchEvent(
+        new StorageEvent(`storage`, {
+          key: id,
+          newValue: `5|${start},${afterA}|${hints}||a-note`
+        })
+      );
+    });
+    await settle();
+
+    expect(puzzle.moves).toBe(1);
+    expect(puzzle.isRowCorrect(0)).toBe(true);
+  });
+
+  it(`leaves a game alone when another tab is behind it`, async () => {
+    await open();
+    await move(0, `left`);
+    await move(0, `up`);
+    await act(async () => {
+      window.dispatchEvent(
+        new StorageEvent(`storage`, {
+          key: id,
+          newValue: `5|${start},${afterA}|${hints}||a-note`
+        })
+      );
+    });
+
+    expect(puzzle.moves).toBe(2);
+  });
+
   it(`keeps one player's moves out of another's game`, async () => {
     // Signing out doesn't reload the page, so what was left to check has to go with the game it belongs to
     setPlayer({ did: `did:plc:someone`, handle: `someone.test` });

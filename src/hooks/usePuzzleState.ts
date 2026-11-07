@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { fetch, FetchError } from "void/client";
 import { Grid, MAX_GUESSES, PuzzleState, type PuzzleStateInit } from "#state";
 import { filterExpiredDates } from "#utils";
-import { readSavedGame } from "#utils/progress";
+import { getProgress, readSavedGame } from "#utils/progress";
 import { getGameKey, getPuzzleOfKey } from "#utils/solves";
 import { usePlayer } from "./usePlayer";
 
@@ -40,16 +40,12 @@ const useWin = (state: PuzzleState): PuzzleState["win"] =>
   );
 
 /**
- * A game, and how far the server has got with checking it.
+ * How far the server has got with checking a game.
  *
  * What's left to check is always worked out from the game's own moves, so
  * nothing can be sent twice, or be sent as part of any other game.
  */
-interface Game {
-  /** Where the game is saved, which is what tells one player's game from another's */
-  readonly key: string;
-  readonly init: PuzzleStateInit;
-  readonly state: PuzzleState;
+interface Progress {
   /** How many of the game's moves have been checked */
   checked: number;
   /** The server's note of the board that those moves lead to, without which it won't check the next one */
@@ -58,24 +54,31 @@ interface Game {
   busy: boolean;
 }
 
-const startGame = (key: string, init: PuzzleStateInit): Game => ({
-  key,
-  init,
-  state: new PuzzleState(init),
-  checked: 0,
-  busy: false
-});
+/** Goes with each game, and so goes away along with it */
+const progress = new WeakMap<PuzzleState, Progress>();
+
+const getProgressOf = (state: PuzzleState): Progress => {
+  const known = progress.get(state) ?? { checked: 0, busy: false };
+
+  progress.set(state, known);
+
+  return known;
+};
 
 /** The game of the given puzzle, which is a new one whenever the player or the puzzle changes */
-const useGame = (key: string, init: PuzzleStateInit): Game => {
-  const [game, setGame] = useState(() => startGame(key, init));
+const useGame = (key: string, init: PuzzleStateInit): PuzzleState => {
+  const [game, setGame] = useState(() => ({
+    key,
+    init,
+    state: new PuzzleState(init)
+  }));
 
-  if (game.key === key && game.init === init) return game;
+  if (game.key === key && game.init === init) return game.state;
 
-  const next = startGame(key, init);
-  setGame(next);
+  const state = new PuzzleState(init);
+  setGame({ key, init, state });
 
-  return next;
+  return state;
 };
 
 export const usePuzzle = (
@@ -98,11 +101,10 @@ export const usePuzzle = (
 } => {
   // Each player has a game of their own, so a change of player is a change of game
   const key = getGameKey(puzzleID, usePlayer()?.did);
-  const game = useGame(key, init);
-  const { state } = game;
+  const state = useGame(key, init);
   const moves = useMoves(state);
   const win = useWin(state);
-  const [stalled, setStalled] = useState<Game | null>(null);
+  const [stalled, setStalled] = useState<PuzzleState | null>(null);
 
   useHints(state);
 
@@ -115,14 +117,18 @@ export const usePuzzle = (
    * can simply be made again.
    */
   const check = useCallback(async (): Promise<void> => {
-    if (game.busy) return;
+    const game = getProgressOf(state);
+    const isDone = (): boolean =>
+      state.win || game.checked >= state.history.length - 1;
+
+    if (game.busy || isDone()) return;
 
     game.busy = true;
 
     let restarted = false;
 
     try {
-      while (!state.win && game.checked < state.history.length - 1) {
+      while (!isDone()) {
         const next = game.checked + 1;
         const guesses = state.history.slice(next, next + MAX_GUESSES);
 
@@ -155,14 +161,14 @@ export const usePuzzle = (
         }
       }
 
-      setStalled((current) => (current === game ? null : current));
+      setStalled((current) => (current === state ? null : current));
 
       if (persist) {
         const [width, history, hint, reported = ``] = state.snapshot;
 
         try {
           localStorage.setItem(
-            game.key,
+            key,
             [width, history, hint, reported, game.position].join(`|`)
           );
         } catch {
@@ -171,11 +177,11 @@ export const usePuzzle = (
       }
     } catch (cause) {
       console.error(`Couldn't check the game's moves`, cause);
-      setStalled(game);
+      setStalled(state);
     } finally {
       game.busy = false;
     }
-  }, [game, state, puzzleID, persist]);
+  }, [key, state, puzzleID, persist]);
 
   const resume = useCallback(
     (saved: string | null) => {
@@ -190,12 +196,15 @@ export const usePuzzle = (
         found.hints,
         found.reported
       ]);
+
+      const game = getProgressOf(state);
+
       game.position = found.from;
       // Without a note, there is no telling how far the server had got with it
       game.checked = found.from ? state.history.length - 1 : 0;
       void check();
     },
-    [game, state, check]
+    [state, check]
   );
 
   useEffect(() => {
@@ -214,6 +223,29 @@ export const usePuzzle = (
       // Storage can be unavailable, e.g. when site data is blocked. The game is still there to be played, it just won't be kept.
     }
   }, [key, persist, resume]);
+
+  // A game can be open in more than one tab, and whichever falls behind would otherwise overwrite the other's moves when it's next saved
+  useEffect(() => {
+    if (!persist) return undefined;
+
+    const follow = ({ key: changed, newValue }: StorageEvent): void => {
+      const saved = getProgress(newValue);
+
+      if (
+        changed === key &&
+        saved &&
+        (saved.solved || saved.moves > state.moves)
+      ) {
+        resume(newValue);
+      }
+    };
+
+    window.addEventListener(`storage`, follow);
+
+    return (): void => {
+      window.removeEventListener(`storage`, follow);
+    };
+  }, [key, persist, resume, state]);
 
   const rotate = useCallback(
     (rowOrCol: number, dir: `down` | `left` | `right` | `up`) => {
@@ -234,7 +266,7 @@ export const usePuzzle = (
     win,
     rotate,
     resume,
-    stalled: stalled === game,
+    stalled: stalled === state,
     retry,
     target: state.target,
     history: state.history,

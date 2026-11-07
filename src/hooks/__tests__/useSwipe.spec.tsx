@@ -131,6 +131,15 @@ describe(`useSwipe`, () => {
     expect(rotate).toHaveBeenCalledExactlyOnceWith(1, `up`);
   });
 
+  it(`isn't held up by a swipe whose end was never heard about`, () => {
+    // Should a finger lift without the board finding out, every swipe after it would otherwise be ignored until a reload
+    pointer(`pointerdown`, 100, 100, { id: 1 });
+    pointer(`pointerdown`, 100, 100, { id: 2 });
+    pointer(`pointerup`, 0, 100, { id: 2 });
+
+    expect(rotate).toHaveBeenCalledTimes(1);
+  });
+
   it(`leaves the buttons around the board alone`, () => {
     pointer(`pointerdown`, 100, 100, { target: `#arrow` });
     pointer(`pointerup`, 200, 100, { target: `#arrow` });

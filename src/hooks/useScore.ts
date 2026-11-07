@@ -139,18 +139,20 @@ export const useScore = (
   history: readonly string[]
 ): Score => {
   const did = usePlayer()?.did;
-  const [status, setStatus] = useState<ScoreStatus | null>(null);
-  const [detail, setDetail] = useState<string | null>(null);
+  // Who solved what, or `null` while nothing has been solved. Whatever became of one solve says nothing about the next.
+  const solve = win ? getGameKey(puzzleID, did) : null;
+  const [outcome, setOutcome] = useState<{
+    solve: string;
+    status: ScoreStatus;
+    detail?: string | null;
+  } | null>(null);
+  const { status = null, detail = null } =
+    outcome?.solve === solve ? outcome : {};
   const [scores, setScores] = useState<readonly RankedScore[] | null>(null);
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    if (!win) {
-      // Whatever became of an earlier solve says nothing about the game that's taken its place
-      setStatus(null);
-      setDetail(null);
-      return undefined;
-    }
+    if (solve === null) return undefined;
 
     // Set when the solve is no longer the one being followed, so that nothing more is made of it
     const stale = new AbortController();
@@ -158,22 +160,22 @@ export const useScore = (
     const isStale = (): boolean => stale.signal.aborted;
 
     const follow = async (): Promise<void> => {
-      const solve = recordSolve(puzzleID, did);
+      const solved = recordSolve(puzzleID, did);
       const loaded = await loadScores(puzzleID);
 
       if (isStale()) return;
       setScores(loaded);
 
-      if (solve.posted) {
-        setStatus(`posted`);
-      } else if (isPastPuzzleDay(puzzleID, new Date(solve.at))) {
-        setStatus(`closed`);
+      if (solved.posted) {
+        setOutcome({ solve, status: `posted` });
+      } else if (isPastPuzzleDay(puzzleID, new Date(solved.at))) {
+        setOutcome({ solve, status: `closed` });
       } else if (!isOpenForScores(puzzleID)) {
-        setStatus(`missed`);
+        setOutcome({ solve, status: `missed` });
       } else if (history.length - 1 > MAX_MOVES) {
-        setStatus(`too-long`);
+        setOutcome({ solve, status: `too-long` });
       } else if (did) {
-        setStatus(`posting`);
+        setOutcome({ solve, status: `posting` });
 
         try {
           await post(puzzleID, history, did);
@@ -181,17 +183,16 @@ export const useScore = (
 
           if (isStale()) return;
           setScores(ranked);
-          setStatus(`posted`);
+          setOutcome({ solve, status: `posted` });
         } catch (cause) {
           const reason = explain(cause);
 
           if (isStale()) return;
           console.error(`Couldn't post the score`, cause);
-          setDetail(reason.detail);
-          setStatus(reason.status);
+          setOutcome({ solve, ...reason });
         }
       } else {
-        setStatus(`signed-out`);
+        setOutcome({ solve, status: `signed-out` });
       }
     };
 
@@ -200,7 +201,7 @@ export const useScore = (
     return (): void => {
       stale.abort();
     };
-  }, [puzzleID, win, history, did, attempt]);
+  }, [puzzleID, solve, history, did, attempt]);
 
   const retry = useCallback(() => {
     setAttempt((count) => count + 1);

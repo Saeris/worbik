@@ -1,5 +1,5 @@
 import { HTTPException } from "hono/http-exception";
-import { and, asc, db, eq, inArray } from "void/db";
+import { and, asc, db, desc, eq, inArray } from "void/db";
 import { scores } from "#db/schema";
 import { replay } from "#state";
 import { isNonNullable, isOpenForScores, parseSize, sizes } from "#utils";
@@ -52,8 +52,8 @@ export const recordScore = async (
  * its score is the number of moves that the replay counted, rather than one
  * that the player claims.
  *
- * Only the day's puzzle can be scored. Older ones can still be played, but
- * their leaderboards have closed.
+ * Only the day's puzzle can be scored, along with the hour's grace after it.
+ * The leaderboards of older ones have closed.
  */
 export const submitGame = async (
   puzzleID: string,
@@ -91,7 +91,8 @@ export const submitGame = async (
  * The score that a player posted for a puzzle, or `null` if they haven't.
  *
  * The player is found by their identity, or by the handle that they had
- * when they posted the score.
+ * when they posted the score. A handle can pass from one player to another,
+ * in which case it's whoever posted under it last.
  */
 export const getScore = async (
   puzzle: string,
@@ -108,6 +109,7 @@ export const getScore = async (
           : eq(scores.handle, player.toLowerCase())
       )
     )
+    .orderBy(desc(scores.createdAt))
     .limit(1);
 
   return found.at(0) ?? null;

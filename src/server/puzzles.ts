@@ -74,7 +74,8 @@ const create = async (
   const puzzle = generate(
     config,
     await seededRandom(`${env.PUZZLE_SECRET}:${id}`),
-    env.PUZZLE_SCRAMBLE
+    // A puzzle is kept for good, so this can't be left to whatever happens to be set
+    import.meta.env.DEV ? env.PUZZLE_SCRAMBLE : undefined
   ).toChallenge();
 
   try {

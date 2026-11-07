@@ -10,9 +10,10 @@ import { parseSize } from "#utils";
  * result on one, is pasted.
  *
  * It names a score only if the player really did post it. A puzzle's card
- * never changes, and nor does a player's once they have a score, as their
- * first is the one that's kept. So either can be held on to by whoever
- * fetches it, which is what keeps this from being drawn over and over.
+ * never changes, and a player's only does if they delete their data, as
+ * their first score is the one that's kept. So either can be held on to by
+ * whoever fetches it, which is what keeps this from being drawn over and
+ * over, and a card that outlives its score is why the privacy policy says so.
  */
 export const GET = defineHandler.withValidator({
   query: v.object({

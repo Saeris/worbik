@@ -2,7 +2,7 @@ import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
 import { defineHandler } from "void";
 import { resolveHandle, SUBMIT_SCORE, verifyPlayer } from "#server/identity";
-import { getRanking, submitGame } from "#server/scores";
+import { getLeaderboard, submitGame } from "#server/scores";
 import { MAX_MOVES } from "#state";
 import { MAX_TILES } from "#utils/sizes";
 
@@ -22,11 +22,9 @@ export const game = v.object({
 export const GET = defineHandler.withValidator({
   query: v.object({
     /** The ID of the puzzle to rank the scores of */
-    puzzle: v.string(),
-    /** The identity of a player to find on it, however far down they are. Scores are public, so this needs no proof. */
-    player: v.optional(v.pipe(v.string(), v.maxLength(2048)))
+    puzzle: v.string()
   })
-})(async (_c, { query }) => getRanking(query.puzzle, query.player));
+})(async (_c, { query }) => getLeaderboard(query.puzzle));
 
 /**
  * Submits a game that solved a puzzle, to earn a place on its leaderboard.

@@ -66,7 +66,7 @@ export const loadScores = async (
   did?: string
 ): Promise<Ranking | null> => {
   try {
-    return await fetch(`/api/scores`, {
+    return await fetch(`/api/ranking`, {
       query: { puzzle: puzzleID, ...(did && { player: did }) }
     });
   } catch {

@@ -176,7 +176,7 @@ export class PuzzleState {
     this.#grid = new Grid(current, width);
     this.#history = history;
     this.#hints = group(hint.split(``), width);
-    this.#reportedMoves = moves === undefined ? null : Number(moves);
+    this.#reportedMoves = Number(moves) || null;
     this.#checkWin(this.current.flat().join(``));
     // A game that was already won is left alone by that check, but may have just been replaced
     return this.#update();

@@ -28,6 +28,10 @@ const next = (state: string, width: Size): Set<string> => {
   return moves;
 };
 
+/** Whether one board follows from another by a single move */
+export const isMove = (width: Size, from: string, to: string): boolean =>
+  next(from, width).has(to);
+
 /**
  * Replays a game from the states its board went through, and returns how
  * many moves it took to solve the puzzle, or `null` if it isn't a game that

@@ -2,6 +2,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useSyncExternalStore
 } from "react";
@@ -9,6 +10,7 @@ import { fetch } from "void/client";
 import { useQueuedAPICall } from "#hooks";
 import { Grid, PuzzleState, type PuzzleStateInit } from "#state";
 import { filterExpiredDates } from "#utils";
+import { getProgress } from "#utils/progress";
 
 const useMatrix = (state: PuzzleState): string =>
   useSyncExternalStore(
@@ -62,17 +64,26 @@ export const usePuzzle = (
   const moves = useMoves(state);
   const win = useWin(state);
 
+  // The server's note of where the game is, without which it won't check the next move
+  const position = useRef<string | undefined>(undefined);
+
   useHints(state);
 
   const resume = useCallback(
     (saved: string | null) => {
+      const [, history, , , from] = saved?.split(`|`) ?? [];
+      const progress = getProgress(saved);
+
       // A saved game is only of this puzzle if it began where this puzzle does. One that didn't is of a puzzle that has since been remade, which happens in development.
-      if (
-        saved?.split(`|`)[1]?.split(`,`)[0] ===
-        state.initial.toString().toLowerCase()
-      ) {
-        state.restore(saved.split(`|`) as PuzzleState["snapshot"]);
+      if (history?.split(`,`)[0] !== state.initial.toString().toLowerCase()) {
+        return;
       }
+
+      // A game that was left unfinished before the server began keeping track of moves can't be carried on from
+      if (progress && !progress.solved && !from) return;
+
+      position.current = from;
+      state.restore(saved?.split(`|`) as PuzzleState["snapshot"]);
     },
     [state]
   );
@@ -94,16 +105,24 @@ export const usePuzzle = (
   const queue = useQueuedAPICall(
     useCallback(
       async (vals: string[]): Promise<void> => {
-        const snapshot = state
-          .validate(
-            await fetch(`/api/check`, {
-              query: { puzzle: puzzleID, guesses: vals.join(`,`) }
-            })
-          )
-          .snapshot.join(`|`);
+        const { hints, from } = await fetch(`/api/check`, {
+          query: {
+            puzzle: puzzleID,
+            guesses: vals.join(`,`),
+            ...(position.current && { from: position.current })
+          }
+        });
+
+        position.current = from;
+
+        const [width, history, hint, reported = ``] =
+          state.validate(hints).snapshot;
 
         if (persist) {
-          localStorage.setItem(puzzleID, snapshot);
+          localStorage.setItem(
+            puzzleID,
+            [width, history, hint, reported, from].join(`|`)
+          );
         }
       },
       [puzzleID, state, persist]

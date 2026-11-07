@@ -53,13 +53,15 @@ interface Progress {
   position?: string;
   /** Whether moves are on their way to the server */
   busy: boolean;
+  /** How many times a saved game has taken over from what was on the board, which makes any answer on its way out of date */
+  restores: number;
 }
 
 /** Goes with each game, and so goes away along with it */
 const progress = new WeakMap<PuzzleState, Progress>();
 
 const getProgressOf = (state: PuzzleState): Progress => {
-  const known = progress.get(state) ?? { checked: 0, busy: false };
+  const known = progress.get(state) ?? { checked: 0, busy: false, restores: 0 };
 
   progress.set(state, known);
 
@@ -132,6 +134,7 @@ export const usePuzzle = (
       while (!isDone()) {
         const next = game.checked + 1;
         const guesses = state.history.slice(next, next + MAX_GUESSES);
+        const { restores } = game;
 
         try {
           // Each call has to settle before the next starts, so that their results are applied in order
@@ -145,9 +148,12 @@ export const usePuzzle = (
             timeout: REQUEST_TIMEOUT
           });
 
-          game.position = from;
-          game.checked += guesses.length;
-          state.validate(hints);
+          // What it has to say is about a game that's no longer on the board
+          if (game.restores === restores) {
+            game.position = from;
+            game.checked += guesses.length;
+            state.validate(hints);
+          }
         } catch (cause) {
           // The note can't be used, and only the game itself can stand in for it: every move from the start is a move the server can check without one
           if (
@@ -201,6 +207,7 @@ export const usePuzzle = (
 
       const game = getProgressOf(state);
 
+      game.restores += 1;
       game.position = found.from;
       // Without a note, there is no telling how far the server had got with it
       game.checked = found.from ? state.history.length - 1 : 0;
@@ -230,22 +237,35 @@ export const usePuzzle = (
   useEffect(() => {
     if (!persist) return undefined;
 
-    const follow = ({ key: changed, newValue }: StorageEvent): void => {
-      const saved = getProgress(newValue);
+    const follow = (stored: string | null): void => {
+      const saved = getProgress(stored);
 
-      if (
-        changed === key &&
-        saved &&
-        (saved.solved || saved.moves > state.moves)
-      ) {
-        resume(newValue);
+      if (saved && !state.win && (saved.solved || saved.moves > state.moves)) {
+        resume(stored);
       }
     };
 
-    window.addEventListener(`storage`, follow);
+    const onChange = ({ key: changed, newValue }: StorageEvent): void => {
+      if (changed === key) follow(newValue);
+    };
+
+    // A tab that a phone has put to sleep hears nothing of what's been saved in the meantime
+    const onWake = (): void => {
+      if (document.visibilityState !== `visible`) return;
+
+      try {
+        follow(localStorage.getItem(key));
+      } catch {
+        // Without storage, there are no other tabs to keep up with
+      }
+    };
+
+    window.addEventListener(`storage`, onChange);
+    document.addEventListener(`visibilitychange`, onWake);
 
     return (): void => {
-      window.removeEventListener(`storage`, follow);
+      window.removeEventListener(`storage`, onChange);
+      document.removeEventListener(`visibilitychange`, onWake);
     };
   }, [key, persist, resume, state]);
 

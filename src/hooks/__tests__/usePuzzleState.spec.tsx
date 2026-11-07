@@ -540,6 +540,80 @@ describe(`staying in step with the server`, () => {
     expect(puzzle.moves).toBe(2);
   });
 
+  it(`catches up with another tab on waking`, async () => {
+    // A phone puts a tab to sleep, and a sleeping tab hears nothing of what's saved, so it would overwrite newer moves
+    await open();
+    localStorage.setItem(id, `5|${start},${afterA}|${hints}||a-note`);
+    await act(async () => {
+      document.dispatchEvent(new Event(`visibilitychange`));
+    });
+    await settle();
+
+    expect(puzzle.moves).toBe(1);
+  });
+
+  it(`does nothing on going to sleep`, async () => {
+    await open();
+    localStorage.setItem(id, `5|${start},${afterA}|${hints}||a-note`);
+    vi.spyOn(document, `visibilityState`, `get`).mockReturnValue(`hidden`);
+    await act(async () => {
+      document.dispatchEvent(new Event(`visibilitychange`));
+    });
+
+    expect(puzzle.moves).toBe(0);
+  });
+
+  it(`leaves a solved game alone on waking`, async () => {
+    // Nothing can come after a solve, and picking it up again would throw away what's known about it
+    await open();
+    await move(0, `left`);
+    await move(1, `left`);
+
+    const { history } = puzzle;
+
+    localStorage.setItem(
+      id,
+      `5|${[...history, solution].join(`,`)}|${solution.toUpperCase()}||a-note`
+    );
+    await act(async () => {
+      document.dispatchEvent(new Event(`visibilitychange`));
+    });
+
+    expect(puzzle.win).toBe(true);
+    expect(puzzle.moves).toBe(2);
+  });
+
+  it(`ignores an answer about a game that another tab has replaced`, async () => {
+    // It would leave a note for one board saved beside another, which is what used to make games unwinnable
+    const held = Promise.withResolvers<void>();
+
+    check.mockImplementationOnce((async (
+      ...args: Parameters<typeof server>
+    ) => {
+      await held.promise;
+      return server(...args);
+    }) as never);
+    await open();
+    await act(async () => {
+      puzzle.rotate(0, `left`);
+    });
+    await act(async () => {
+      window.dispatchEvent(
+        new StorageEvent(`storage`, {
+          key: id,
+          newValue: `5|${start},${afterA},${afterB}|${hints}||a-note`
+        })
+      );
+    });
+    await act(async () => {
+      held.resolve();
+    });
+    await settle();
+
+    expect(puzzle.moves).toBe(2);
+    expect(localStorage.getItem(id)?.endsWith(`|a-note`)).toBe(true);
+  });
+
   it(`keeps one player's moves out of another's game`, async () => {
     // Signing out doesn't reload the page, so what was left to check has to go with the game it belongs to
     setPlayer({ did: `did:plc:someone`, handle: `someone.test` });

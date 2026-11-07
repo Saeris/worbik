@@ -1,4 +1,4 @@
-import { randomInt } from "./randomInt";
+import { randomInt, type Random } from "./randomInt";
 import { repeat } from "./repeat";
 
 export const drawFrom = <T extends unknown[], I extends number>(
@@ -6,21 +6,23 @@ export const drawFrom = <T extends unknown[], I extends number>(
   idx: I
 ): T[I] => arr.splice(idx, 1)[0];
 
-export const drawRandom = <T extends unknown[]>(arr: T): T[keyof T] =>
-  // eslint-disable-next-line no-bitwise
-  drawFrom(arr, randomInt(0, arr.length - 1));
+export const drawRandom = <T extends unknown[]>(
+  arr: T,
+  random?: Random
+): T[keyof T] => drawFrom(arr, randomInt(0, arr.length - 1, random));
 
 export const drawN = <T extends unknown[]>(
   arr: T,
   count: number
-): Array<T[number]> => repeat<T[number]>(count)(() => arr.shift() as T[number]);
+): Array<T[number]> => repeat<T[number]>(count)(() => arr.shift());
 
 export const drawNFromBottom = <T extends unknown[]>(
   arr: T,
   count: number
-): Array<T[number]> => repeat<T[number]>(count)(() => arr.pop() as T[number]);
+): Array<T[number]> => repeat<T[number]>(count)(() => arr.pop());
 
 export const drawNRandom = <T extends unknown[]>(
   arr: T,
-  count: number
-): Array<T[number]> => repeat<T[number]>(count)(() => drawRandom(arr));
+  count: number,
+  random?: Random
+): Array<T[number]> => repeat<T[number]>(count)(() => drawRandom(arr, random));

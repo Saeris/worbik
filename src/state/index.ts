@@ -5,3 +5,4 @@ export {
   type Challenge,
   type Snapshot
 } from "./PuzzleState";
+export { MAX_MOVES, replay } from "./replay";

@@ -1,7 +1,10 @@
+/*
+ * A button that rotates a row or column of the board. It is as long as the
+ * tiles it sits beside and two fifths as thick, whatever size those tiles
+ * are, with both of those sizes being worked out by the board.
+ */
 .button {
-  --min: var(--spacing-8);
-  --max: var(--spacing-20);
-  flex: 1 1 auto;
+  flex: none;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -10,38 +13,29 @@
   box-shadow: 0px var(--spacing-0) 0px 0px var(--neutral-bd);
   box-sizing: border-box;
   color: var(--neutral-fg);
-  font-size: var(--font-size-6);
   cursor: pointer;
 
+  /* The icon is as large as the button is thick */
   svg {
-    aspect-ratio: 1 / 1;
-    max-width: var(--spacing-8);
-    max-height: var(--spacing-8);
+    inline-size: var(--arrow);
+    block-size: var(--arrow);
   }
 
-  &:hover,
-  &:focus {
-    &:not(:disabled) {
-      box-shadow: var(--focus-ring);
-      outline: none;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover:not(:disabled) {
+      box-shadow: var(--hover-ring);
     }
   }
 }
 
+/* Rotates a row, from either end of it */
 .horizontal {
-  padding: var(--spacing-2) 0;
-  min-width: var(--spacing-8);
-  max-width: var(--spacing-8);
-  min-height: var(--min);
-  height: 100%;
-  max-height: var(--max);
+  inline-size: var(--arrow);
+  block-size: var(--tile);
 }
 
+/* Rotates a column, from above or below it */
 .vertical {
-  padding: 0 var(--spacing-2);
-  min-width: var(--min);
-  width: 100%;
-  max-width: var(--max);
-  min-height: var(--spacing-8);
-  max-height: var(--spacing-8);
+  inline-size: var(--tile);
+  block-size: var(--arrow);
 }

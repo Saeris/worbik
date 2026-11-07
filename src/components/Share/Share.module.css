@@ -1,0 +1,112 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.heading {
+  font-size: var(--font-size-6);
+  font-weight: 500;
+  line-height: var(--font-height-6);
+}
+
+.close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  margin-inline-end: calc(-1 * var(--spacing-2));
+  border-radius: var(--spacing-0);
+
+  svg {
+    inline-size: var(--spacing-6);
+    block-size: var(--spacing-6);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: var(--neutral-bg);
+    }
+  }
+}
+
+/* Its room is kept before it has loaded, so that the sheet doesn't grow once it does */
+.card {
+  inline-size: 100%;
+  block-size: auto;
+  aspect-ratio: 1200 / 630;
+  border-radius: var(--spacing-1);
+  /* The color that every card is drawn on, to stand in for it until then */
+  background: oklch(27.5% 0.018 285);
+}
+
+.message {
+  padding: var(--spacing-3);
+  border: 1px solid var(--bd);
+  border-radius: var(--spacing-0);
+  font-size: var(--font-size-2);
+  font-weight: 300;
+  line-height: var(--font-height-3);
+
+  span {
+    display: block;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+  }
+}
+
+.note {
+  color: var(--muted);
+  font-size: var(--font-size-1);
+  font-weight: 300;
+  line-height: var(--font-height-2);
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-3);
+
+  /* The device's own way of sharing, when there is one, takes a row to itself above the rest */
+  > button:first-child:nth-last-child(3) {
+    grid-column: 1 / -1;
+  }
+}
+
+.button,
+.primary,
+.post {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  block-size: 48px;
+  border: 1px solid var(--bd);
+  border-radius: var(--spacing-0);
+  background: var(--bg);
+  box-shadow: 0px var(--spacing-0) 0px 0px var(--bd);
+  color: var(--fg);
+  font-size: var(--font-size-3);
+  font-weight: 500;
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      box-shadow: var(--hover-ring);
+    }
+  }
+}
+
+.primary,
+.post {
+  border-color: var(--fg);
+  background: var(--fg);
+  box-shadow: 0px var(--spacing-0) 0px 0px
+    color-mix(in oklch, var(--fg) 70%, var(--bg));
+  color: var(--bg);
+}
+
+/* Posting the score stands apart from the ways of sharing the link, on a row of its own */
+.post {
+  inline-size: 100%;
+}

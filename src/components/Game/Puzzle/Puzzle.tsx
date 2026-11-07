@@ -1,33 +1,39 @@
-"use client";
 /* eslint-disable react/no-array-index-key */
-import React from "react";
 import {
   Composite,
   CompositeGroup,
   CompositeRow,
   useCompositeStore
 } from "@ariakit/react";
+import { cx } from "class-variance-authority";
 import { Tile } from "#components/Tile";
 import { Direction } from "#components/Direction";
 import { range } from "#utils";
-import type { usePuzzle } from "#hooks";
+import { useSwipe, type usePuzzle } from "#hooks";
 import styles from "./Puzzle.module.css";
 
 export interface PuzzleProps {
   readonly state: ReturnType<typeof usePuzzle>;
+  readonly className?: string;
 }
 
-export const Puzzle: React.FC<PuzzleProps> = ({ state }) => {
+export const Puzzle: React.FC<PuzzleProps> = ({ state, className }) => {
   const grid = useCompositeStore();
   const repeat = range(state.initial.width);
+  const swipe = useSwipe(state.rotate);
 
   return (
     <Composite
       store={grid}
-      style={{ "--items": state.initial.width } as React.CSSProperties}
-      className={styles.container}
+      style={
+        {
+          "--columns": state.initial.width,
+          "--rows": state.initial.height
+        } as React.CSSProperties
+      }
+      className={cx(styles.container, className)}
     >
-      <CompositeGroup className={styles.grid}>
+      <CompositeGroup className={styles.grid} {...swipe}>
         <CompositeRow className={styles.row}>
           {repeat.map((y) => (
             <Direction
@@ -55,7 +61,7 @@ export const Puzzle: React.FC<PuzzleProps> = ({ state }) => {
                 y={y}
                 char={char}
                 hint={state.getHintAt(x, y)}
-                correct={state.isRowCorrect(x)}
+                solved={state.isRowCorrect(x)}
                 disabled={state.win}
                 rotate={state.rotate}
               />

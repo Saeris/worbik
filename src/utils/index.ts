@@ -1,9 +1,16 @@
 export { between } from "./between";
 export { getDateKey, filterExpiredDates, type DateKey } from "./getDateKey";
-export { getDomains } from "./getDomains";
+export { getPuzzleID, ROLLOVER_HOUR_UTC } from "./getPuzzleID";
 export { group } from "./group";
 export { isNonNullable } from "./isNonNullable";
 export { isExpired } from "./isExpired";
+export {
+  getPuzzleStart,
+  isOpenForScores,
+  isPuzzleDay,
+  PUZZLE_DAY,
+  SCORING_WINDOW
+} from "./isOpenForScores";
 export { isUppercase } from "./isUppercase";
 export { parseSize } from "./parseSize";
 export {
@@ -11,12 +18,10 @@ export {
   type RawPuzzleSchema,
   type PuzzleSchema
 } from "./puzzleSchema";
-export { randomInt } from "./randomInt";
+export { randomInt, type Random } from "./randomInt";
 export { range } from "./range";
 export { repeat } from "./repeat";
-export { sendDiscordWebhook } from "./sendDiscordWebhook";
+export { seededRandom } from "./seededRandom";
 export { sizes, type Size, type Dimensions } from "./sizes";
 export { toInt } from "./toInt";
 export type { Maybe } from "./types";
-export { updateEdgeConfig, type UpdateItemsResponse } from "./updateEdgeConfig";
-export { wait } from "./wait";

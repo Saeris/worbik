@@ -1,0 +1,106 @@
+.open {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  block-size: 44px;
+  padding-inline: var(--spacing-3) var(--spacing-2);
+  border: 1px solid var(--bd);
+  border-radius: var(--spacing-0);
+  background: var(--bg);
+  box-shadow: 0px var(--spacing-0) 0px 0px var(--bd);
+  color: var(--fg);
+  font-size: var(--font-size-3);
+  font-weight: 500;
+
+  svg {
+    inline-size: var(--spacing-4);
+    block-size: var(--spacing-4);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      box-shadow: var(--hover-ring);
+    }
+  }
+}
+
+.heading {
+  color: var(--fg);
+  font-size: var(--font-size-6);
+  font-weight: 500;
+  line-height: var(--font-height-6);
+}
+
+.sizes {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-2);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--spacing-3);
+  color: var(--muted);
+  font-size: var(--font-size-2);
+  font-weight: 300;
+}
+
+.note {
+  color: var(--muted);
+  font-size: var(--font-size-1);
+  font-weight: 300;
+  line-height: var(--font-height-2);
+}
+
+.size {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-0);
+  block-size: 60px;
+  border: 1px solid var(--bd);
+  border-radius: var(--spacing-0);
+  background: var(--bg);
+  box-shadow: 0px var(--spacing-0) 0px 0px var(--bd);
+  color: var(--fg);
+  font-size: var(--font-size-3);
+  font-weight: 500;
+
+  /* How the player has done on it, which is only spelled out for those who can't see the color of it */
+  small {
+    font-size: var(--font-size-1);
+    font-weight: 300;
+    line-height: var(--font-height-1);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* A puzzle is colored the way that its tiles are: one under way like a letter that's in place, and a solved one like a solved row */
+  &.started {
+    border-color: var(--correct-bd);
+    background: var(--correct-bg);
+    box-shadow: 0px var(--spacing-0) 0px 0px var(--correct-bd);
+    color: var(--correct-fg);
+  }
+
+  &.solved {
+    border-color: var(--solved-bd);
+    background: var(--solved-bg);
+    box-shadow: 0px var(--spacing-0) 0px 0px var(--solved-bd);
+    color: var(--solved-fg);
+  }
+
+  /* The size of the board that is being played */
+  &[aria-current] {
+    outline: 2px solid var(--fg);
+    outline-offset: 2px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      box-shadow: var(--hover-ring);
+    }
+  }
+}

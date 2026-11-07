@@ -3,3 +3,9 @@
   justify-content: center;
   gap: var(--spacing-0);
 }
+
+.guide {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75em;
+}

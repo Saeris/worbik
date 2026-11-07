@@ -1,8 +1,5 @@
-"use client";
-import React, { memo } from "react";
-import { DialogDismiss, DialogHeading } from "@ariakit/react";
-import { PiInfoThin, PiXThin } from "react-icons/pi";
-import { Modal, ModalHeader } from "../Modal";
+import { memo } from "react";
+import type { Size } from "#utils";
 import { Tile } from "../Tile";
 import styles from "./Guide.module.css";
 
@@ -14,18 +11,12 @@ const numbers = {
 } as const;
 
 export interface GuideProps {
-  width: number;
-  height: number;
+  width: Size;
+  height: Size;
 }
 
 export const Guide: React.FC<GuideProps> = memo(({ width, height }) => (
-  <Modal label={<PiInfoThin />} aria-label={`How to Play`}>
-    <ModalHeader>
-      <DialogHeading>How To Play:</DialogHeading>
-      <DialogDismiss>
-        <PiXThin />
-      </DialogDismiss>
-    </ModalHeader>
+  <div className={styles.guide}>
     <p>
       {`Hidden in this puzzle are `}
       <strong>{`${String(numbers[height])} words`}</strong>
@@ -44,15 +35,15 @@ export const Guide: React.FC<GuideProps> = memo(({ width, height }) => (
     </div>
     <p>{`As you play, letters in the correct position will turn their tile yellow and will permanently display a reminder in the bottom right corner.`}</p>
     <div className={styles.row}>
-      <Tile x={0} y={0} char="W" hint="W" correct disabled />
-      <Tile x={0} y={0} char="O" hint="O" correct disabled />
-      <Tile x={0} y={0} char="R" hint="R" correct disabled />
-      <Tile x={0} y={0} char="B" hint="B" correct disabled />
-      <Tile x={0} y={0} char="I" hint="I" correct disabled />
-      <Tile x={0} y={0} char="K" hint="K" correct disabled />
+      <Tile x={0} y={0} char="W" hint="W" solved disabled />
+      <Tile x={0} y={0} char="O" hint="O" solved disabled />
+      <Tile x={0} y={0} char="R" hint="R" solved disabled />
+      <Tile x={0} y={0} char="B" hint="B" solved disabled />
+      <Tile x={0} y={0} char="I" hint="I" solved disabled />
+      <Tile x={0} y={0} char="K" hint="K" solved disabled />
     </div>
     <p>{`When you complete a row, all of the tiles will turn green. Get all of the letters in the correct position to win!`}</p>
-  </Modal>
+  </div>
 ));
 
 Guide.displayName = `Guide`;

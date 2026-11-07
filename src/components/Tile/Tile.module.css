@@ -1,6 +1,37 @@
 .tile {
-  --min: var(--spacing-8);
+  --min: var(--spacing-6);
   --max: var(--spacing-20);
+
+  /*
+   * A tile is laid out like a Scrabble tile, with a large letter in its
+   * middle and a small one tucked into its bottom corner. Tiles come in
+   * a range of sizes, and those two letters must never touch at any of them.
+   *
+   * So rather than being tuned by hand for each size, the large letter is
+   * given whatever room is left between the middle of the tile and the top
+   * of the small one, which itself is kept within a range that stays legible.
+   */
+
+  /* How tall Montserrat's capital letters are, as a fraction of its font size */
+  --cap-height: 0.7;
+  /* How far below the bottom of Montserrat's capitals a line of text extends, when it is as tall as its font size */
+  --descent: 0.14em;
+  /* How far the small letter is from the edges of the tile */
+  --hint-inset: clamp(2px, 4cqi, 4px);
+  /* How far the small letter is from the bottom of the large one */
+  --hint-gap: max(1.5px, 5cqi);
+  --hint-size: clamp(9px, 25cqi, 12px);
+  --letter-size: min(
+    36px,
+    (
+        50cqi - var(--hint-inset) - var(--cap-height) * var(--hint-size) -
+          var(--hint-gap)
+      ) /
+      (var(--cap-height) / 2)
+  );
+
+  /* Lets the letters be sized relative to the width of their tile, with `cqi` units */
+  container-type: inline-size;
   position: relative;
   flex: 1 1 auto;
   aspect-ratio: 1 / 1;
@@ -16,39 +47,59 @@
   background: var(--neutral-bg);
   box-shadow: 0px var(--spacing-0) 0px 0px var(--neutral-bd);
   color: var(--neutral-fg);
-  font-size: var(--font-size-7);
   font-weight: 200;
-  line-height: var(--font-height-6);
+  line-height: 1;
   text-align: center;
   text-transform: uppercase;
+  user-select: none;
 
-  &:hover,
-  &:focus {
-    &:not(:disabled) {
-      box-shadow: var(--focus-ring);
-      outline: none;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover:not(:disabled) {
+      box-shadow: var(--hover-ring);
     }
   }
 
-  span {
-    position: absolute;
-    bottom: var(--spacing-0);
-    right: var(--spacing-0);
-    width: var(--font-height-1);
-    font-size: var(--font-size-1);
-    font-weight: 300;
-    line-height: var(--font-height-1);
+  /*
+   * A focused tile is the cursor that the WASD keys act upon, so it gets the
+   * focus ring however it came to be focused, and not only from the keyboard
+   */
+  &:focus {
+    outline: var(--focus-outline);
+    outline-offset: var(--focus-offset);
+    box-shadow: var(--focus-gap);
   }
 }
 
-.hint {
-  background: var(--yellow-bg);
-  box-shadow: 0px var(--spacing-0) 0px 0px var(--yellow-bd);
-  color: var(--yellow-fg);
+/* The letter that is currently on the tile */
+.letter {
+  font-size: var(--letter-size);
 }
 
+/* A reminder of the letter that belongs on the tile, once it has been found */
+.hint {
+  position: absolute;
+  inset-block-end: calc(var(--hint-inset) - var(--descent));
+  inset-inline-end: var(--hint-inset);
+  font-size: var(--hint-size);
+  font-weight: 300;
+}
+
+/* The letter is in its correct position */
 .correct {
-  background: var(--green-bg);
-  box-shadow: 0px var(--spacing-0) 0px 0px var(--green-bd);
-  color: var(--green-fg);
+  background: var(--correct-bg);
+  box-shadow: 0px var(--spacing-0) 0px 0px var(--correct-bd);
+  color: var(--correct-fg);
+}
+
+/* Every letter in the row is in its correct position */
+.solved {
+  background: var(--solved-bg);
+  box-shadow: 0px var(--spacing-0) 0px 0px var(--solved-bd);
+  color: var(--solved-fg);
+  /*
+   * A solid fill swallows strokes as thin as the other states use, most of
+   * all where they're dark on light. The heavier weight is also a second way
+   * to recognize a solved tile, which doesn't depend on seeing color at all.
+   */
+  font-weight: 400;
 }

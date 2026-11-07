@@ -1,61 +1,11 @@
 {
-  "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/tsconfig.json",
-  "ts-node": {
-    "transpileOnly": true
-  },
-  "include": [
-    ".next/types/**/*.ts",
-    "./src/**/*.*",
-    "./scripts/**/*.*",
-    "./src/**/*.d.ts"
-  ],
-  "exclude": ["node_modules"],
+  "extends": ["@saeris/configs/tsconfig", "./.void/tsconfig.json"],
   "compilerOptions": {
-    "noEmit": true,
-    "isolatedModules": true,
-    // Always include these settings
-    "declarationMap": true,
-    "sourceMap": true,
-    "importHelpers": true,
-    /* Basic Options */
-    "target": "ESNext",
-    "module": "ESNext",
-    "allowImportingTsExtensions": true,
-    "lib": [
-      "ESNext", // adds support for ESNext functionality
-      "DOM" // adds support for 'window' other dom methods
-    ],
-    "allowJs": true,
-    /* JSX support */
-    "jsx": "preserve",
-    "declaration": true,
-    /* Strict Type-Checking Options */
-    "strict": false,
-    "strictNullChecks": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    // "strictFunctionTypes": true,
-    /* Module Resolution Options */
-    "baseUrl": "./",
-    "paths": {
-      "#*": ["./src/*"]
-    },
-    "moduleResolution": "Bundler",
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    /* Advanced Options */
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true,
-    "incremental": true,
-    "noErrorTruncation": true,
-    "plugins": [
-      {
-        "name": "next"
-      },
-      {
-        "name": "typescript-plugin-css-modules"
-      }
-    ]
-  }
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": ["node", "vite/client", "vitest/globals", "void/env"],
+    "jsx": "react-jsx",
+    "allowImportingTsExtensions": true
+  },
+  "include": ["src", "scripts", "*.config.ts"],
+  "exclude": ["node_modules", "dist"]
 }

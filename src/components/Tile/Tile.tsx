@@ -1,5 +1,4 @@
-"use client";
-import React, { memo, useCallback } from "react";
+import { memo, useCallback } from "react";
 import { CompositeItem } from "@ariakit/react";
 import { cva } from "class-variance-authority";
 import styles from "./Tile.module.css";
@@ -7,8 +6,8 @@ import styles from "./Tile.module.css";
 const variants = cva(styles.tile, {
   variants: {
     variant: {
-      hint: styles.hint,
-      correct: styles.correct
+      correct: styles.correct,
+      solved: styles.solved
     }
   }
 });
@@ -17,21 +16,23 @@ export interface TileProps {
   x: number;
   y: number;
   char: string;
+  /** The letter that belongs in this position, once it has been found */
   hint?: string;
-  correct?: boolean;
+  /** Whether every letter in this tile's row is in its correct position */
+  solved?: boolean;
   disabled?: boolean;
   rotate?: (rowOrCol: number, dir: `down` | `left` | `right` | `up`) => void;
 }
 
 export const Tile: React.FC<TileProps> = memo(
-  ({ x, y, char, hint, correct, disabled, rotate }) => {
+  ({ x, y, char, hint, solved, disabled, rotate }) => {
     const handleKeypress: React.KeyboardEventHandler<HTMLButtonElement> =
       useCallback(
         (e) => {
           const key = e.key;
           if ([`w`, `a`, `s`, `d`].includes(key)) {
             // w | d = increment, a | s = decriment
-            const dir = {
+            const dir: Record<string, `down` | `left` | `right` | `up`> = {
               w: `up`,
               a: `left`,
               s: `down`,
@@ -47,11 +48,11 @@ export const Tile: React.FC<TileProps> = memo(
         [rotate, x, y]
       );
 
-    const variant = correct
-      ? `correct`
+    const variant = solved
+      ? `solved`
       : char.toUpperCase() === hint
-      ? `hint`
-      : null;
+        ? `correct`
+        : null;
 
     return (
       <CompositeItem
@@ -64,9 +65,11 @@ export const Tile: React.FC<TileProps> = memo(
         }`}
         disabled={disabled}
         className={variants({ variant })}
+        data-row={x}
+        data-column={y}
       >
-        {char.toUpperCase()}
-        <span>{hint}</span>
+        <span className={styles.letter}>{char.toUpperCase()}</span>
+        <span className={styles.hint}>{hint}</span>
       </CompositeItem>
     );
   }

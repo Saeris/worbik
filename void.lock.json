@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "source": {
+    "name": "worbik"
+  },
+  "resolved": {
+    "name": "worbik",
+    "account_id": "433f430e9fd7b2cd6d2def49923d1982",
+    "compatibility_date": "2026-02-24",
+    "d1_databases": [
+      {
+        "binding": "DB",
+        "database_name": "worbik-db",
+        "database_id": "290756df-130b-4d77-9666-58e556c98d30",
+        "migrations_dir": "./src/db/migrations"
+      }
+    ],
+    "kv_namespaces": [
+      {
+        "binding": "KV",
+        "id": "1a71e4c9af3944e3a35ae5ef0b133ca4"
+      }
+    ],
+    "routes": [
+      {
+        "pattern": "worbik.com",
+        "custom_domain": true
+      }
+    ]
+  },
+  "text": "// void:published-traffic:v1:eyJ3b3JrZXJzX2RldiI6ZmFsc2UsInByZXZpZXdfdXJscyI6ZmFsc2UsInJvdXRlcyI6W3sicGF0dGVybiI6IndvcmJpay5jb20iLCJjdXN0b21fZG9tYWluIjp0cnVlfV19\n{\n  \"name\": \"worbik\",\n  \"account_id\": \"433f430e9fd7b2cd6d2def49923d1982\",\n  \"compatibility_date\": \"2026-02-24\",\n  \"d1_databases\": [\n    {\n      \"binding\": \"DB\",\n      \"database_name\": \"worbik-db\",\n      \"database_id\": \"290756df-130b-4d77-9666-58e556c98d30\",\n      \"migrations_dir\": \"./src/db/migrations\"\n    }\n  ],\n  \"kv_namespaces\": [\n    {\n      \"binding\": \"KV\",\n      \"id\": \"1a71e4c9af3944e3a35ae5ef0b133ca4\"\n    }\n  ],\n  \"routes\": [\n    {\n      \"pattern\": \"worbik.com\",\n      \"custom_domain\": true\n    }\n  ]\n}\n"
+}

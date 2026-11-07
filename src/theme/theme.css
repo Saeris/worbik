@@ -1,46 +1,101 @@
 :root {
-  /* Colors */
-  --green-fg: oklch(25.56% 0.043 120.68); /* grass-11 */
-  --green-bg: oklch(87.36% 0.09 115.01); /* grass-4 */
-  --green-bd: oklch(69.21% 0.134 118.56); /* grass-6 */
+  /*
+   * Follows the system's color scheme, unless the player picks one
+   * in the settings, which is reflected by the `data-theme` attribute
+   */
+  color-scheme: light dark;
 
-  --yellow-fg: oklch(27.74% 0.051 56.15); /* sunflower-11 */
-  --yellow-bg: oklch(85.69% 0.137 98.64); /* sunflower-4 */
-  --yellow-bd: oklch(74.11% 0.142 89.98); /* sunflower-6 */
-
-  --neutral-fg: oklch(42.41% 0.008 53.28); /* flint-10 */
-  --neutral-bg: oklch(95.56% 0.002 67.8); /* flint-2 */
-  --neutral-bd: oklch(85.99% 0.006 59.64); /* flint-4 */
-
-  --hover: oklch(69.85% 0.079 231.99); /* calypso-5 */
-  --error: oklch(74.64% 0.101 32.6); /* azalea-5 */
-
-  --fg: oklch(27.52% 0.006 56.15); /* flint-11 */
-  --bg: oklch(97.91% 0 0); /* flint-1 */
-  --bd: oklch(85.99% 0.006 59.64); /* flint-4 */
-  --muted: oklch(46.84% 0.01 56.14); /* flint-9 */
-
-  &.dark {
-    --green-fg: oklch(97.78% 0.017 110.28); /* grass-1 */
-    --green-bg: oklch(69.21% 0.134 118.56); /* grass-6 */
-    --green-bd: oklch(48.38% 0.091 120.17); /* grass-8 */
-
-    --yellow-fg: oklch(98.18% 0.02 103.66); /* sunflower-1 */
-    --yellow-bg: oklch(74.11% 0.142 89.98); /* sunflower-6 */
-    --yellow-bd: oklch(52.42% 0.101 71.56); /* sunflower-8 */
-
-    --neutral-fg: oklch(95.56% 0.002 67.8); /* flint-2 */
-    --neutral-bg: oklch(27.52% 0.006 56.15); /* flint-11 */
-    --neutral-bd: oklch(42.41% 0.008 53.28); /* flint-10 */
-
-    --hover: oklch(61.25% 0.09 232.92); /* calypso-6 */
-    --error: oklch(66.1% 0.132 32.85); /* azalea-6 */
-
-    --fg: oklch(97.91% 0 0); /* flint-1 */
-    --bg: oklch(27.52% 0.006 56.15); /* flint-11 */
-    --bd: oklch(52.6% 0.011 51.96); /* flint-8 */
-    --muted: oklch(91.79% 0.004 39.48); /* flint-3 */
+  &[data-theme="light"] {
+    color-scheme: light;
   }
+
+  &[data-theme="dark"] {
+    color-scheme: dark;
+  }
+
+  /*
+   * Colors: light-dark(<light>, <dark>)
+   *
+   * Each is annotated with the Figma variables its values come from.
+   * `oklch()` is the source of truth; never round-trip these through hex.
+   */
+
+  /* Surfaces and text */
+  --bg: light-dark(
+    oklch(98.85% 0.0054 274.97),
+    oklch(19.19% 0.0082 274.47)
+  ); /* Slate/25, Zinc/950 */
+  --fg: light-dark(
+    oklch(27.7% 0.0183 285.14),
+    oklch(92.12% 0.0248 275.9)
+  ); /* Gunsmoke/11, Slate/200 */
+  --bd: light-dark(
+    oklch(88.38% 0.011 280.46),
+    oklch(41.91% 0.0236 275.8)
+  ); /* Gunsmoke/3, Slate/800 */
+  --muted: light-dark(
+    oklch(53.43% 0.0252 277.11),
+    oklch(72% 0.0252 277.11)
+  ); /* Slate/700 */
+
+  /*
+   * Tile states
+   *
+   * The three states a tile can be in must be told apart by everyone,
+   * including the ~8% of men with a color vision deficiency, for whom a
+   * yellow and a green of similar lightness are one and the same color.
+   *
+   * So each state sits on its own rung of lightness, ordered by how far it
+   * is from the page: neutral blends in, correct is a tint, and solved is a
+   * solid fill whose text flips polarity. Hue then only has to reinforce a
+   * difference that lightness already carries on its own, which holds up
+   * under protanopia, deuteranopia, tritanopia, and in grayscale alike.
+   *
+   * These are guarded by `src/theme/__tests__/palette.spec.ts`.
+   */
+
+  /* A letter that isn't (yet) known to be in its correct position */
+  --neutral-bg: light-dark(
+    oklch(95.23% 0.0083 271.33),
+    oklch(41.91% 0.0236 275.8)
+  ); /* Zinc/100, Slate/800 */
+  --neutral-bd: light-dark(
+    oklch(85.24% 0.0083 278.62),
+    oklch(30.34% 0.0221 274.02)
+  );
+  --neutral-fg: light-dark(
+    oklch(30.62% 0.009 276.84),
+    oklch(92.12% 0.0248 275.9)
+  ); /* Zinc/900, Slate/200 */
+
+  /* A letter that is in its correct position */
+  --correct-bg: light-dark(
+    oklch(85.32% 0.0778 89.36),
+    oklch(61.17% 0.125 89.79)
+  ); /* Yellow/300, Yellow/600 */
+  --correct-bd: light-dark(
+    oklch(78.77% 0.1001 91.75),
+    oklch(52.28% 0.1007 91.52)
+  );
+  --correct-fg: light-dark(
+    oklch(30.06% 0.0614 89.78),
+    oklch(98.85% 0.0057 84.57)
+  ); /* Yellow/900, Yellow/25 */
+
+  /* A letter in a row that has been solved */
+  --solved-bg: light-dark(
+    oklch(51.13% 0.1159 139.86),
+    oklch(84.47% 0.0773 139.8)
+  ); /* Emerald/700, Emerald/300 */
+  --solved-bd: light-dark(oklch(41% 0.095 139.86), oklch(78.25% 0.0972 136.84));
+  --solved-fg: light-dark(
+    oklch(98.8% 0.005 145.54),
+    oklch(18.89% 0.0418 141.09)
+  ); /* Emerald/25, Emerald/950 */
+
+  /* Feedback */
+  --hover: light-dark(oklch(78.63% 0.0986 245.71), oklch(60.76% 0.1185 246.36));
+  --error: light-dark(oklch(74.64% 0.101 32.6), oklch(66.1% 0.132 32.85));
 
   /* Spacing */
   --spacing-0: 2px;
@@ -63,6 +118,8 @@
   --spacing-64: 256px;
 
   /* Typography */
+  --font-body: "Montserrat Variable", sans-serif;
+
   --font-height-1: 16px;
   --font-height-2: 18px;
   --font-height-3: 20px;
@@ -88,7 +145,19 @@
   --font-size-11: 64px;
 
   /* Effects */
-  --focus-ring: 0px var(--spacing-0) 0px 0px var(--hover),
+  /* Highlights the control that is underneath the pointer */
+  --hover-ring:
+    0px var(--spacing-0) 0px 0px var(--hover),
     0px var(--spacing-0) var(--spacing-1) var(--spacing-0)
-      oklch(69.85% 0.079 231.99 / 0.5);
+      color-mix(in oklch, var(--hover) 50%, transparent);
+
+  /*
+   * Focus is shown as a ring of two tones: the color of text, held apart
+   * from the focused control by a gap in the color of the page. Those two
+   * are the furthest apart in lightness of any colors in the theme, so at
+   * least one of them always stands out against whatever the ring surrounds.
+   */
+  --focus-outline: 2px solid var(--fg);
+  --focus-offset: 2px;
+  --focus-gap: 0 0 0 var(--focus-offset) var(--bg);
 }

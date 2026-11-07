@@ -1,0 +1,112 @@
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  font-size: var(--font-size-3);
+  font-weight: 500;
+}
+
+.day {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  block-size: 44px;
+  border: 1px solid var(--bd);
+  border-radius: var(--spacing-0);
+
+  button {
+    display: grid;
+    place-items: center;
+    inline-size: 44px;
+    block-size: 100%;
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+
+    svg {
+      inline-size: var(--spacing-4);
+      block-size: var(--spacing-4);
+    }
+  }
+}
+
+/* The select says what it's for by the sizes that it lists, so its label is only for those who can't see them */
+.label {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.size {
+  flex: none;
+  block-size: 44px;
+  padding-inline: var(--spacing-3);
+  border: 1px solid var(--bd);
+  border-radius: var(--spacing-0);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: max(var(--font-size-3), 16px);
+  font-weight: 500;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-1);
+  min-block-size: 160px;
+  font-size: var(--font-size-3);
+  text-align: center;
+
+  strong {
+    font-size: var(--font-size-5);
+    font-weight: 500;
+  }
+}
+
+.note {
+  color: var(--muted);
+  font-size: var(--font-size-1);
+  line-height: var(--font-height-2);
+}
+
+.join {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+
+  button {
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    inline-size: 100%;
+    block-size: 48px;
+    border: 1px solid var(--fg);
+    border-radius: var(--spacing-0);
+    background: var(--fg);
+    box-shadow: 0px var(--spacing-0) 0px 0px
+      color-mix(in oklch, var(--fg) 70%, var(--bg));
+    color: var(--bg);
+    font-size: var(--font-size-3);
+    font-weight: 500;
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        box-shadow: var(--hover-ring);
+      }
+    }
+  }
+}
+
+.board {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}

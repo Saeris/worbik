@@ -78,7 +78,7 @@ export const Drawer: React.FC<DrawerProps> = memo(
     });
 
     const titles = {
-      "delete-account": `Delete account`,
+      "delete-account": `Delete your Worbik data`,
       "sign-in": solved ? `Post your score` : `Sign in`,
       leaderboard: `Leaderboard`,
       profile: `Profile`,
@@ -91,7 +91,7 @@ export const Drawer: React.FC<DrawerProps> = memo(
       if (view) heading.current?.focus();
     }, [view]);
 
-    // Deleting an account is reached from the settings, on any size of screen, and so leads back to them
+    // Deleting a player's data is reached from the settings, on any size of screen, and so leads back to them
     const within = screen === `delete-account` ? `settings` : null;
 
     const back = useCallback(() => {

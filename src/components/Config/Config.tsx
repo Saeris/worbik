@@ -103,7 +103,7 @@ const endSession = async (did: string): Promise<void> => {
 };
 
 export interface ConfigProps {
-  /** Called when a player asks to delete their account */
+  /** Called when a player asks to delete their Worbik data */
   onDelete: () => void;
 }
 
@@ -165,7 +165,7 @@ export const Config: React.FC<ConfigProps> = memo(({ onDelete }) => {
               Delete your scores from every leaderboard. This can’t be undone.
             </p>
             <button type="button" className={styles.danger} onClick={onDelete}>
-              Delete account
+              Delete my Worbik data
             </button>
           </div>
         </>

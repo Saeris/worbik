@@ -35,7 +35,7 @@ Each score that you post stores:
 
 That's all. The moves of your game are sent along with your score so that the server can check it, and are then discarded.
 
-**What Worbik can't see.** Your password never reaches Worbik. Signing in gives it permission to do two things: to know who you are, and to have the server that hosts your account vouch for you when you post a score, bring another device up to date, or delete your account. It can't read or write anything in your account, which means your email address, posts, and follows are all out of its reach.
+**What Worbik can't see.** Your password never reaches Worbik. Signing in gives it permission to do two things: to know who you are, and to have the server that hosts your account vouch for you when you post a score, bring another device up to date, or delete your Worbik data. It can't read or write anything in your account, which means your email address, posts, and follows are all out of its reach.
 
 Your browser also keeps the details of your sign-in, and the handles of the last few accounts that signed in on that device, so that they can be suggested next time.
 
@@ -60,13 +60,13 @@ Scores are the point of a leaderboard, so these are public:
 
 - **To sign out**, use Settings.
 - **To clear what's in your browser**, clear the site data for worbik.com.
-- **To delete your account**, use Settings. This permanently removes every score that Worbik has for you, which is everything it keeps about you, along with your streak and history. It can't be undone. Your account itself isn't touched, as it doesn't belong to Worbik, and you can sign in again at any time and start over.
+- **To delete your Worbik data**, use Settings. This permanently removes every score that Worbik has for you, which is everything it keeps about you, along with your streak and history. It can't be undone. Your Bluesky or other Atmosphere account isn't touched, as it doesn't belong to Worbik, and you can sign in again at any time and start over.
 
 Pictures of a result may stay visible for a while after its score is deleted, wherever a chat app or browser has kept a copy.
 
 ## How long it's kept
 
-There is no scheduled deletion. Scores are kept until you delete your account, as a leaderboard that quietly forgot people would be worse than one that doesn't. That doesn't make them safe: as the [Terms of Service](/terms) say, Worbik may lose data or shut down at any time.
+There is no scheduled deletion. Scores are kept until you delete your Worbik data, as a leaderboard that quietly forgot people would be worse than one that doesn't. That doesn't make them safe: as the [Terms of Service](/terms) say, Worbik may lose data or shut down at any time.
 
 ## Children
 

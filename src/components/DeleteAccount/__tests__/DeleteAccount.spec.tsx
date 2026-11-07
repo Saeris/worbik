@@ -9,11 +9,11 @@ import {
   rememberAccount,
   setPlayer
 } from "../../../auth/player";
-import { DELETE_ACCOUNT } from "../../../utils/service";
+import { DELETE_DATA } from "../../../utils/service";
 import { getGameKey } from "../../../utils/solves";
 import { DeleteAccount } from "../DeleteAccount";
 
-/** Stands in for a sign-in that doesn't cover deleting an account */
+/** Stands in for a sign-in that doesn't cover deleting a player's data */
 class SignedOutError extends Error {}
 
 vi.mock(`void/client`, () => ({ fetch: vi.fn<() => Promise<unknown>>() }));
@@ -91,6 +91,14 @@ describe(`deleteAccount`, () => {
     vi.unstubAllGlobals();
   });
 
+  it(`says that only Worbik's data is deleted`, () => {
+    // "Account" could be read as the one they use for Bluesky, which Worbik has no way to touch
+    expect(container.textContent).toContain(`Delete my Worbik data`);
+    expect(container.textContent).toContain(
+      `Bluesky or other Atmosphere account isn’t touched`
+    );
+  });
+
   it(`warns that it's permanent`, () => {
     expect(container.textContent).toContain(`can’t be undone`);
     expect(container.textContent).toContain(`every leaderboard`);
@@ -129,7 +137,7 @@ describe(`deleteAccount`, () => {
     await type(`alice.test`);
     await submit();
 
-    expect(proof).toHaveBeenCalledExactlyOnceWith(alice.did, DELETE_ACCOUNT);
+    expect(proof).toHaveBeenCalledExactlyOnceWith(alice.did, DELETE_DATA);
     expect(request).toHaveBeenCalledExactlyOnceWith(`/api/account`, {
       method: `DELETE`,
       headers: { authorization: `Bearer a-token` }
@@ -155,7 +163,7 @@ describe(`deleteAccount`, () => {
   });
 
   it(`changes nothing if the server can't do it`, async () => {
-    // Being told that an account is gone when it isn't would be worse than being told to try again
+    // Being told that their data is gone when it isn't would be worse than being told to try again
     request.mockRejectedValue(new Error(`Offline`));
     await type(`alice.test`);
     await submit();

@@ -1,6 +1,6 @@
 import { HTTPException } from "hono/http-exception";
 import { defineHandler } from "void";
-import { DELETE_ACCOUNT, verifyPlayer } from "#server/identity";
+import { DELETE_DATA, verifyPlayer } from "#server/identity";
 import { deleteScores } from "#server/scores";
 
 /**
@@ -10,7 +10,7 @@ import { deleteScores } from "#server/scores";
  * themselves, with a proof that's good for this and nothing else.
  */
 export const DELETE = defineHandler(async (c) => {
-  const did = await verifyPlayer(c.req.raw, DELETE_ACCOUNT).catch(() => {
+  const did = await verifyPlayer(c.req.raw, DELETE_DATA).catch(() => {
     throw new HTTPException(401, {
       message: `This request does not prove who is making it`
     });

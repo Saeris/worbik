@@ -83,11 +83,14 @@
 
 .account {
   display: flex;
+  /* A button that doesn't fit beside its words goes beneath them, rather than squeezing them into a column */
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   gap: var(--spacing-3);
 
   p {
+    flex: 1 1 16ch;
     min-inline-size: 0;
     color: var(--muted);
     font-size: var(--font-size-1);

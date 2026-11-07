@@ -12,13 +12,13 @@ import type { Did, Nsid } from "@atcute/lexicons";
 import { isHandle, type AtprotoDid } from "@atcute/lexicons/syntax";
 import { ServiceJwtVerifier } from "@atcute/xrpc-server/auth";
 import {
-  DELETE_ACCOUNT,
+  DELETE_DATA,
   GET_SOLVES,
   serviceDid,
   SUBMIT_SCORE
 } from "#utils/service";
 
-export { DELETE_ACCOUNT, GET_SOLVES, serviceDid, SUBMIT_SCORE };
+export { DELETE_DATA, GET_SOLVES, serviceDid, SUBMIT_SCORE };
 
 /**
  * The longest that a proof may be valid for: five minutes, plus room for

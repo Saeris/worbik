@@ -3,16 +3,16 @@ import { fetch } from "void/client";
 import { normalizeHandle } from "#auth/handle";
 import { forgetAccount, setPlayer } from "#auth/player";
 import { usePlayer } from "#hooks";
-import { DELETE_ACCOUNT } from "#utils/service";
+import { DELETE_DATA } from "#utils/service";
 import { forgetGames } from "#utils/solves";
 import styles from "./DeleteAccount.module.css";
 
 export interface DeleteAccountProps {
-  /** Called when a player's sign-in is too old to delete their account with */
+  /** Called when a player's sign-in is too old to delete their data with */
   onSignIn: () => void;
 }
 
-/** What has become of an attempt to delete the player's account */
+/** What has become of an attempt to delete the player's data */
 type Status = `deleted` | `deleting` | `expired` | `failed` | `idle`;
 
 /**
@@ -50,7 +50,7 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = memo(
         await fetch(`/api/account`, {
           method: `DELETE`,
           headers: {
-            authorization: `Bearer ${await getProof(did, DELETE_ACCOUNT)}`
+            authorization: `Bearer ${await getProof(did, DELETE_DATA)}`
           }
         });
       } catch (cause) {
@@ -77,7 +77,7 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = memo(
       return (
         <div className={styles.delete}>
           <output>
-            <strong>Your account has been deleted.</strong>
+            <strong>Your Worbik data has been deleted.</strong>
           </output>
           <p>
             Your scores are gone from every leaderboard, and you’ve been signed
@@ -103,9 +103,9 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = memo(
           by you or by anyone else.
         </p>
         <p>
-          The account itself isn’t affected, as it doesn’t belong to Worbik. You
-          can sign in with it again at any time, and you’ll start over with
-          nothing.
+          Your Bluesky or other Atmosphere account isn’t touched, as it doesn’t
+          belong to Worbik. You can sign in with it again at any time, and
+          you’ll start over with nothing.
         </p>
         <label htmlFor={`${id}-confirm`}>
           To confirm, type <strong>{name}</strong> below
@@ -128,8 +128,8 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = memo(
         />
         {status === `failed` && (
           <p role="alert" className={styles.error}>
-            Couldn’t delete your account, and nothing was changed. Try again in
-            a moment.
+            Couldn’t delete your Worbik data, and nothing was changed. Try again
+            in a moment.
           </p>
         )}
         {status === `expired` && (
@@ -146,7 +146,7 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = memo(
           className={styles.danger}
           disabled={!confirmed || status === `deleting`}
         >
-          {status === `deleting` ? `Deleting…` : `Delete my account`}
+          {status === `deleting` ? `Deleting…` : `Delete my Worbik data`}
         </button>
       </form>
     );

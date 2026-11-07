@@ -62,11 +62,9 @@ describe(`usePostedGames`, () => {
   let root: Root;
   let container: HTMLElement;
 
-  const Game: React.FC<{ win?: boolean }> = ({ win = false }) => {
-    usePostedGames(puzzle, win, resume);
-
-    return null;
-  };
+  const Game: React.FC<{ win?: boolean }> = ({ win = false }) => (
+    <p>{usePostedGames(puzzle, win, resume) ? `Sign in again` : null}</p>
+  );
 
   const render = async (win?: boolean): Promise<void> => {
     await act(async () => {
@@ -189,22 +187,48 @@ describe(`usePostedGames`, () => {
     expect(resume).toHaveBeenCalledTimes(1);
   });
 
-  it(`signs out a player whose sign-in can't fetch their games`, async () => {
-    // They signed in before this was needed, and signing in again is the only way to bring this device up to date
+  it(`asks a player to sign in again when their sign-in can't fetch their games`, async () => {
+    // Signing in again is the only way to bring this device up to date, so it has to be said
     proof.mockRejectedValue(new SignedOutError());
     serve(solved);
     setPlayer(alice);
     await render();
 
-    expect(getPlayer()).toBeNull();
+    expect(container.textContent).toBe(`Sign in again`);
   });
 
-  it(`stays signed in when the server can't be reached`, async () => {
-    // A lost connection says nothing about their sign-in
+  it(`leaves the player signed in until they do`, async () => {
+    // Signing them out would swap the game they're playing for a different one, with nothing to say why
+    proof.mockRejectedValue(new SignedOutError());
+    serve(solved);
+    setPlayer(alice);
+    await render();
+
+    expect(getPlayer()).toStrictEqual(alice);
+  });
+
+  it(`doesn't ask the next player to sign in again`, async () => {
+    // It was the last player's sign-in that ran out, and this one's is fine
+    proof.mockRejectedValue(new SignedOutError());
+    serve(solved);
+    setPlayer(alice);
+    await render();
+    proof.mockResolvedValue(`a-token`);
+    serve();
+    await act(async () => {
+      setPlayer({ did: `did:plc:bob`, handle: `bob.test` });
+    });
+
+    expect(container.textContent).toBe(``);
+  });
+
+  it(`says nothing when the server can't be reached`, async () => {
+    // A lost connection says nothing about their sign-in, and asking them to sign in wouldn't help
     request.mockRejectedValue(new Error(`Offline`));
     setPlayer(alice);
     await render();
 
     expect(getPlayer()).toStrictEqual(alice);
+    expect(container.textContent).toBe(``);
   });
 });

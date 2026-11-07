@@ -1,65 +1,35 @@
-// @vitest-environment happy-dom
-import { act } from "react";
-import { createRoot, type Root } from "react-dom/client";
-import { signOut } from "../../../auth/oauth";
-import { getPlayer, setPlayer } from "../../../auth/player";
+import { http, HttpResponse } from "msw";
+import { page } from "vite-plus/test/browser";
+import { render } from "vitest-browser-react";
+import { getPlayer, setPlayer } from "#auth/player";
+import { body } from "#test/game";
+import { PDS } from "#test/handlers";
+import { network } from "#test/network";
+import { hasSession, signInAs } from "#test/session";
 import { Config } from "../Config";
-
-vi.mock(`void/client`, () => ({
-  fetch: vi.fn<() => Promise<unknown>>(),
-  FetchError: class extends Error {}
-}));
-
-vi.mock(`../../../auth/oauth`, () => ({
-  signOut: vi.fn<() => Promise<void>>()
-}));
 
 const alice = { did: `did:plc:alice`, handle: `alice.test` } as const;
 
 describe(`config`, () => {
   const onDelete = vi.fn<() => void>();
-  let root: Root;
-  let container: HTMLElement;
 
   const open = async (): Promise<void> => {
-    await act(async () => {
-      root.render(<Config onDelete={onDelete} />);
-    });
+    await render(<Config onDelete={onDelete} />);
   };
 
   const scheme = (value: string): HTMLInputElement | null =>
-    container.querySelector(`input[value="${value}"]`);
+    document.querySelector(`input[value="${value}"]`);
 
-  const pick = async (value: string): Promise<void> => {
-    await act(async () => {
-      scheme(value)?.click();
-    });
+  const pick = async (name: string): Promise<void> => {
+    await page.getByRole(`radio`, { name }).click({ force: true });
   };
 
   const press = async (name: string): Promise<void> => {
-    await act(async () => {
-      [...container.querySelectorAll(`button`)]
-        .find((button) => button.textContent === name)
-        ?.click();
-    });
+    await page.getByRole(`button`, { name }).click();
   };
 
-  beforeEach(() => {
-    vi.stubGlobal(`IS_REACT_ACT_ENVIRONMENT`, true);
-    container = document.body.appendChild(document.createElement(`div`));
-    root = createRoot(container);
-  });
-
-  afterEach(async () => {
-    await act(async () => {
-      root.unmount();
-    });
-    container.remove();
-    setPlayer(null);
-    localStorage.clear();
+  afterEach(() => {
     delete document.documentElement.dataset.theme;
-    vi.unstubAllGlobals();
-    vi.clearAllMocks();
   });
 
   describe(`the color scheme`, () => {
@@ -72,7 +42,7 @@ describe(`config`, () => {
 
     it(`applies a choice, and remembers it`, async () => {
       await open();
-      await pick(`dark`);
+      await pick(`Dark`);
 
       expect(document.documentElement.dataset.theme).toBe(`dark`);
       expect(localStorage.getItem(`theme`)).toBe(`dark`);
@@ -89,8 +59,8 @@ describe(`config`, () => {
 
     it(`forgets a choice when going back to the system's`, async () => {
       await open();
-      await pick(`dark`);
-      await pick(`system`);
+      await pick(`Dark`);
+      await pick(`Match system`);
 
       expect(document.documentElement.dataset.theme).toBeUndefined();
       expect(localStorage.getItem(`theme`)).toBeNull();
@@ -107,9 +77,7 @@ describe(`config`, () => {
     it(`follows a change made in another tab`, async () => {
       await open();
       localStorage.setItem(`theme`, `dark`);
-      await act(async () => {
-        window.dispatchEvent(new StorageEvent(`storage`));
-      });
+      window.dispatchEvent(new StorageEvent(`storage`));
 
       expect(scheme(`dark`)?.checked).toBe(true);
       expect(document.documentElement.dataset.theme).toBe(`dark`);
@@ -120,11 +88,13 @@ describe(`config`, () => {
 
       meta.name = `theme-color`;
       document.body.style.backgroundColor = `rgb(1, 2, 3)`;
+      onTestFinished(() => {
+        meta.remove();
+        document.body.style.backgroundColor = ``;
+      });
       await open();
 
       expect(meta.getAttribute(`content`)).toBe(`rgb(1, 2, 3)`);
-      meta.remove();
-      document.body.style.backgroundColor = ``;
     });
   });
 
@@ -132,44 +102,58 @@ describe(`config`, () => {
     it(`has nothing to offer someone who hasn't signed in`, async () => {
       await open();
 
-      expect(container.textContent).not.toContain(`Sign out`);
-      expect(container.textContent).not.toContain(`Delete my Worbik data`);
+      await expect.element(body).not.toMatchTextContent(`Sign out`);
+      await expect
+        .element(body)
+        .not.toMatchTextContent(`Delete my Worbik data`);
     });
 
     it(`says who is signed in`, async () => {
       setPlayer(alice);
       await open();
 
-      expect(container.textContent).toContain(`@alice.test`);
+      await expect.element(body).toMatchTextContent(`@alice.test`);
     });
 
     it(`names a player without a handle by their identity`, async () => {
       setPlayer({ did: alice.did, handle: null });
       await open();
 
-      expect(container.textContent).toContain(alice.did);
+      await expect.element(body).toMatchTextContent(alice.did);
     });
 
     it(`signs a player out here straight away, and tells their server`, async () => {
       // On a shared device, being signed out can't wait on a server that may not answer
-      vi.mocked(signOut).mockReturnValue(new Promise(() => {}));
-      setPlayer(alice);
+      const held = Promise.withResolvers<undefined>();
+      let told = false;
+
+      network.use(
+        http.post(`${PDS}/oauth/revoke`, async () => {
+          told = true;
+          await held.promise;
+
+          return HttpResponse.json({});
+        })
+      );
+      await signInAs(alice);
       await open();
       await press(`Sign out`);
 
       expect(getPlayer()).toBeNull();
-      await vi.waitFor(() => {
-        expect(signOut).toHaveBeenCalledExactlyOnceWith(alice.did);
-      });
+      await expect.poll(() => told).toBe(true);
+
+      held.resolve(undefined);
+      await expect.poll(() => hasSession(alice.did)).toBe(false);
     });
 
     it(`signs a player out even when their server can't be told`, async () => {
-      vi.mocked(signOut).mockRejectedValue(new Error(`Offline`));
-      setPlayer(alice);
+      network.use(http.post(`${PDS}/oauth/revoke`, () => HttpResponse.error()));
+      await signInAs(alice);
       await open();
       await press(`Sign out`);
 
       expect(getPlayer()).toBeNull();
+      await expect.poll(() => hasSession(alice.did)).toBe(false);
     });
 
     it(`leads to deleting a player's data, without doing anything yet`, async () => {

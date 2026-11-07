@@ -1,26 +1,10 @@
-// @vitest-environment happy-dom
-import { act } from "react";
-import { createRoot, type Root } from "react-dom/client";
-import { setPlayer } from "../../../auth/player";
-import { getGameKey } from "../../../utils/solves";
+import { page } from "vite-plus/test/browser";
+import { render } from "vitest-browser-react";
+import { setPlayer } from "#auth/player";
+import { body } from "#test/game";
+import { Router } from "#test/router";
+import { getGameKey } from "#utils/solves";
 import { SizePicker } from "../SizePicker";
-
-vi.mock(`@void/react`, () => ({
-  Link: ({
-    href,
-    children,
-    ...props
-  }: React.ComponentProps<`a`>): React.ReactNode => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  )
-}));
-
-vi.mock(`void/client`, () => ({
-  fetch: vi.fn<() => Promise<unknown>>(),
-  FetchError: class extends Error {}
-}));
 
 const day = `11-07-2026`;
 const puzzle = `${day}_6x8`;
@@ -31,46 +15,36 @@ const underWay = `5|bcaefd,abcefd,abcfde|ABC   `;
 const solved = `5|bcaefd,abcefd,abcdef|ABCDEF`;
 
 describe(`sizePicker`, () => {
-  let root: Root;
-  let container: HTMLElement;
+  const visit = vi.fn<(href: string) => void>();
+
+  const show = async (): Promise<void> => {
+    await render(
+      <Router visit={visit}>
+        <SizePicker puzzleID={puzzle} width={6} height={8} />
+      </Router>
+    );
+  };
 
   const open = async (): Promise<void> => {
-    await act(async () => {
-      root.render(<SizePicker puzzleID={puzzle} width={6} height={8} />);
-    });
-    await act(async () => {
-      container.querySelector(`button`)?.click();
-    });
+    await show();
+    await page.getByRole(`button`, { name: `Board size: 6×8` }).click();
+    await expect.element(body).toMatchTextContent(`Today’s puzzles`);
   };
 
   const link = (size: string): HTMLAnchorElement | null =>
     document.querySelector(`a[href="/${size}"]`);
 
   beforeEach(() => {
-    vi.stubGlobal(`IS_REACT_ACT_ENVIRONMENT`, true);
     vi.useFakeTimers({ toFake: [`Date`] });
     vi.setSystemTime(new Date(`2026-11-07T22:30:00Z`));
-    container = document.body.appendChild(document.createElement(`div`));
-    root = createRoot(container);
-  });
-
-  afterEach(async () => {
-    await act(async () => {
-      root.unmount();
-    });
-    document.body.innerHTML = ``;
-    setPlayer(null);
-    localStorage.clear();
-    vi.useRealTimers();
-    vi.unstubAllGlobals();
   });
 
   it(`names the board that's being played`, async () => {
-    await act(async () => {
-      root.render(<SizePicker puzzleID={puzzle} width={6} height={8} />);
-    });
+    await show();
 
-    expect(container.textContent).toBe(`6×8`);
+    await expect
+      .element(page.getByRole(`button`, { name: `Board size: 6×8` }))
+      .toBeVisible();
   });
 
   it(`lists all sixteen of the day's puzzles`, async () => {
@@ -107,14 +81,14 @@ describe(`sizePicker`, () => {
     localStorage.setItem(`${day}_7x7`, solved);
     await open();
 
-    expect(document.body.textContent).toContain(`1 of 16 solved`);
+    await expect.element(body).toMatchTextContent(`1 of 16 solved`);
   });
 
   it(`leaves out games from other days`, async () => {
     localStorage.setItem(`11-06-2026_5x5`, solved);
     await open();
 
-    expect(document.body.textContent).toContain(`0 of 16 solved`);
+    await expect.element(body).toMatchTextContent(`0 of 16 solved`);
   });
 
   it(`shows a player their own games, and not someone else's`, async () => {
@@ -134,7 +108,9 @@ describe(`sizePicker`, () => {
     // It's half past ten at night, and the day's puzzles change over at ten in the morning
     await open();
 
-    expect(document.body.textContent).toContain(`New puzzles in 11 h 30 min.`);
+    await expect
+      .element(body)
+      .toMatchTextContent(`New puzzles in 11 h 30 min.`);
   });
 
   it(`doesn't count down past the end of the day`, async () => {
@@ -142,19 +118,15 @@ describe(`sizePicker`, () => {
     vi.setSystemTime(new Date(`2026-11-08T10:30:00Z`));
     await open();
 
-    expect(document.body.textContent).not.toContain(`New puzzles in`);
+    await expect.element(body).not.toMatchTextContent(`New puzzles in`);
   });
 
-  it(`closes once a puzzle is picked`, async () => {
+  it(`goes to the puzzle that's picked, and closes`, async () => {
     // The page that's linked to may be the one that's open, which wouldn't close it by itself
     await open();
-    await act(async () => {
-      link(`6x8`)?.addEventListener(`click`, (event) => {
-        event.preventDefault();
-      });
-      link(`6x8`)?.click();
-    });
+    await page.getByRole(`link`, { name: `6×8, not played` }).click();
 
-    expect(link(`5x5`)).toBeNull();
+    expect(visit.mock.calls[0][0]).toBe(`/6x8`);
+    await expect.element(body).not.toMatchTextContent(`Today’s puzzles`);
   });
 });

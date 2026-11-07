@@ -22,6 +22,7 @@ import {
 } from "@atcute/oauth-browser-client";
 import * as v from "valibot";
 import { fetch } from "void/client";
+import { navigation } from "#utils/navigation";
 import {
   OAUTH_CALLBACK,
   OAUTH_CLIENT_METADATA,
@@ -160,7 +161,7 @@ export const signIn = async (handle?: string): Promise<void> => {
     setTimeout(resolve, 200);
   });
 
-  location.assign(url);
+  navigation.assign(url);
 };
 
 /** Whether an identity is of a kind that the Atmosphere uses, and so can be looked up */

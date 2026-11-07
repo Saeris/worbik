@@ -1,8 +1,16 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { DatabaseSync, type SQLInputValue } from "node:sqlite";
 import { join } from "node:path";
+import { P256PrivateKeyExportable } from "@atcute/crypto";
+import type { Did, Nsid } from "@atcute/lexicons";
+import { createServiceJwt } from "@atcute/xrpc-server/auth";
 import { Hono, type Context } from "hono";
+import { http, HttpResponse } from "msw";
 import { createDb } from "void/db";
+import type { Challenge } from "#state";
+import { getRequestedDid } from "#test/handlers";
+import { server } from "#test/server";
+import { serviceDid } from "#utils/service";
 
 /**
  * What tests of the server run against: the real D1 driver, with the real
@@ -84,4 +92,82 @@ export const send = async (
   });
 
   return app.request(`https://worbik.test${path}`, init);
+};
+
+/** What's kept in KV, which a test can put puzzles into */
+const puzzles = new Map<string, Challenge>();
+
+/** Stands in for `void/kv`, as a Worker's bindings don't exist outside of one */
+export const kv = {
+  map: () => ({
+    get: async (key: string) => puzzles.get(key) ?? null,
+    put: async (key: string, value: Challenge) => {
+      puzzles.set(key, value);
+    }
+  })
+};
+
+/** Puts a puzzle in place, as if it had been made and kept */
+export const keepPuzzle = (id: string, challenge: Challenge): void => {
+  puzzles.set(id, challenge);
+};
+
+/** Where tests send their requests, which is who a proof has to be addressed to */
+const ORIGIN = `https://worbik.test`;
+
+/** Everyone whose identity can be looked up, by that identity */
+const documents = new Map<string, object>();
+
+/**
+ * Gives a player an identity that can be looked up, with a key that their
+ * server signs with and a handle that points back at them, the same way as
+ * they would be found out in the world. Returns a way to prove who they are,
+ * which is checked for real.
+ */
+export const createPlayer = async (
+  did: Did,
+  handle: string
+): Promise<{ proof: (method: Nsid) => Promise<Record<string, string>> }> => {
+  const key = await P256PrivateKeyExportable.createKeypair();
+
+  documents.set(did, {
+    "@context": [`https://www.w3.org/ns/did/v1`],
+    id: did,
+    alsoKnownAs: [`at://${handle}`],
+    verificationMethod: [
+      {
+        id: `${did}#atproto`,
+        type: `Multikey`,
+        controller: did,
+        publicKeyMultibase: await key.exportPublicKey(`multikey`)
+      }
+    ]
+  });
+
+  server.use(
+    http.get(`https://plc.directory/*`, ({ request }) => {
+      const found = documents.get(getRequestedDid(request));
+
+      return found
+        ? HttpResponse.json(found)
+        : HttpResponse.json({ message: `Nobody` }, { status: 404 });
+    }),
+    http.get(`https://${handle}/.well-known/atproto-did`, () =>
+      HttpResponse.text(did)
+    ),
+    http.get(`https://cloudflare-dns.com/dns-query`, () =>
+      HttpResponse.json({ Status: 3 })
+    )
+  );
+
+  return {
+    proof: async (lxm) => ({
+      authorization: `Bearer ${await createServiceJwt({
+        keypair: key,
+        issuer: did,
+        audience: serviceDid(ORIGIN),
+        lxm
+      })}`
+    })
+  };
 };

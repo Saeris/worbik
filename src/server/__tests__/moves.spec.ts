@@ -1,8 +1,6 @@
 import type { Challenge } from "#state";
 import { checkGuesses, readBoard, vouchForBoard } from "../moves";
 
-vi.mock(`void/env`, () => ({ env: { PUZZLE_SECRET: `secret` } }));
-
 const puzzle = `03-02-2026_5x5`;
 const other = `03-03-2026_5x5`;
 const solution = `abcdefghijklmnopqrstuvwxy`;

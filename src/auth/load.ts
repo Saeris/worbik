@@ -1,3 +1,4 @@
+import { navigation } from "#utils/navigation";
 import { OutdatedError } from "./errors";
 import type * as OAuth from "./oauth";
 
@@ -24,7 +25,7 @@ export const isOutdated = (cause: unknown): boolean =>
 export const reloadIfOutdated = (cause: unknown): boolean => {
   const outdated = isOutdated(cause);
 
-  if (outdated) location.reload();
+  if (outdated) navigation.reload();
 
   return outdated;
 };

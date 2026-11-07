@@ -1,4 +1,7 @@
+import type { Nsid } from "@atcute/lexicons";
+import { http, HttpResponse } from "msw";
 import { db } from "void/db";
+import { server } from "#test/server";
 import { scores } from "../../db/schema";
 import { DELETE } from "../../routes/api/account";
 import { GET as getCard } from "../../routes/api/card";
@@ -16,8 +19,7 @@ import { GET as getSitemap } from "../../routes/sitemap.xml";
 import { MAX_MOVES } from "../../state";
 import { getPuzzleID } from "../../utils/getPuzzleID";
 import { DELETE_DATA, GET_SOLVES, SUBMIT_SCORE } from "../../utils/service";
-import { getPuzzle } from "../puzzles";
-import { send, type createTestDb } from "./harness";
+import { createPlayer, keepPuzzle, send, type createTestDb } from "./harness";
 
 vi.mock(`void/db`, async (importOriginal) => {
   const { createTestDb: create } = await import(`./harness`);
@@ -25,30 +27,12 @@ vi.mock(`void/db`, async (importOriginal) => {
   return { ...(await importOriginal<object>()), db: create() };
 });
 
-vi.mock(`void/env`, () => ({ env: { PUZZLE_SECRET: `secret` } }));
-
-vi.mock(`../puzzles`, () => ({ getPuzzle: vi.fn<typeof getPuzzle>() }));
-
-// Proofs are checked for real in `identity.spec.ts`. What matters here is that each route asks for the right one.
-vi.mock(`../identity`, async (importOriginal) => ({
-  ...(await importOriginal<object>()),
-  verifyPlayer: async (request: Request, lxm: string): Promise<string> => {
-    const [did, method] =
-      request.headers.get(`authorization`)?.split(` `).slice(1) ?? [];
-
-    if (!did || method !== lxm) throw new Error(`That proves nothing`);
-
-    return did;
-  },
-  resolveHandle: async (): Promise<string> => `alice.test`,
-  resolveDid: async (handle: string): Promise<string | null> =>
-    handle === `alice.test` ? `did:plc:alice` : null
-}));
+vi.mock(`void/kv`, async () => ({ kv: (await import(`./harness`)).kv }));
 
 const puzzle = getPuzzleID();
 const [day] = puzzle.split(`_`);
-const alice = `did:plc:alice`;
-const bob = `did:plc:bob`;
+const alice = `did:plc:aaaaaaaaaaaaaaaaaaaaaaaa`;
+const bob = `did:plc:bbbbbbbbbbbbbbbbbbbbbbbb`;
 
 /** A board that takes two moves to solve: both of its rows are rotated once */
 const solution = `abcdefghijklmnopqrstuvwxy`;
@@ -65,11 +49,6 @@ const seed = async (did: string, moves: number = 10): Promise<void> => {
   });
 };
 
-/** What a player's server would hand them, for one method and nothing else */
-const proof = (did: string, method: string): Record<string, string> => ({
-  authorization: `Bearer ${did} ${method}`
-});
-
 const post = (
   body: object,
   headers: Record<string, string> = {}
@@ -80,8 +59,18 @@ const post = (
 });
 
 describe(`routes`, () => {
-  beforeEach(() => {
-    vi.mocked(getPuzzle).mockResolvedValue([2, start, solution]);
+  /** What a player's server would hand them, good for one method and nothing else */
+  let proof: (did: string, method: Nsid) => Promise<Record<string, string>>;
+
+  beforeEach(async () => {
+    keepPuzzle(puzzle, [2, start, solution]);
+
+    const players: Record<string, Awaited<ReturnType<typeof createPlayer>>> = {
+      [alice]: await createPlayer(alice, `alice.test`),
+      [bob]: await createPlayer(bob, `bob.test`)
+    };
+
+    proof = async (did, method) => players[did].proof(method);
   });
 
   afterEach(() => {
@@ -95,7 +84,7 @@ describe(`routes`, () => {
 
       const response = await send(DELETE, `/api/account`, {
         method: `DELETE`,
-        headers: proof(alice, DELETE_DATA)
+        headers: await proof(alice, DELETE_DATA)
       });
 
       expect(response.status).toBe(200);
@@ -105,10 +94,12 @@ describe(`routes`, () => {
     });
 
     it.each([
-      [`no proof at all`, {}],
+      [`no proof at all`, null],
       // A proof is good for one method, so one that a game was posted with can't be turned to this
-      [`a proof that's good for something else`, proof(alice, SUBMIT_SCORE)]
-    ])(`keeps everything when given %s`, async (_, headers) => {
+      [`a proof that's good for something else`, SUBMIT_SCORE]
+    ])(`keeps everything when given %s`, async (_, method) => {
+      const headers = method ? await proof(alice, method) : {};
+
       await seed(alice);
 
       const response = await send(DELETE, `/api/account`, {
@@ -128,7 +119,7 @@ describe(`routes`, () => {
 
       await send(DELETE, `/api/account`, {
         method: `DELETE`,
-        headers: proof(bob, DELETE_DATA)
+        headers: await proof(bob, DELETE_DATA)
       });
 
       await expect(
@@ -158,16 +149,18 @@ describe(`routes`, () => {
       const response = await send(
         fetchSolves,
         `/api/solves`,
-        post({ day }, proof(alice, GET_SOLVES))
+        post({ day }, await proof(alice, GET_SOLVES))
       );
 
       await expect(response.json()).resolves.toMatchObject([{ solution }]);
     });
 
     it.each([
-      [`no proof at all`, {}],
-      [`a proof that's good for something else`, proof(alice, SUBMIT_SCORE)]
-    ])(`keeps solutions to itself when given %s`, async (_, headers) => {
+      [`no proof at all`, null],
+      [`a proof that's good for something else`, SUBMIT_SCORE]
+    ])(`keeps solutions to itself when given %s`, async (_, method) => {
+      const headers = method ? await proof(alice, method) : {};
+
       // Leaderboards name who has solved a puzzle, so this would otherwise hand the day's answers to anyone
       await seed(alice);
 
@@ -187,7 +180,7 @@ describe(`routes`, () => {
       const response = await send(
         fetchSolves,
         `/api/solves`,
-        post({ day, player: alice }, proof(bob, GET_SOLVES))
+        post({ day, player: alice }, await proof(bob, GET_SOLVES))
       );
 
       await expect(response.json()).resolves.toStrictEqual([]);
@@ -210,7 +203,7 @@ describe(`routes`, () => {
       const response = await send(
         postScore,
         `/api/scores`,
-        post({ ...game, did: bob }, proof(alice, SUBMIT_SCORE))
+        post({ ...game, did: bob }, await proof(alice, SUBMIT_SCORE))
       );
 
       await expect(response.json()).resolves.toMatchObject({
@@ -221,9 +214,11 @@ describe(`routes`, () => {
     });
 
     it.each([
-      [`no proof at all`, {}],
-      [`a proof that's good for something else`, proof(alice, GET_SOLVES)]
-    ])(`posts nothing when given %s`, async (_, headers) => {
+      [`no proof at all`, null],
+      [`a proof that's good for something else`, GET_SOLVES]
+    ])(`posts nothing when given %s`, async (_, method) => {
+      const headers = method ? await proof(alice, method) : {};
+
       const response = await send(
         postScore,
         `/api/scores`,
@@ -251,7 +246,7 @@ describe(`routes`, () => {
       const response = await send(
         postScore,
         `/api/scores`,
-        post(body, proof(alice, SUBMIT_SCORE))
+        post(body, await proof(alice, SUBMIT_SCORE))
       );
 
       expect(response.status).toBe(400);
@@ -329,9 +324,10 @@ describe(`routes`, () => {
     });
 
     it(`says so when there's no such puzzle`, async () => {
-      vi.mocked(getPuzzle).mockResolvedValue(null);
-
-      const response = await send(check, path);
+      const response = await send(
+        check,
+        `/api/check?puzzle=01-01-2020_5x5&guesses=${middle}`
+      );
 
       expect(response.status).toBe(404);
     });
@@ -357,6 +353,12 @@ describe(`routes`, () => {
     });
 
     it(`says so when nobody goes by a handle`, async () => {
+      server.use(
+        http.get(`https://nobody.test/.well-known/atproto-did`, () =>
+          HttpResponse.text(`Not found`, { status: 404 })
+        )
+      );
+
       const response = await send(getHandle, `/api/handle?handle=nobody.test`);
 
       expect(response.status).toBe(404);
@@ -406,9 +408,7 @@ describe(`routes`, () => {
     });
 
     it(`says so when there's no such puzzle`, async () => {
-      vi.mocked(getPuzzle).mockResolvedValue(null);
-
-      const response = await send(getCard, `/api/card?puzzle=${puzzle}`);
+      const response = await send(getCard, `/api/card?puzzle=01-01-2020_5x5`);
 
       expect(response.status).toBe(404);
     });

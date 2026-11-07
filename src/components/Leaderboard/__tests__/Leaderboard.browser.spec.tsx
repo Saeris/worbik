@@ -1,22 +1,10 @@
-// @vitest-environment happy-dom
-import { act } from "react";
-import { createRoot, type Root } from "react-dom/client";
-import { fetch } from "void/client";
-import { setPlayer } from "../../../auth/player";
+import { delay, http, HttpResponse } from "msw";
+import { page } from "vite-plus/test/browser";
+import { render } from "vitest-browser-react";
+import { setPlayer } from "#auth/player";
+import { body } from "#test/game";
+import { network } from "#test/network";
 import { Leaderboard } from "../Leaderboard";
-
-vi.mock(`void/client`, () => ({
-  fetch: vi.fn<() => Promise<unknown>>(),
-  FetchError: class extends Error {}
-}));
-
-interface Options {
-  query: { puzzle: string; player?: string };
-}
-
-const request = vi.mocked(
-  fetch as unknown as (path: string, options: Options) => Promise<unknown>
-);
 
 const puzzle = `11-07-2026_5x5`;
 const alice = { did: `did:plc:alice`, handle: `alice.test` } as const;
@@ -35,84 +23,50 @@ const ranking = (total: number, you: object | null = null): object => ({
 
 /** Answers with a leaderboard for each puzzle that the test knows of, and fails for any other */
 const serve = (rankings: Record<string, object | Promise<object>>): void => {
-  request.mockImplementation(async (_path, { query }) => {
-    const answer = rankings[query.puzzle];
+  network.use(
+    http.get(`*/api/ranking`, async ({ request }) => {
+      const answer =
+        await rankings[new URL(request.url).searchParams.get(`puzzle`) ?? ``];
 
-    if (answer === undefined) throw new Error(`Offline`);
-
-    return answer;
-  });
+      return answer ? HttpResponse.json(answer) : HttpResponse.error();
+    })
+  );
 };
 
 describe(`leaderboard`, () => {
   const onSignIn = vi.fn<() => void>();
-  let root: Root;
-  let container: HTMLElement;
 
   const open = async (): Promise<void> => {
-    await act(async () => {
-      root.render(
-        <Leaderboard
-          puzzleID={puzzle}
-          width={5}
-          height={5}
-          onSignIn={onSignIn}
-        />
-      );
-    });
+    await render(
+      <Leaderboard puzzleID={puzzle} width={5} height={5} onSignIn={onSignIn} />
+    );
   };
 
   const press = async (name: string): Promise<void> => {
-    await act(async () => {
-      container
-        .querySelector<HTMLButtonElement>(`button[aria-label="${name}"]`)
-        ?.click();
-    });
+    await page.getByRole(`button`, { name }).click();
   };
 
   const pick = async (size: string): Promise<void> => {
-    const select = container.querySelector(`select`);
-
-    await act(async () => {
-      if (select) {
-        Object.getOwnPropertyDescriptor(
-          HTMLSelectElement.prototype,
-          `value`
-        )?.set?.call(select, size);
-        select.dispatchEvent(new Event(`change`, { bubbles: true }));
-      }
-    });
+    await page.getByLabelText(`Board size`).selectOptions(size);
   };
 
-  beforeEach(() => {
-    vi.stubGlobal(`IS_REACT_ACT_ENVIRONMENT`, true);
-    container = document.body.appendChild(document.createElement(`div`));
-    root = createRoot(container);
-  });
-
-  afterEach(async () => {
-    await act(async () => {
-      root.unmount();
-    });
-    container.remove();
-    setPlayer(null);
-    vi.unstubAllGlobals();
-    vi.clearAllMocks();
-  });
+  const says = async (words: string): Promise<void> => {
+    await expect.element(body).toMatchTextContent(words);
+  };
 
   it(`lists who solved the puzzle`, async () => {
     serve({ [puzzle]: ranking(2) });
     await open();
 
-    expect(container.textContent).toContain(`player0.test`);
-    expect(container.textContent).toContain(`2 players posted a score.`);
+    await says(`player0.test`);
+    await says(`2 players posted a score.`);
   });
 
   it(`gets one player right`, async () => {
     serve({ [puzzle]: ranking(1) });
     await open();
 
-    expect(container.textContent).toContain(`1 player posted a score.`);
+    await says(`1 player posted a score.`);
   });
 
   it(`says how many more there are than it lists`, async () => {
@@ -120,20 +74,16 @@ describe(`leaderboard`, () => {
     serve({ [puzzle]: ranking(150) });
     await open();
 
-    expect(container.textContent).toContain(
-      `150 players posted a score, and the top 100 are listed.`
-    );
+    await says(`150 players posted a score, and the top 100 are listed.`);
   });
 
   it(`shows a player where they stand beyond the end of the list`, async () => {
     setPlayer(alice);
-    serve({
-      [puzzle]: ranking(150, { ...alice, moves: 500, place: 150 })
-    });
+    serve({ [puzzle]: ranking(150, { ...alice, moves: 500, place: 150 }) });
     await open();
 
-    expect(container.textContent).toContain(`alice.test`);
-    expect(container.querySelectorAll(`li`)).toHaveLength(101);
+    await says(`alice.test`);
+    expect(document.querySelectorAll(`li`)).toHaveLength(101);
   });
 
   it(`doesn't list a player twice when they're among those listed`, async () => {
@@ -145,16 +95,15 @@ describe(`leaderboard`, () => {
     });
     await open();
 
-    expect(container.querySelectorAll(`li`)).toHaveLength(1);
+    await says(`alice.test`);
+    expect(document.querySelectorAll(`li`)).toHaveLength(1);
   });
 
   it(`invites the first solve of today's puzzle`, async () => {
     serve({ [puzzle]: ranking(0) });
     await open();
 
-    expect(container.textContent).toContain(
-      `Be the first to solve today’s 5×5`
-    );
+    await says(`Be the first to solve today’s 5×5`);
   });
 
   it(`doesn't invite anyone to solve a day that's over`, async () => {
@@ -162,16 +111,16 @@ describe(`leaderboard`, () => {
     await open();
     await press(`Earlier day`);
 
-    expect(container.textContent).toContain(`Nobody posted a score`);
-    expect(container.textContent).not.toContain(`Be the first`);
+    await says(`Nobody posted a score`);
+    await expect.element(body).not.toMatchTextContent(`Be the first`);
   });
 
   it(`says so when scores can't be loaded, rather than that there are none`, async () => {
     serve({});
     await open();
 
-    expect(container.textContent).toContain(`Couldn’t load these scores`);
-    expect(container.textContent).not.toContain(`No scores yet`);
+    await says(`Couldn’t load these scores`);
+    await expect.element(body).not.toMatchTextContent(`No scores yet`);
   });
 
   it(`steps back through the days, and forward again`, async () => {
@@ -179,12 +128,12 @@ describe(`leaderboard`, () => {
     await open();
     await press(`Earlier day`);
 
-    expect(container.textContent).toContain(`3 players`);
+    await says(`3 players`);
 
     await press(`Later day`);
 
-    expect(container.textContent).toContain(`Today`);
-    expect(container.textContent).toContain(`1 player`);
+    await says(`Today`);
+    await says(`1 player`);
   });
 
   it(`stops at today`, async () => {
@@ -192,10 +141,9 @@ describe(`leaderboard`, () => {
     serve({ [puzzle]: ranking(1) });
     await open();
 
-    expect(
-      container.querySelector<HTMLButtonElement>(`[aria-label="Later day"]`)
-        ?.disabled
-    ).toBe(true);
+    await expect
+      .element(page.getByRole(`button`, { name: `Later day` }))
+      .toBeDisabled();
   });
 
   it(`has a leaderboard for every size of board`, async () => {
@@ -203,18 +151,27 @@ describe(`leaderboard`, () => {
     await open();
     await pick(`8x6`);
 
-    expect(container.textContent).toContain(`7 players`);
+    await says(`7 players`);
   });
 
   it(`says where the player stands on each one`, async () => {
     // Without saying who is asking, the server can't say where they place
     setPlayer(alice);
-    request.mockImplementation(async (_path, { query }) =>
-      ranking(150, query.player ? { ...alice, moves: 500, place: 150 } : null)
+    network.use(
+      http.get(`*/api/ranking`, ({ request }) =>
+        HttpResponse.json(
+          ranking(
+            150,
+            new URL(request.url).searchParams.get(`player`)
+              ? { ...alice, moves: 500, place: 150 }
+              : null
+          )
+        )
+      )
     );
     await open();
 
-    expect(container.textContent).toContain(`alice.test`);
+    await says(`alice.test`);
   });
 
   it(`never shows a slow answer in place of a later choice`, async () => {
@@ -224,31 +181,31 @@ describe(`leaderboard`, () => {
     serve({ [puzzle]: slow.promise, "11-07-2026_8x6": ranking(7) });
     await open();
     await pick(`8x6`);
-    await act(async () => {
-      slow.resolve(ranking(1));
-    });
+    await says(`7 players`);
+    slow.resolve(ranking(1));
+    await delay(50);
 
-    expect(container.textContent).toContain(`7 players`);
+    await says(`7 players`);
   });
 
   it(`goes back to loading while another board's scores are on their way`, async () => {
     // These scores would otherwise stay on show under the label of a board that they aren't for
-    serve({ [puzzle]: ranking(2), "11-07-2026_8x6": new Promise(() => {}) });
+    serve({
+      [puzzle]: ranking(2),
+      "11-07-2026_8x6": new Promise(() => {})
+    });
     await open();
+    await says(`2 players`);
     await pick(`8x6`);
 
-    expect(container.textContent).toContain(`Loading…`);
-    expect(container.textContent).not.toContain(`2 players`);
+    await says(`Loading…`);
+    await expect.element(body).not.toMatchTextContent(`2 players`);
   });
 
   it(`offers signing in to someone who hasn't`, async () => {
     serve({ [puzzle]: ranking(1) });
     await open();
-    await act(async () => {
-      [...container.querySelectorAll(`button`)]
-        .find((button) => button.textContent === `Sign in to post scores`)
-        ?.click();
-    });
+    await press(`Sign in to post scores`);
 
     expect(onSignIn).toHaveBeenCalledTimes(1);
   });
@@ -258,6 +215,7 @@ describe(`leaderboard`, () => {
     serve({ [puzzle]: ranking(1) });
     await open();
 
-    expect(container.textContent).not.toContain(`Sign in to post scores`);
+    await says(`1 player`);
+    await expect.element(body).not.toMatchTextContent(`Sign in to post scores`);
   });
 });

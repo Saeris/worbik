@@ -5,6 +5,7 @@ import { normalizeHandle } from "#auth/handle";
 import { isOutdated, loadOAuth } from "#auth/load";
 import { forgetAccount, setPlayer } from "#auth/player";
 import { usePlayer } from "#hooks";
+import { navigation } from "#utils/navigation";
 import { DELETE_DATA } from "#utils/service";
 import { forgetGames } from "#utils/solves";
 import { REQUEST_TIMEOUT } from "#utils/withTimeout";
@@ -85,10 +86,6 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = memo(
       await signOut(did);
     }, []);
 
-    const reload = useCallback(() => {
-      location.reload();
-    }, []);
-
     const submit = useCallback(
       (event: React.SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -160,7 +157,11 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = memo(
           <p role="alert" className={styles.error}>
             Worbik has been updated, so this page has to be reloaded first.
             Nothing was deleted.{` `}
-            <button type="button" className={styles.link} onClick={reload}>
+            <button
+              type="button"
+              className={styles.link}
+              onClick={navigation.reload}
+            >
               Reload
             </button>
           </p>

@@ -1,6 +1,4 @@
-// @vitest-environment happy-dom
-import { act } from "react";
-import { createRoot, type Root } from "react-dom/client";
+import { render } from "vitest-browser-react";
 import { getSwipeDirection, useSwipe, type SwipeDirection } from "../useSwipe";
 
 describe(`getSwipeDirection`, () => {
@@ -21,8 +19,6 @@ describe(`getSwipeDirection`, () => {
 
 describe(`useSwipe`, () => {
   const rotate = vi.fn<(rowOrCol: number, dir: SwipeDirection) => void>();
-  let root: Root;
-  let container: HTMLElement;
 
   /** A board with a single tile, in the third row and second column */
   const Board: React.FC = () => (
@@ -42,7 +38,7 @@ describe(`useSwipe`, () => {
     y: number,
     { id = 1, isPrimary = true, target = `[data-row]` } = {}
   ): void => {
-    container.querySelector(target)!.dispatchEvent(
+    document.querySelector(target)!.dispatchEvent(
       new PointerEvent(type, {
         bubbles: true,
         clientX: x,
@@ -54,21 +50,7 @@ describe(`useSwipe`, () => {
   };
 
   beforeEach(async () => {
-    vi.stubGlobal(`IS_REACT_ACT_ENVIRONMENT`, true);
-    container = document.body.appendChild(document.createElement(`div`));
-    root = createRoot(container);
-    await act(async () => {
-      root.render(<Board />);
-    });
-  });
-
-  afterEach(async () => {
-    await act(async () => {
-      root.unmount();
-    });
-    container.remove();
-    rotate.mockReset();
-    vi.unstubAllGlobals();
+    await render(<Board />);
   });
 
   it(`rotates the row of a tile that is swiped sideways`, () => {

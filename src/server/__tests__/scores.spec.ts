@@ -2,7 +2,6 @@ import { db } from "void/db";
 import { scores } from "../../db/schema";
 import { getPuzzleID } from "../../utils/getPuzzleID";
 import { getProfile } from "../profile";
-import { getPuzzle } from "../puzzles";
 import {
   deleteScores,
   getDayScores,
@@ -13,7 +12,7 @@ import {
   recordScore,
   submitGame
 } from "../scores";
-import type { createTestDb } from "./harness";
+import { keepPuzzle, type createTestDb } from "./harness";
 
 vi.mock(`void/db`, async (importOriginal) => {
   const { createTestDb: create } = await import(`./harness`);
@@ -21,7 +20,7 @@ vi.mock(`void/db`, async (importOriginal) => {
   return { ...(await importOriginal<object>()), db: create() };
 });
 
-vi.mock(`../puzzles`, () => ({ getPuzzle: vi.fn<typeof getPuzzle>() }));
+vi.mock(`void/kv`, async () => ({ kv: (await import(`./harness`)).kv }));
 
 const puzzle = getPuzzleID();
 const [today] = puzzle.split(`_`);
@@ -49,7 +48,7 @@ const seed = async (
 
 describe(`scores`, () => {
   beforeEach(() => {
-    vi.mocked(getPuzzle).mockResolvedValue([2, start, solution]);
+    keepPuzzle(puzzle, [2, start, solution]);
   });
 
   afterEach(() => {
@@ -81,10 +80,8 @@ describe(`scores`, () => {
     });
 
     it(`turns away a puzzle that doesn't exist`, async () => {
-      vi.mocked(getPuzzle).mockResolvedValue(null);
-
       await expect(
-        submitGame(puzzle, [start, solution], alice)
+        submitGame(`01-01-2020_5x5`, [start, solution], alice)
       ).rejects.toMatchObject({ status: 404 });
     });
 
@@ -273,10 +270,11 @@ describe(`scores`, () => {
     });
 
     it(`leaves out a game whose puzzle has gone`, async () => {
-      vi.mocked(getPuzzle).mockResolvedValue(null);
-      await seed(10, alice.did);
+      await seed(10, alice.did, 1000, `01-01-2020_5x5`);
 
-      await expect(getPostedGames(alice.did, today)).resolves.toStrictEqual([]);
+      await expect(
+        getPostedGames(alice.did, `01-01-2020`)
+      ).resolves.toStrictEqual([]);
     });
   });
 

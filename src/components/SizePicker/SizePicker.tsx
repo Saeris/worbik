@@ -9,6 +9,8 @@ import { cx } from "class-variance-authority";
 import { PiCaretDownThin } from "react-icons/pi";
 import { getPuzzleStart, PUZZLE_DAY, sizes, type Size } from "#utils";
 import { formatCountdown, getProgress, type Progress } from "#utils/progress";
+import { getGameKey } from "#utils/solves";
+import { usePlayer } from "#hooks";
 import { Sheet } from "../Sheet";
 import styles from "./SizePicker.module.css";
 
@@ -23,7 +25,10 @@ export interface SizePickerProps {
 }
 
 /** How far the player has got with each of the day's puzzles, by the size of its board */
-const readDay = (puzzleID: string): Record<string, Progress | null> => {
+const readDay = (
+  puzzleID: string,
+  did?: string
+): Record<string, Progress | null> => {
   const [day] = puzzleID.split(`_`);
 
   return Object.fromEntries(
@@ -31,7 +36,10 @@ const readDay = (puzzleID: string): Record<string, Progress | null> => {
       const size = `${columns}x${rows}`;
 
       try {
-        return [size, getProgress(localStorage.getItem(`${day}_${size}`))];
+        return [
+          size,
+          getProgress(localStorage.getItem(getGameKey(`${day}_${size}`, did)))
+        ];
       } catch {
         // Storage can be unavailable, e.g. when site data is blocked
         return [size, null];
@@ -58,7 +66,8 @@ const Today: React.FC<TodayProps> = ({
   now,
   onPick
 }) => {
-  const day = useMemo(() => readDay(puzzleID), [puzzleID]);
+  const did = usePlayer()?.did;
+  const day = useMemo(() => readDay(puzzleID, did), [puzzleID, did]);
   // How long until the next day's puzzles take the place of these
   const left = getPuzzleStart(puzzleID) + PUZZLE_DAY - now;
   const solved = Object.values(day).filter((game) => game?.solved).length;

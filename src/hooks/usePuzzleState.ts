@@ -3,7 +3,6 @@ import {
   useEffect,
   useMemo,
   useRef,
-  useState,
   useSyncExternalStore
 } from "react";
 import { fetch } from "void/client";
@@ -11,6 +10,8 @@ import { useQueuedAPICall } from "#hooks";
 import { Grid, PuzzleState, type PuzzleStateInit } from "#state";
 import { filterExpiredDates } from "#utils";
 import { getProgress } from "#utils/progress";
+import { getGameKey, getPuzzleOfKey } from "#utils/solves";
+import { usePlayer } from "./usePlayer";
 
 const useMatrix = (state: PuzzleState): string =>
   useSyncExternalStore(
@@ -59,8 +60,10 @@ export const usePuzzle = (
   /** Picks up a saved game, in place of whatever is on the board */
   resume: (saved: string | null) => void;
 } => {
-  const [restore, setRestore] = useState(persist);
-  const state = useMemo(() => new PuzzleState(init), [init]);
+  // Each player has a game of their own, so a change of player is a change of game
+  const key = getGameKey(puzzleID, usePlayer()?.did);
+  // oxlint-disable-next-line react/exhaustive-deps -- a new player gets a new game, and `key` is how that's known
+  const state = useMemo(() => new PuzzleState(init), [init, key]);
   const moves = useMoves(state);
   const win = useWin(state);
 
@@ -89,18 +92,18 @@ export const usePuzzle = (
   );
 
   useEffect(() => {
-    if (typeof window !== `undefined` && restore) {
-      resume(localStorage.getItem(puzzleID));
-      // purge puzzles older than yesterday, utc-0 + 32hrs
-      Object.keys(localStorage).forEach((key) => {
-        if (filterExpiredDates(key)) {
-          localStorage.removeItem(key);
-        }
-      });
+    if (!persist) return;
 
-      setRestore(false);
-    }
-  }, [puzzleID, resume, restore]);
+    position.current = undefined;
+    resume(localStorage.getItem(key));
+
+    // purge puzzles older than yesterday, utc-0 + 32hrs
+    Object.keys(localStorage).forEach((stored) => {
+      if (filterExpiredDates(getPuzzleOfKey(stored))) {
+        localStorage.removeItem(stored);
+      }
+    });
+  }, [key, persist, resume]);
 
   const queue = useQueuedAPICall(
     useCallback(
@@ -120,12 +123,12 @@ export const usePuzzle = (
 
         if (persist) {
           localStorage.setItem(
-            puzzleID,
+            key,
             [width, history, hint, reported, from].join(`|`)
           );
         }
       },
-      [puzzleID, state, persist]
+      [puzzleID, key, state, persist]
     )
   );
 

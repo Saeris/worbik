@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@void/react";
 import { rememberAccount, setPlayer } from "#auth/player";
+import { adoptGames } from "#utils/solves";
 import styles from "./callback.module.css";
 
 /**
@@ -15,6 +16,8 @@ const signIn = async (): Promise<string> => {
   const { player, from } = await completeSignIn();
   setPlayer(player);
   rememberAccount(player);
+  // The game that brought them here comes with them, as it's what they signed in to post
+  adoptGames(player.did);
   return from;
 };
 

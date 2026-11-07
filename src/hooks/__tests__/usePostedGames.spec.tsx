@@ -6,7 +6,7 @@ import { getProof } from "../../auth/oauth";
 import { getPlayer, setPlayer } from "../../auth/player";
 import { getProgress } from "../../utils/progress";
 import { GET_SOLVES } from "../../utils/service";
-import { recordSolve } from "../../utils/solves";
+import { getGameKey, recordSolve } from "../../utils/solves";
 import { usePostedGames } from "../usePostedGames";
 
 /** Stands in for a sign-in that has run out, or that doesn't cover what's being asked */
@@ -137,7 +137,9 @@ describe(`usePostedGames`, () => {
     setPlayer(alice);
     await render();
 
-    expect(getProgress(localStorage.getItem(other))).toStrictEqual({
+    expect(
+      getProgress(localStorage.getItem(getGameKey(other, alice.did)))
+    ).toStrictEqual({
       moves: 7,
       solved: true
     });
@@ -150,12 +152,12 @@ describe(`usePostedGames`, () => {
     setPlayer(alice);
     await render();
 
-    expect(recordSolve(puzzle).posted).toBe(true);
+    expect(recordSolve(puzzle, alice.did).posted).toBe(true);
   });
 
   it(`takes what was posted over a different solve on this device`, async () => {
     // A player's first solve is the one that's kept, so that is the score they have
-    localStorage.setItem(puzzle, savedSolve(30));
+    localStorage.setItem(getGameKey(puzzle, alice.did), savedSolve(30));
     serve(solved);
     setPlayer(alice);
     await render();
@@ -165,7 +167,7 @@ describe(`usePostedGames`, () => {
 
   it(`asks for no proof when this device is up to date`, async () => {
     // This is what happens nearly every time, and asking means a trip to the server that hosts their account
-    localStorage.setItem(puzzle, savedSolve(42));
+    localStorage.setItem(getGameKey(puzzle, alice.did), savedSolve(42));
     serve(solved);
     setPlayer(alice);
     await render();

@@ -3,12 +3,12 @@ import { fetch } from "void/client";
 import { setPlayer } from "#auth/player";
 import { getProgress, toSavedGame } from "#utils/progress";
 import { GET_SOLVES } from "#utils/service";
-import { markPosted } from "#utils/solves";
+import { getGameKey, markPosted } from "#utils/solves";
 import { usePlayer } from "./usePlayer";
 
-/** Whether this device already has a game of a puzzle that matches what was posted */
-const hasGame = (puzzle: string, moves: number): boolean => {
-  const game = getProgress(localStorage.getItem(puzzle));
+/** Whether this device already has a game of a puzzle that matches what the player posted */
+const hasGame = (did: string, puzzle: string, moves: number): boolean => {
+  const game = getProgress(localStorage.getItem(getGameKey(puzzle, did)));
 
   return game?.solved === true && game.moves === moves;
 };
@@ -46,7 +46,7 @@ export const usePostedGames = (
         query: { player: did, day }
       });
       const missing = posted.some(
-        ({ puzzle, moves }) => !hasGame(puzzle, moves)
+        ({ puzzle, moves }) => !hasGame(did, puzzle, moves)
       );
 
       // Nearly every time, there is nothing more to do. Only a device that's behind has to ask for proof.
@@ -65,8 +65,8 @@ export const usePostedGames = (
       for (const game of games) {
         const saved = toSavedGame(game);
 
-        localStorage.setItem(game.puzzle, saved);
-        markPosted(game.puzzle);
+        localStorage.setItem(getGameKey(game.puzzle, did), saved);
+        markPosted(game.puzzle, did);
         if (game.puzzle === puzzleID) resume(saved);
       }
     };

@@ -1,11 +1,14 @@
 import { fmt, lint, mergeLint, react } from "@saeris/configs";
+import { voidMarkdown } from "@void/md/plugin";
 import { voidReact } from "@void/react/plugin";
 import { defineConfig } from "vite-plus";
 import { voidPlugin } from "void";
 
 export default defineConfig({
   // Unit tests run in plain Node, where booting the Workers runtime that backs Void's plugin fails
-  plugins: process.env.VITEST ? [] : [voidPlugin(), voidReact()],
+  plugins: process.env.VITEST
+    ? []
+    : [voidPlugin(), voidReact(), voidMarkdown()],
   lint: mergeLint(lint, react, {
     overrides: [
       {

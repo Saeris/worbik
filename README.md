@@ -80,6 +80,10 @@ The card is drawn without any image library, to stay within the ten milliseconds
 
 Signing in happens in the browser, with [atcute][atcute]. The server that hosts a player's account learns about Worbik from `/oauth/client-metadata.json`, which describes the app at whichever address it's served from, and the permission asked for names the two methods that the server vouches for the player to call: `com.worbik.submitScore`, and `com.worbik.getSolves`, which brings a new device up to date. Adding to these makes anyone already signed in sign in again.
 
+## 📜 Terms and privacy
+
+The [Terms of Service][terms] and [Privacy Policy][privacy] are written in plain English, as Markdown in `src/pages/(legal)`, and are served at `/terms` and `/privacy`. The privacy policy says what Worbik stores and what the browser sends where, so it has to change along with those.
+
 ## 🚀 Deploying
 
 Void deploys the app to a Cloudflare Worker, creating what it needs on the way: the KV namespace that holds puzzles and the D1 database that holds scores, with the migrations in `src/db/migrations` applied. Everything fits within the Workers Free plan.
@@ -94,6 +98,8 @@ Signing in works at whichever address the app is served from. A player's sign-in
 [ci_badge]: https://github.com/Saeris/worbik/actions/workflows/ci.yml/badge.svg
 [ci]: https://github.com/Saeris/worbik/actions/workflows/ci.yml
 [site]: https://worbik.com
+[terms]: https://worbik.com/terms
+[privacy]: https://worbik.com/privacy
 [atproto]: https://atproto.com
 [void]: https://void.cloud
 [viteplus]: https://viteplus.dev/

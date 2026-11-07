@@ -157,6 +157,10 @@ export const Config: React.FC = memo(() => {
           </div>
         </>
       )}
+      <p className={styles.legal}>
+        <a href="/terms">Terms of Service</a>
+        <a href="/privacy">Privacy Policy</a>
+      </p>
     </div>
   );
 });

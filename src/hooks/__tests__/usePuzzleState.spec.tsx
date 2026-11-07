@@ -11,6 +11,7 @@ import {
   type PuzzleStateInit
 } from "../../state";
 import { getPuzzleID } from "../../utils";
+import { REQUEST_TIMEOUT } from "../../utils/withTimeout";
 import { usePuzzle } from "../usePuzzleState";
 
 /** What the server answers with: the letters that are in place, and a note of where the game is */
@@ -107,7 +108,8 @@ describe(`usePuzzle`, () => {
 
     expect(check).toHaveBeenCalledTimes(1);
     expect(check).toHaveBeenLastCalledWith(`/api/check`, {
-      query: { puzzle: `03-02-2026_3x2`, guesses: `abcefd` }
+      query: { puzzle: `03-02-2026_3x2`, guesses: `abcefd` },
+      timeout: REQUEST_TIMEOUT
     });
 
     await act(async () => {
@@ -134,7 +136,8 @@ describe(`usePuzzle`, () => {
 
     expect(check).toHaveBeenCalledTimes(2);
     expect(check).toHaveBeenLastCalledWith(`/api/check`, {
-      query: { puzzle: `03-02-2026_3x2`, guesses: `abcfde,abcdef` }
+      query: { puzzle: `03-02-2026_3x2`, guesses: `abcfde,abcdef` },
+      timeout: REQUEST_TIMEOUT
     });
   });
 
@@ -155,7 +158,8 @@ describe(`usePuzzle`, () => {
     });
 
     expect(check).toHaveBeenLastCalledWith(`/api/check`, {
-      query: { puzzle: `03-02-2026_3x2`, guesses: `abcefd,abcfde` }
+      query: { puzzle: `03-02-2026_3x2`, guesses: `abcefd,abcfde` },
+      timeout: REQUEST_TIMEOUT
     });
     expect(container.textContent).toBe(`ABC|   `);
   });
@@ -211,7 +215,8 @@ describe(`restoring a saved game`, () => {
     });
 
     expect(check).toHaveBeenLastCalledWith(`/api/check`, {
-      query: expect.objectContaining({ from: `a-note` })
+      query: expect.objectContaining({ from: `a-note` }),
+      timeout: REQUEST_TIMEOUT
     });
     expect(localStorage.getItem(`03-02-2026_3x2`)).toContain(`a-newer-note`);
   });
@@ -224,7 +229,8 @@ describe(`restoring a saved game`, () => {
 
     expect(puzzle.moves).toBe(1);
     expect(check).toHaveBeenLastCalledWith(`/api/check`, {
-      query: { puzzle: `03-02-2026_3x2`, guesses: `abcefd` }
+      query: { puzzle: `03-02-2026_3x2`, guesses: `abcefd` },
+      timeout: REQUEST_TIMEOUT
     });
   });
 
@@ -548,7 +554,8 @@ describe(`staying in step with the server`, () => {
 
     expect(check).toHaveBeenCalledTimes(1);
     expect(check).toHaveBeenLastCalledWith(`/api/check`, {
-      query: { puzzle: id, guesses: afterA }
+      query: { puzzle: id, guesses: afterA },
+      timeout: REQUEST_TIMEOUT
     });
   });
 });

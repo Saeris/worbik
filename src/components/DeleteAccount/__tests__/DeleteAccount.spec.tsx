@@ -4,6 +4,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { fetch } from "void/client";
 import { SignedOutError } from "../../../auth/errors";
 import { getProof, signOut } from "../../../auth/oauth";
+import { REQUEST_TIMEOUT } from "../../../utils/withTimeout";
 import {
   getAccounts,
   getPlayer,
@@ -134,7 +135,8 @@ describe(`deleteAccount`, () => {
     expect(proof).toHaveBeenCalledExactlyOnceWith(alice.did, DELETE_DATA);
     expect(request).toHaveBeenCalledExactlyOnceWith(`/api/account`, {
       method: `DELETE`,
-      headers: { authorization: `Bearer a-token` }
+      headers: { authorization: `Bearer a-token` },
+      timeout: REQUEST_TIMEOUT
     });
   });
 
@@ -162,7 +164,7 @@ describe(`deleteAccount`, () => {
     await type(`alice.test`);
     await submit();
 
-    expect(container.textContent).toContain(`nothing was changed`);
+    expect(container.textContent).toContain(`Couldn’t delete your Worbik data`);
     expect(getPlayer()).toStrictEqual(alice);
     expect(localStorage.getItem(getGameKey(puzzle, alice.did))).toBe(`a game`);
   });

@@ -5,7 +5,8 @@ import { SignedOutError } from "#auth/errors";
 import { MAX_MOVES } from "#state";
 import { isOpenForScores, isPastPuzzleDay } from "#utils";
 import { SUBMIT_SCORE } from "#utils/service";
-import { getGameKey, markPosted, recordSolve } from "#utils/solves";
+import { getGameKey, markPosted, recordSolve, type Solve } from "#utils/solves";
+import { REQUEST_TIMEOUT } from "#utils/withTimeout";
 import { usePlayer } from "./usePlayer";
 
 /** A score as a leaderboard lists it, in the order that it ranks */
@@ -54,10 +55,16 @@ export interface Score {
   readonly ranking: Ranking | null;
   /** Why the solve couldn't be posted, in the words of whatever turned it away, for working out what went wrong */
   readonly detail: string | null;
-  /** Whether a solve that couldn't be posted is being posted again */
+  /** Whether another try is under way */
   readonly retrying: boolean;
-  /** Tries again to post a solve that couldn't be posted */
+  /** Tries again to post a solve that couldn't be posted, or to load a leaderboard that couldn't be */
   readonly retry: () => void;
+}
+
+/** What became of a solve, and why, if that needs explaining */
+interface Outcome {
+  readonly status: ScoreStatus;
+  readonly detail?: string | null;
 }
 
 /** Loads the leaderboard of a puzzle, or `null` if it can't be reached */
@@ -67,7 +74,8 @@ export const loadScores = async (
 ): Promise<Ranking | null> => {
   try {
     return await fetch(`/api/ranking`, {
-      query: { puzzle: puzzleID, ...(did && { player: did }) }
+      query: { puzzle: puzzleID, ...(did && { player: did }) },
+      timeout: REQUEST_TIMEOUT
     });
   } catch {
     // A solve can be posted without its leaderboard having loaded
@@ -89,7 +97,8 @@ const send = async (
   await fetch(`/api/scores`, {
     method: `POST`,
     body: { puzzle: puzzleID, history: [...history] },
-    headers: { authorization: `Bearer ${await getProof(did, SUBMIT_SCORE)}` }
+    headers: { authorization: `Bearer ${await getProof(did, SUBMIT_SCORE)}` },
+    timeout: REQUEST_TIMEOUT
   });
   markPosted(puzzleID, did);
 };
@@ -117,9 +126,7 @@ const message = v.object({ message: v.string() });
  * Why a solve couldn't be posted: in terms of what the player can do about
  * it, and in the words of whatever turned it away.
  */
-const explain = (
-  cause: unknown
-): { status: ScoreStatus; detail: string | null } => {
+const explain = (cause: unknown): Outcome => {
   if (cause instanceof SignedOutError)
     return { status: `expired`, detail: null };
 
@@ -135,6 +142,24 @@ const explain = (
     status: `failed`,
     detail: cause instanceof Error ? cause.message : String(cause)
   };
+};
+
+/**
+ * What is to become of a solve, going by what's known without asking anyone:
+ * `posting` if it's to be sent, or else what has already become of it.
+ */
+const getStatus = (
+  puzzleID: string,
+  solved: Solve,
+  moves: number,
+  did?: string
+): ScoreStatus => {
+  if (solved.posted) return `posted`;
+  if (isPastPuzzleDay(puzzleID, new Date(solved.at))) return `closed`;
+  if (!isOpenForScores(puzzleID)) return `missed`;
+  if (moves > MAX_MOVES) return `too-long`;
+
+  return did ? `posting` : `signed-out`;
 };
 
 /**
@@ -154,15 +179,15 @@ export const useScore = (
   const did = usePlayer()?.did;
   // Who solved what, or `null` while nothing has been solved. Whatever became of one solve says nothing about the next.
   const solve = win ? getGameKey(puzzleID, did) : null;
-  const [outcome, setOutcome] = useState<{
-    solve: string;
-    status: ScoreStatus;
-    detail?: string | null;
-  } | null>(null);
+  const [outcome, setOutcome] = useState<(Outcome & { solve: string }) | null>(
+    null
+  );
   const { status = null, detail = null } =
     outcome?.solve === solve ? outcome : {};
   const [ranking, setRanking] = useState<Ranking | null>(null);
   const [attempt, setAttempt] = useState(0);
+  // The last attempt to have finished, which falls behind `attempt` while one is under way
+  const [settled, setSettled] = useState(0);
 
   useEffect(() => {
     if (solve === null) return undefined;
@@ -174,39 +199,31 @@ export const useScore = (
 
     const follow = async (): Promise<void> => {
       const solved = recordSolve(puzzleID, did);
+      let result: Outcome = {
+        status: getStatus(puzzleID, solved, history.length - 1, did)
+      };
+
+      // The solve goes first, so that a leaderboard that's slow to load can't hold it up
+      if (result.status === `posting` && did) {
+        setOutcome({ solve, ...result });
+
+        try {
+          await post(puzzleID, history, did);
+          result = { status: `posted` };
+        } catch (cause) {
+          console.error(`Couldn't post the score`, cause);
+          result = explain(cause);
+        }
+
+        if (isStale()) return;
+      }
+
       const loaded = await loadScores(puzzleID, did);
 
       if (isStale()) return;
       setRanking(loaded);
-
-      if (solved.posted) {
-        setOutcome({ solve, status: `posted` });
-      } else if (isPastPuzzleDay(puzzleID, new Date(solved.at))) {
-        setOutcome({ solve, status: `closed` });
-      } else if (!isOpenForScores(puzzleID)) {
-        setOutcome({ solve, status: `missed` });
-      } else if (history.length - 1 > MAX_MOVES) {
-        setOutcome({ solve, status: `too-long` });
-      } else if (did) {
-        setOutcome({ solve, status: `posting` });
-
-        try {
-          await post(puzzleID, history, did);
-          const ranked = await loadScores(puzzleID, did);
-
-          if (isStale()) return;
-          setRanking(ranked);
-          setOutcome({ solve, status: `posted` });
-        } catch (cause) {
-          const reason = explain(cause);
-
-          if (isStale()) return;
-          console.error(`Couldn't post the score`, cause);
-          setOutcome({ solve, ...reason });
-        }
-      } else {
-        setOutcome({ solve, status: `signed-out` });
-      }
+      setOutcome({ solve, ...result });
+      setSettled(attempt);
     };
 
     void follow();
@@ -224,7 +241,7 @@ export const useScore = (
     status,
     ranking,
     detail,
-    retrying: status === `posting` && attempt > 0,
+    retrying: attempt > settled,
     retry
   };
 };

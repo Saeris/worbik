@@ -4,6 +4,7 @@ import { Grid, MAX_GUESSES, PuzzleState, type PuzzleStateInit } from "#state";
 import { filterExpiredDates } from "#utils";
 import { getProgress, readSavedGame } from "#utils/progress";
 import { getGameKey, getPuzzleOfKey } from "#utils/solves";
+import { REQUEST_TIMEOUT } from "#utils/withTimeout";
 import { usePlayer } from "./usePlayer";
 
 const useMatrix = (state: PuzzleState): string =>
@@ -140,7 +141,8 @@ export const usePuzzle = (
               puzzle: puzzleID,
               guesses: guesses.join(`,`),
               ...(game.position && { from: game.position })
-            }
+            },
+            timeout: REQUEST_TIMEOUT
           });
 
           game.position = from;

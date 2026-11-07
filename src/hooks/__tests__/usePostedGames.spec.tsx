@@ -8,6 +8,7 @@ import { getPlayer, setPlayer } from "../../auth/player";
 import { getProgress } from "../../utils/progress";
 import { GET_SOLVES } from "../../utils/service";
 import { getGameKey, recordSolve } from "../../utils/solves";
+import { REQUEST_TIMEOUT } from "../../utils/withTimeout";
 import { usePostedGames } from "../usePostedGames";
 
 vi.mock(`void/client`, () => ({ fetch: vi.fn<() => Promise<unknown>>() }));
@@ -118,7 +119,8 @@ describe(`usePostedGames`, () => {
       {
         method: `POST`,
         body: { day },
-        headers: { authorization: `Bearer a-token` }
+        headers: { authorization: `Bearer a-token` },
+        timeout: REQUEST_TIMEOUT
       }
     ]);
   });

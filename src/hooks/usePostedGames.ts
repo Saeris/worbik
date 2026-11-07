@@ -4,6 +4,7 @@ import { SignedOutError } from "#auth/errors";
 import { getProgress, toSavedGame } from "#utils/progress";
 import { GET_SOLVES } from "#utils/service";
 import { getGameKey, markPosted } from "#utils/solves";
+import { REQUEST_TIMEOUT } from "#utils/withTimeout";
 import { usePlayer } from "./usePlayer";
 
 /** Whether this device already has a game of a puzzle that matches what the player posted */
@@ -49,7 +50,8 @@ export const usePostedGames = (
 
     const sync = async (): Promise<void> => {
       const posted = await fetch(`/api/solves`, {
-        query: { player: did, day }
+        query: { player: did, day },
+        timeout: REQUEST_TIMEOUT
       });
       const missing = posted.some(
         ({ puzzle, moves }) => !hasGame(did, puzzle, moves)
@@ -63,7 +65,8 @@ export const usePostedGames = (
       const games = await fetch(`/api/solves`, {
         method: `POST`,
         body: { day },
-        headers: { authorization: `Bearer ${await getProof(did, GET_SOLVES)}` }
+        headers: { authorization: `Bearer ${await getProof(did, GET_SOLVES)}` },
+        timeout: REQUEST_TIMEOUT
       });
 
       if (isStale()) return;

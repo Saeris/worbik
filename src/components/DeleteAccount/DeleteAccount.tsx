@@ -6,6 +6,7 @@ import { forgetAccount, setPlayer } from "#auth/player";
 import { usePlayer } from "#hooks";
 import { DELETE_DATA } from "#utils/service";
 import { forgetGames } from "#utils/solves";
+import { REQUEST_TIMEOUT } from "#utils/withTimeout";
 import styles from "./DeleteAccount.module.css";
 
 export interface DeleteAccountProps {
@@ -59,7 +60,8 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = memo(
           method: `DELETE`,
           headers: {
             authorization: `Bearer ${await getProof(did, DELETE_DATA)}`
-          }
+          },
+          timeout: REQUEST_TIMEOUT
         });
       } catch (cause) {
         setStatus(cause instanceof SignedOutError ? `expired` : `failed`);
@@ -136,8 +138,7 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = memo(
         />
         {status === `failed` && (
           <p role="alert" className={styles.error}>
-            Couldn’t delete your Worbik data, and nothing was changed. Try again
-            in a moment.
+            Couldn’t delete your Worbik data. Try again in a moment.
           </p>
         )}
         {status === `expired` && (

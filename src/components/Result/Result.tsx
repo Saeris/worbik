@@ -24,9 +24,9 @@ export interface ResultProps {
   ranking: Ranking | null;
   /** Why the solve couldn't be posted, in the words of whatever turned it away */
   detail: string | null;
-  /** Whether a solve that couldn't be posted is being posted again */
+  /** Whether another try is under way */
   retrying: boolean;
-  /** Tries again to post a solve that couldn't be posted */
+  /** Tries again to post a solve that couldn't be posted, or to load a leaderboard that couldn't be */
   retry: () => void;
   /** Called to see the whole leaderboard */
   onLeaderboard: () => void;
@@ -77,9 +77,12 @@ export const Result: React.FC<ResultProps> = memo(
     const mine = ranking?.you;
     const { rows, from } = getRows(ranking, you);
     // A failure stays on show while the solve is being posted again, so that nothing moves while it is
-    const shown = retrying ? `failed` : status;
+    const shown = retrying && status === `posting` ? `failed` : status;
+    // The score is safe, but where it places can't be said until the leaderboard loads
+    const unranked = status === `posted` && !ranking;
     // Sharing is the thing to do next unless there is something that needs doing first
     const waiting =
+      unranked ||
       shown === `expired` ||
       shown === `failed` ||
       shown === `closed` ||
@@ -123,6 +126,12 @@ export const Result: React.FC<ResultProps> = memo(
             {detail && <small>{detail}</small>}
           </p>
         )}
+        {unranked && (
+          <p role="alert" className={styles.alert}>
+            <strong>Couldn’t load the leaderboard</strong>
+            Your score is posted. Try again to see where it places.
+          </p>
+        )}
         {shown === `expired` && (
           <p role="alert" className={styles.alert}>
             <strong>Your sign-in has run out</strong>
@@ -136,7 +145,7 @@ export const Result: React.FC<ResultProps> = memo(
               Sign in again
             </button>
           )}
-          {shown === `failed` && (
+          {(shown === `failed` || unranked) && (
             <button
               type="button"
               className={styles.action}
@@ -158,10 +167,10 @@ export const Result: React.FC<ResultProps> = memo(
             moves={moves}
             // Posting a score is offered alongside sharing it, to a player who has yet to say who they are
             onSignIn={status === `signed-out` ? onSignIn : undefined}
-            // A link can only show a score that is on the leaderboard, under the name that it's listed by there
+            // A link can only show a score that is on the leaderboard, under the name that it's listed by there. Without the leaderboard, the player's identity finds it just the same.
             player={
-              status === `posted` && mine
-                ? (mine.handle ?? mine.did)
+              status === `posted`
+                ? (mine?.handle ?? mine?.did ?? you)
                 : undefined
             }
           />

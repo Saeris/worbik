@@ -10,6 +10,7 @@ import { getPuzzleID } from "../../utils/getPuzzleID";
 import { getPuzzleStart } from "../../utils/isOpenForScores";
 import { recordSolve } from "../../utils/solves";
 import { SUBMIT_SCORE } from "../../utils/service";
+import { REQUEST_TIMEOUT } from "../../utils/withTimeout";
 import { useScore, type Score } from "../useScore";
 
 /** Stands in for an answer from the server that isn't a success */
@@ -131,7 +132,8 @@ describe(`useScore`, () => {
       {
         method: `POST`,
         body: { puzzle, history },
-        headers: { authorization: `Bearer a-token` }
+        headers: { authorization: `Bearer a-token` },
+        timeout: REQUEST_TIMEOUT
       }
     ]);
     expect(proof).toHaveBeenCalledExactlyOnceWith(alice.did, SUBMIT_SCORE);
@@ -241,7 +243,6 @@ describe(`useScore`, () => {
 
   it(`can try again to post a solve that didn't get through`, async () => {
     // A lost connection shouldn't cost a player their place, so long as the puzzle's day hasn't ended
-    request.mockImplementationOnce(async () => ranking);
     request.mockImplementationOnce(async () => {
       throw new FetchError(500);
     });
@@ -258,5 +259,76 @@ describe(`useScore`, () => {
 
     expect(score.status).toBe(`posted`);
     expect(posts()).toHaveLength(2);
+  });
+
+  it(`doesn't let a leaderboard that won't load hold up a solve`, async () => {
+    // Waiting on it first meant that one slow answer could keep a score from ever being sent
+    request.mockImplementation(async (_path, { method }) =>
+      method === `POST` ? alices : new Promise(() => {})
+    );
+    setPlayer(alice);
+    await render(true);
+
+    expect(posts()).toHaveLength(1);
+  });
+
+  it(`reads the leaderboard once for each solve that it posts`, async () => {
+    // It's only worth reading once the score is on it, and every request counts against a daily allowance
+    setPlayer(alice);
+    await render(true);
+
+    expect(request).toHaveBeenCalledTimes(2);
+  });
+
+  it(`can load a leaderboard that didn't load the first time`, async () => {
+    // The score is safe by then, so it's only the leaderboard that needs asking for again
+    request.mockImplementation(async (_path, { method }) => {
+      if (method === `POST`) return alices;
+      throw new Error(`Offline`);
+    });
+    setPlayer(alice);
+    await render(true);
+
+    expect(score.status).toBe(`posted`);
+    expect(score.ranking).toBeNull();
+
+    request.mockImplementation(async () => ranking);
+    await act(async () => {
+      score.retry();
+    });
+
+    expect(score.ranking).toStrictEqual(ranking);
+    expect(score.retrying).toBe(false);
+    expect(posts()).toHaveLength(1);
+  });
+
+  it(`says that another try is under way until it has finished`, async () => {
+    // Pressing a button that seems to do nothing only gets it pressed again
+    request.mockImplementation(async (_path, { method }) => {
+      if (method === `POST`) return alices;
+      throw new Error(`Offline`);
+    });
+    setPlayer(alice);
+    await render(true);
+
+    let finish: (loaded: unknown) => void = () => {};
+
+    request.mockImplementation(
+      async () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        })
+    );
+    await act(async () => {
+      score.retry();
+    });
+
+    expect(score.retrying).toBe(true);
+
+    await act(async () => {
+      finish(ranking);
+    });
+
+    expect(score.retrying).toBe(false);
   });
 });

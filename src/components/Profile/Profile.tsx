@@ -7,6 +7,7 @@ import { getPuzzleID, getPuzzleStart } from "#utils";
 import { getMonthLength, getWeeks, toDayKey } from "#utils/calendar";
 import { ordinal } from "#utils/ordinal";
 import { getStreaks } from "#utils/streak";
+import { REQUEST_TIMEOUT } from "#utils/withTimeout";
 import styles from "./Profile.module.css";
 
 /** What a player has done, as the server tells it */
@@ -409,7 +410,10 @@ const useHistory = (did: string | undefined): History | null | undefined => {
       let history: History | null = null;
 
       try {
-        history = await fetch(`/api/profile`, { query: { player: did } });
+        history = await fetch(`/api/profile`, {
+          query: { player: did },
+          timeout: REQUEST_TIMEOUT
+        });
       } catch {
         // Shown as a profile that couldn't be loaded, rather than as an empty one
       }

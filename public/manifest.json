@@ -1,29 +1,33 @@
 {
   "$schema": "https://json.schemastore.org/web-manifest-combined.json",
+  "id": "/",
+  "name": "Worbik",
   "short_name": "Worbik",
-  "name": "Worbik - Word Puzzle Mini-Game",
+  "description": "A daily word puzzle. Rotate the rows and columns until every row is a word.",
+  "categories": ["games"],
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
+  "theme_color": "#fafbff",
+  "background_color": "#fafbff",
   "icons": [
     {
-      "src": "/favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "/logo192.png",
+      "src": "/icon-192.png",
       "type": "image/png",
       "sizes": "192x192",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "/logo512.png",
+      "src": "/icon-512.png",
       "type": "image/png",
       "sizes": "512x512",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
     }
   ]
 }

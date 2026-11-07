@@ -68,6 +68,10 @@ Set `PUZZLE_SCRAMBLE=1` in `.env` to have new puzzles scrambled with a single mo
 
 While `yarn dev` is running, `/palette` shows a board with a tile in every state, in both color schemes, as it appears with typical vision, under each color vision deficiency, and in grayscale. It also shows tiles at every size, for checking that a tile's letter and its hint never touch. The page only exists in development. The same guarantees are enforced by `src/theme/__tests__/palette.spec.ts`, which reads the colors straight out of `src/theme/theme.css`.
 
+### Icons and the site's card
+
+While `yarn dev` is running, `/brand` draws the app's icons and the card that its pages show when linked to, in the game's own font and tile colors, each at the size of its file in `public/`. When the look of the game changes, save them again from there. `favicon.ico` holds the three smallest.
+
 ### The share card
 
 The card is drawn without any image library, to stay within the ten milliseconds of processor time that a Worker gets on Cloudflare's free plan: flat shapes in sixteen colors, with letters that were drawn ahead of time. While `yarn dev` is running, `/glyphs` draws those letters from the game's font. Save what it shows as `src/server/card/glyphs.json` whenever the wording of the card or the font changes.

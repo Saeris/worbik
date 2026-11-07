@@ -51,6 +51,11 @@ const applyScheme = (scheme: Scheme): void => {
   } else {
     document.documentElement.dataset.theme = scheme;
   }
+
+  // The phone's status bar follows along, as it's outside of the page
+  document
+    .querySelector(`meta[name="theme-color"]`)
+    ?.setAttribute(`content`, getComputedStyle(document.body).backgroundColor);
 };
 
 const changeScheme: React.ChangeEventHandler<HTMLInputElement> = ({

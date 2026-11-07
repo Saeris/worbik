@@ -1,0 +1,183 @@
+/* Everything lands on a whole pixel, as a picture saved from anywhere else comes out a pixel larger than it should be */
+.page {
+  display: grid;
+  justify-items: start;
+  gap: var(--spacing-6);
+  padding: var(--spacing-6);
+  color: var(--fg);
+  font-size: var(--font-size-3);
+  line-height: 24px;
+
+  h1 {
+    font-size: var(--font-size-6);
+  }
+}
+
+.row {
+  display: grid;
+  justify-items: start;
+  gap: var(--spacing-6);
+}
+
+.art {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  margin: 0;
+
+  figcaption {
+    color: var(--muted);
+    font-size: var(--font-size-1);
+    line-height: 16px;
+  }
+}
+
+/* The tile colors are those of the light theme, whichever theme this page is viewed in */
+.icon,
+.tile {
+  color-scheme: light;
+  background: var(--solved-bg);
+  color: var(--solved-fg);
+  font-family: var(--font-body);
+  line-height: 1;
+
+  i {
+    position: absolute;
+    font-style: normal;
+  }
+}
+
+.icon {
+  --size: 512px;
+  /* How far the small letter sits from the edges. Phones round the corners of an icon, and this keeps it clear of that. */
+  --hint-inset: 13%;
+
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: clip;
+  inline-size: var(--size);
+  block-size: var(--size);
+  /* The edge that a tile stands on */
+  box-shadow: inset 0 calc(var(--size) * -0.05) 0 var(--solved-bd);
+
+  b {
+    /* Just above center, as the edge along the bottom takes up some of the height */
+    margin-block-end: calc(var(--size) * 0.05);
+    font-size: calc(var(--size) * 0.6);
+    font-weight: 400;
+  }
+
+  i {
+    inset-block-end: var(--hint-inset);
+    inset-inline-end: var(--hint-inset);
+    font-size: calc(var(--size) * 0.115);
+    font-weight: 500;
+  }
+}
+
+/* Android cuts its icons to any of several shapes, and only promises to keep the circle in the middle four-fifths */
+.maskable {
+  --hint-inset: 24%;
+
+  box-shadow: none;
+
+  b {
+    margin-block-end: 0;
+    font-size: calc(var(--size) * 0.44);
+  }
+
+  i {
+    font-size: calc(var(--size) * 0.085);
+  }
+}
+
+/* Nothing that small can be read at this size, and the letter needs to be bolder to hold up */
+.small {
+  border-radius: 14%;
+  box-shadow: inset 0 calc(var(--size) * -0.08) 0 var(--solved-bd);
+
+  b {
+    font-size: calc(var(--size) * 0.78);
+    font-weight: 600;
+  }
+
+  i {
+    display: none;
+  }
+}
+
+/* Laid out to match the cards that the server draws for a puzzle */
+.card {
+  display: flex;
+  align-items: center;
+  gap: 80px;
+  inline-size: 1200px;
+  block-size: 630px;
+  padding-inline: 88px 40px;
+  background: rgb(39 39 49);
+  color: rgb(250 251 255);
+  font-family: var(--font-body);
+}
+
+.tiles {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(3, 136px);
+  gap: 12px;
+}
+
+.tile {
+  position: relative;
+  display: grid;
+  place-items: center;
+  block-size: 136px;
+  border-radius: 6px;
+  box-shadow: inset 0 -8px 0 var(--solved-bd);
+
+  b {
+    margin-block-end: 8px;
+    font-size: 76px;
+    font-weight: 400;
+  }
+
+  i {
+    inset-block-end: 16px;
+    inset-inline-end: 12px;
+    font-size: 18px;
+    font-weight: 500;
+  }
+}
+
+.words {
+  display: flex;
+  flex-direction: column;
+
+  h2 {
+    font-size: 112px;
+    font-weight: 300;
+    line-height: 1.1;
+  }
+
+  p {
+    margin-block-start: 16px;
+    color: rgb(201 203 211);
+    font-size: 30px;
+    font-weight: 300;
+    line-height: 1.3;
+  }
+
+  strong {
+    margin-block-start: 56px;
+    color: rgb(242 210 75);
+    font-size: 40px;
+    font-weight: 500;
+  }
+
+  span {
+    margin-block-start: 8px;
+    color: rgb(201 203 211);
+    font-size: 30px;
+    font-weight: 300;
+  }
+}

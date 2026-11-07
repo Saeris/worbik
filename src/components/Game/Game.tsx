@@ -60,9 +60,23 @@ export const Game: React.FC<GameProps> = ({ puzzleID, init, persist }) => {
             onSignIn={showSignIn}
           />
         ) : (
-          <p className={styles.status}>
-            <strong>{state.moves}</strong>
-            {state.moves === 1 ? ` move` : ` moves`}
+          <p
+            className={styles.status}
+            role={state.stalled ? `alert` : undefined}
+          >
+            {state.stalled ? (
+              <>
+                {`Couldn’t check that move. `}
+                <button type="button" onClick={state.retry}>
+                  Try again
+                </button>
+              </>
+            ) : (
+              <>
+                <strong>{state.moves}</strong>
+                {state.moves === 1 ? ` move` : ` moves`}
+              </>
+            )}
           </p>
         )}
         <Puzzle className={styles.board} state={state} />

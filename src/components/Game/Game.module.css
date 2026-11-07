@@ -107,6 +107,16 @@
     font-variant-numeric: tabular-nums;
   }
 
+  button {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--fg);
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
   @media (orientation: landscape) and (max-height: 540px) {
     justify-self: end;
   }

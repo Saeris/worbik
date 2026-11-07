@@ -10,6 +10,13 @@ import { Grid } from "./Grid.ts";
  */
 export const MAX_MOVES = 2000;
 
+/**
+ * The most guesses that can be checked at once. They travel in the address
+ * of the request, which has a limit of its own, and this is well within it
+ * for the largest of boards.
+ */
+export const MAX_GUESSES = 100;
+
 /** Every state that can be reached from the given one in a single move */
 const next = (state: string, width: Size): Set<string> => {
   const { height } = new Grid(state, width);

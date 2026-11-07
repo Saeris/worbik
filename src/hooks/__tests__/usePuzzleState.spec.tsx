@@ -1,8 +1,16 @@
 // @vitest-environment happy-dom
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { fetch } from "void/client";
-import type { PuzzleStateInit } from "../../state";
+import { fetch, FetchError } from "void/client";
+import { setPlayer } from "../../auth/player";
+import { checkGuesses, vouchForBoard } from "../../server/moves";
+import {
+  MAX_GUESSES,
+  PuzzleState,
+  type Challenge,
+  type PuzzleStateInit
+} from "../../state";
+import { getPuzzleID } from "../../utils";
 import { usePuzzle } from "../usePuzzleState";
 
 /** What the server answers with: the letters that are in place, and a note of where the game is */
@@ -11,9 +19,19 @@ interface Answer {
   from?: string;
 }
 
-vi.mock(`void/client`, () => ({ fetch: vi.fn<() => Promise<Answer>>() }));
+vi.mock(`void/client`, () => ({
+  fetch: vi.fn<() => Promise<Answer>>(),
+  FetchError: class extends Error {
+    constructor(readonly status: number) {
+      super();
+    }
+  }
+}));
+vi.mock(`void/env`, () => ({ env: { PUZZLE_SECRET: `secret` } }));
 
-const check = vi.mocked(fetch as unknown as () => Promise<Answer>);
+const check = vi.mocked(
+  fetch as unknown as (...args: any[]) => Promise<Answer>
+);
 
 /**
  * A 3×2 puzzle whose solution is `abc` over `def`, in which no letter
@@ -198,12 +216,16 @@ describe(`restoring a saved game`, () => {
     expect(localStorage.getItem(`03-02-2026_3x2`)).toContain(`a-newer-note`);
   });
 
-  it(`starts over from an unfinished game that has no note`, async () => {
-    // Games saved before moves were kept track of can't be carried on from, as the server would refuse the next one
+  it(`has an unfinished game with no note checked from the start`, async () => {
+    // With nothing to say how far the server got, the game itself is what it's shown
+    check.mockResolvedValue({ hints: [`ABCefd`], from: `a-note` });
     localStorage.setItem(`03-02-2026_3x2`, `3|bcaefd,abcefd|ABC   `);
     await render();
 
-    expect(puzzle.moves).toBe(0);
+    expect(puzzle.moves).toBe(1);
+    expect(check).toHaveBeenLastCalledWith(`/api/check`, {
+      query: { puzzle: `03-02-2026_3x2`, guesses: `abcefd` }
+    });
   });
 
   it(`keeps a solved game, which needs no note`, async () => {
@@ -214,11 +236,286 @@ describe(`restoring a saved game`, () => {
     expect(puzzle.win).toBe(true);
   });
 
+  it(`leaves whatever isn't a game of this puzzle's board`, async () => {
+    // Storage can hold anything, and a bad hint would otherwise take the whole page down with it
+    localStorage.setItem(`03-02-2026_3x2`, `3|bcaefd,abcefd|AB`);
+    await render();
+
+    expect(puzzle.moves).toBe(0);
+  });
+
+  it(`keeps the board's width a number`, async () => {
+    // What's saved is text, and the size picker compares this to find the board being played
+    localStorage.setItem(`03-02-2026_3x2`, `3|bcaefd,abcefd|ABC   ||a-note`);
+    await render();
+
+    expect(puzzle.initial.width).toBe(3);
+  });
+
   it(`leaves a game of a puzzle that has since been remade`, async () => {
     // Its moves were made on a different board, and a score made of them would be turned away
     localStorage.setItem(`03-02-2026_3x2`, `3|zzzzzz,abcefd|ABC   `);
     await render();
 
     expect(puzzle.moves).toBe(0);
+  });
+});
+
+describe(`staying in step with the server`, () => {
+  const id = getPuzzleID({ width: 5, height: 5 });
+  const solution = `abcdefghijklmnopqrstuvwxy`;
+  /** The solution with its first two rows each rotated one place to the right */
+  const start = `eabcdjfghiklmnopqrstuvwxy`;
+  const game: Challenge = [2, start, solution];
+  const board: PuzzleStateInit = [5, PuzzleState.compare(start, solution), 2];
+  /** The board after the first row is put right */
+  const afterA = `abcdejfghiklmnopqrstuvwxy`;
+  /** That board, after a wrong move: the first column rotated up */
+  const afterB = `jbcdekfghiplmnouqrstavwxy`;
+  /** What's known once the first row is in place, along with the rows that began in place */
+  const hints = `ABCDE     ${solution.slice(10).toUpperCase()}`;
+
+  const refuse = (status: number): Error =>
+    new (FetchError as unknown as new (code: number) => Error)(status);
+
+  /** Answers the way that the real server does, which is what these are all about */
+  const server = async (
+    _url: string,
+    { query }: { query: Record<string, string> }
+  ): Promise<Answer> => {
+    try {
+      return await checkGuesses(id, game, query.guesses.split(`,`), query.from);
+    } catch (cause) {
+      throw refuse((cause as { status: number }).status);
+    }
+  };
+
+  const Played: React.FC = () => {
+    // oxlint-disable-next-line react/globals -- hands the hook's result to the tests, which then drive it
+    puzzle = usePuzzle(id, board);
+
+    return <output>{puzzle.moves}</output>;
+  };
+
+  let root: Root | undefined;
+
+  /** Signing an answer takes longer than `act` waits for */
+  const settle = async (): Promise<void> => {
+    await act(async () => {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 30);
+      });
+    });
+  };
+
+  const open = async (): Promise<void> => {
+    root = createRoot(document.body.appendChild(document.createElement(`div`)));
+    await act(async () => {
+      root?.render(<Played />);
+    });
+    await settle();
+  };
+
+  const close = async (): Promise<void> => {
+    await act(async () => {
+      root?.unmount();
+    });
+    root = undefined;
+  };
+
+  const move = async (
+    line: number,
+    dir: `down` | `left` | `right` | `up`
+  ): Promise<void> => {
+    await act(async () => {
+      puzzle.rotate(line, dir);
+    });
+    await settle();
+  };
+
+  beforeEach(() => {
+    vi.stubGlobal(`IS_REACT_ACT_ENVIRONMENT`, true);
+    vi.spyOn(console, `error`).mockImplementation(() => {});
+    check.mockImplementation(server as never);
+  });
+
+  afterEach(async () => {
+    await close();
+    vi.unstubAllGlobals();
+    localStorage.clear();
+    check.mockReset();
+    vi.restoreAllMocks();
+  });
+
+  it(`can always be solved after the page goes away with a move on its way`, async () => {
+    // A save of moves the server hadn't reached used to get every later move refused, leaving the puzzle unsolvable for the rest of the day
+    const held = Promise.withResolvers<void>();
+    check
+      .mockImplementationOnce((async (...args: Parameters<typeof server>) => {
+        await held.promise;
+        return server(...args);
+      }) as never)
+      .mockImplementationOnce((async () => new Promise(() => {})) as never);
+    await open();
+    await act(async () => {
+      puzzle.rotate(0, `left`);
+      puzzle.rotate(0, `up`);
+    });
+    await act(async () => {
+      held.resolve();
+    });
+    await settle();
+    await close();
+
+    await open();
+    await move(0, `left`);
+    await move(1, `left`);
+
+    expect(puzzle.win).toBe(true);
+  });
+
+  it(`recovers a game that was saved ahead of its note`, async () => {
+    // Players already have these, and their games have to come back to life
+    const note = await vouchForBoard(id, afterA);
+    localStorage.setItem(
+      id,
+      `5|${start},${afterA},${afterB}|${hints}||${note}`
+    );
+    await open();
+    await move(0, `down`);
+    await move(1, `left`);
+
+    expect(puzzle.win).toBe(true);
+    expect(puzzle.stalled).toBe(false);
+  });
+
+  it(`recovers a game whose note the server can no longer read`, async () => {
+    // As happens to every game under way if the secret that signs them is ever changed
+    localStorage.setItem(id, `5|${start},${afterA}|${hints}||${afterA}.forged`);
+    await open();
+    await move(1, `left`);
+
+    expect(puzzle.win).toBe(true);
+  });
+
+  it(`goes on when the game can't be saved`, async () => {
+    // A move that was checked but not saved used to be sent again, which the server refuses
+    vi.stubGlobal(`localStorage`, {
+      getItem: () => null,
+      removeItem: () => {},
+      setItem: () => {
+        throw new DOMException(`Full`, `QuotaExceededError`);
+      }
+    });
+    await open();
+    await move(0, `left`);
+    await move(1, `left`);
+
+    expect(puzzle.win).toBe(true);
+  });
+
+  it(`can be played without any storage at all`, async () => {
+    // Browsers that block site data throw at the very mention of it
+    const storage = Object.getOwnPropertyDescriptor(globalThis, `localStorage`);
+
+    Object.defineProperty(globalThis, `localStorage`, {
+      configurable: true,
+      get: () => {
+        throw new DOMException(`Denied`, `SecurityError`);
+      }
+    });
+
+    try {
+      await open();
+      await move(0, `left`);
+      await move(1, `left`);
+
+      expect(puzzle.win).toBe(true);
+    } finally {
+      Object.defineProperty(
+        globalThis,
+        `localStorage`,
+        storage as PropertyDescriptor
+      );
+    }
+  });
+
+  it(`says so when moves can't be checked, and can try again`, async () => {
+    // Without hints a game can't be won, and a player has no other way of knowing that nothing is happening
+    check.mockRejectedValueOnce(new Error(`Failed to fetch`));
+    await open();
+    await move(0, `left`);
+
+    expect(puzzle.stalled).toBe(true);
+
+    await act(async () => {
+      puzzle.retry();
+    });
+    await settle();
+
+    expect(puzzle.stalled).toBe(false);
+    expect(puzzle.isRowCorrect(0)).toBe(true);
+  });
+
+  it(`stops, rather than asking forever, if the game itself is refused`, async () => {
+    check.mockImplementation((async () => {
+      throw refuse(409);
+    }) as never);
+    localStorage.setItem(id, `5|${start},${afterA}|${hints}||a-note`);
+    await open();
+    await move(1, `left`);
+
+    expect(puzzle.stalled).toBe(true);
+    expect(check).toHaveBeenCalledTimes(2);
+  });
+
+  it(`never checks more at once than fits in an address`, async () => {
+    // A long stretch offline, or a whole game being sent again, would otherwise be turned away for its length
+    check.mockImplementation((async () => {
+      throw new Error(`Failed to fetch`);
+    }) as never);
+    await open();
+    await act(async () => {
+      for (let count = 0; count < MAX_GUESSES + 20; count += 1) {
+        puzzle.rotate(count % 5, count % 2 ? `left` : `right`);
+      }
+    });
+    await settle();
+    check.mockReset();
+    check.mockImplementation((async (
+      _url: string,
+      { query }: { query: { guesses: string } }
+    ) => ({
+      hints: query.guesses.split(`,`),
+      from: `a-note`
+    })) as never);
+    await act(async () => {
+      puzzle.retry();
+    });
+    await settle();
+
+    const sizes = check.mock.calls.map(
+      ([, { query }]) => query.guesses.split(`,`).length
+    );
+
+    expect(sizes).toStrictEqual([MAX_GUESSES, 20]);
+  });
+
+  it(`keeps one player's moves out of another's game`, async () => {
+    // Signing out doesn't reload the page, so what was left to check has to go with the game it belongs to
+    setPlayer({ did: `did:plc:someone`, handle: `someone.test` });
+    check.mockRejectedValueOnce(new Error(`Failed to fetch`));
+    await open();
+    await move(0, `left`);
+    await act(async () => {
+      setPlayer(null);
+    });
+    check.mockClear();
+    await move(0, `left`);
+
+    expect(check).toHaveBeenCalledTimes(1);
+    expect(check).toHaveBeenLastCalledWith(`/api/check`, {
+      query: { puzzle: id, guesses: afterA }
+    });
   });
 });

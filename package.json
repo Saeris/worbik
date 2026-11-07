@@ -26,6 +26,13 @@
     "test": "vp test",
     "deploy": "void deploy --platform cloudflare"
   },
+  "wallaby": {
+    "autoDetect": true,
+    "workers": {
+      "initial": 4,
+      "regular": 2
+    }
+  },
   "dependencies": {
     "@ariakit/react": "^0.4.42",
     "@atcute/identity-resolver": "^2.0.3",

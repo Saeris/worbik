@@ -102,7 +102,12 @@ const endSession = async (did: string): Promise<void> => {
   await signOut(did);
 };
 
-export const Config: React.FC = memo(() => {
+export interface ConfigProps {
+  /** Called when a player asks to delete their account */
+  onDelete: () => void;
+}
+
+export const Config: React.FC<ConfigProps> = memo(({ onDelete }) => {
   const player = usePlayer();
 
   const leave = useCallback(() => {
@@ -153,6 +158,14 @@ export const Config: React.FC = memo(() => {
             </p>
             <button type="button" onClick={leave}>
               Sign out
+            </button>
+          </div>
+          <div className={styles.account}>
+            <p>
+              Delete your scores from every leaderboard. This can’t be undone.
+            </p>
+            <button type="button" className={styles.danger} onClick={onDelete}>
+              Delete account
             </button>
           </div>
         </>

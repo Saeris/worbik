@@ -142,3 +142,9 @@
     text-decoration: underline;
   }
 }
+
+/* Set apart from the rest by color, as it's the one thing here that can't be taken back */
+.account button.danger {
+  border-color: var(--error);
+  box-shadow: 0px var(--spacing-0) 0px 0px var(--error);
+}

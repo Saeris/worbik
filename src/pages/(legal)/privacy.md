@@ -35,7 +35,7 @@ Each score that you post stores:
 
 That's all. The moves of your game are sent along with your score so that the server can check it, and are then discarded.
 
-**What Worbik can't see.** Your password never reaches Worbik. Signing in gives it permission to do two things: to know who you are, and to have the server that hosts your account vouch for you when you post a score or bring another device up to date. It can't read or write anything in your account, which means your email address, posts, and follows are all out of its reach.
+**What Worbik can't see.** Your password never reaches Worbik. Signing in gives it permission to do two things: to know who you are, and to have the server that hosts your account vouch for you when you post a score, bring another device up to date, or delete your account. It can't read or write anything in your account, which means your email address, posts, and follows are all out of its reach.
 
 Your browser also keeps the details of your sign-in, and the handles of the last few accounts that signed in on that device, so that they can be suggested next time.
 
@@ -60,17 +60,17 @@ Scores are the point of a leaderboard, so these are public:
 
 - **To sign out**, use Settings.
 - **To clear what's in your browser**, clear the site data for worbik.com.
-- **To have your scores deleted**, [open an issue on GitHub](https://github.com/Saeris/worbik/issues) with your handle, and I will delete them. There is no button for this yet. Deleting your scores also ends your streak, as that's what it's worked out from.
+- **To delete your account**, use Settings. This permanently removes every score that Worbik has for you, which is everything it keeps about you, along with your streak and history. It can't be undone. Your account itself isn't touched, as it doesn't belong to Worbik, and you can sign in again at any time and start over.
 
 Pictures of a result may stay visible for a while after its score is deleted, wherever a chat app or browser has kept a copy.
 
 ## How long it's kept
 
-There is no scheduled deletion. Scores are kept until you ask for them to be deleted, as a leaderboard that quietly forgot people would be worse than one that doesn't. That doesn't make them safe: as the [Terms of Service](/terms) say, Worbik may lose data or shut down at any time.
+There is no scheduled deletion. Scores are kept until you delete your account, as a leaderboard that quietly forgot people would be worse than one that doesn't. That doesn't make them safe: as the [Terms of Service](/terms) say, Worbik may lose data or shut down at any time.
 
 ## Children
 
-Worbik isn't directed at children under 13, and only a player who signs in gives it anything to store. If you believe that a child under 13 has posted scores, open an issue and they will be deleted.
+Worbik isn't directed at children under 13, and only a player who signs in gives it anything to store. If you believe that a child under 13 has posted scores, [open an issue](https://github.com/Saeris/worbik/issues) and they will be deleted.
 
 ## Changes
 
@@ -78,4 +78,4 @@ This policy may change. When it does, the date at the top will change with it, a
 
 ## Legal bases, for anyone who needs them
 
-Under the UK and EU GDPR, the controller of this data is Drake Costa. Scores are processed on the basis of legitimate interest: running the leaderboards that you chose to post to. You have the right to access, correct, and delete your data, and to object to it being processed, which you can do through the [project's issues](https://github.com/Saeris/worbik/issues). You also have the right to complain to your data protection authority. Cloudflare may process data outside of your country, under its own safeguards.
+Under the UK and EU GDPR, the controller of this data is Drake Costa. Scores are processed on the basis of legitimate interest: running the leaderboards that you chose to post to. You have the right to access, correct, and delete your data, and to object to it being processed. You can delete it yourself in Settings, and anything else can be asked for through the [project's issues](https://github.com/Saeris/worbik/issues). You also have the right to complain to your data protection authority. Cloudflare may process data outside of your country, under its own safeguards.

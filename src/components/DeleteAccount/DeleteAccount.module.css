@@ -1,0 +1,71 @@
+.delete {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  font-size: var(--font-size-3);
+  font-weight: 300;
+  line-height: 1.4;
+
+  ul {
+    padding-inline-start: var(--spacing-5);
+  }
+
+  strong {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  label {
+    margin-block-start: var(--spacing-2);
+    font-size: var(--font-size-2);
+    font-weight: 500;
+  }
+}
+
+.field {
+  box-sizing: border-box;
+  inline-size: 100%;
+  block-size: 48px;
+  padding-inline: var(--spacing-3);
+  border: 1px solid var(--fg);
+  border-radius: var(--spacing-0);
+  background: none;
+  color: inherit;
+  /* Anything smaller makes iOS zoom in on the field when it's focused */
+  font-size: max(var(--font-size-3), 16px);
+}
+
+.error {
+  font-size: var(--font-size-2);
+  font-weight: 500;
+}
+
+.link {
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.danger {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  inline-size: 100%;
+  block-size: 48px;
+  border-radius: var(--spacing-0);
+  background: var(--error);
+  /* The same in both themes, as it's what stands out against the color behind it in each */
+  color: oklch(19.19% 0.0082 274.47);
+  font-size: var(--font-size-3);
+  font-weight: 600;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover:not(:disabled) {
+      box-shadow: var(--hover-ring);
+    }
+  }
+}

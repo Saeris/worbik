@@ -165,6 +165,14 @@ export const getPostedGames = async (
   return games.filter(isNonNullable);
 };
 
+/**
+ * Deletes every score that a player has posted, which is all that Worbik
+ * keeps about them. Their places on leaderboards go with them, for good.
+ */
+export const deleteScores = async (did: string): Promise<void> => {
+  await db.delete(scores).where(eq(scores.did, did));
+};
+
 /** The best scores on a puzzle: those with the fewest moves, and the earliest of any that tie */
 export const getLeaderboard = async (
   puzzle: string,

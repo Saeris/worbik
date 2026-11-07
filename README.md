@@ -78,7 +78,7 @@ The card is drawn without any image library, to stay within the ten milliseconds
 
 ### Signing in
 
-Signing in happens in the browser, with [atcute][atcute]. The server that hosts a player's account learns about Worbik from `/oauth/client-metadata.json`, which describes the app at whichever address it's served from, and the permission asked for names the two methods that the server vouches for the player to call: `com.worbik.submitScore`, and `com.worbik.getSolves`, which brings a new device up to date. Adding to these makes anyone already signed in sign in again.
+Signing in happens in the browser, with [atcute][atcute]. The server that hosts a player's account learns about Worbik from `/oauth/client-metadata.json`, which describes the app at whichever address it's served from, and the permission asked for names the three methods that the server vouches for the player to call: `com.worbik.submitScore`, `com.worbik.getSolves`, which brings a new device up to date, and `com.worbik.deleteAccount`. Adding to these makes anyone already signed in sign in again.
 
 ## 📜 Terms and privacy
 

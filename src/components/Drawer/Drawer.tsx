@@ -12,6 +12,7 @@ import {
 import { usePlayer } from "#hooks";
 import type { Size } from "#utils";
 import { Config } from "../Config";
+import { DeleteAccount } from "../DeleteAccount";
 import { Guide } from "../Guide";
 import { Leaderboard } from "../Leaderboard";
 import { Profile } from "../Profile";
@@ -20,6 +21,7 @@ import styles from "./Drawer.module.css";
 
 /** Each of the screens that the drawer can show, other than the menu that leads to them */
 export type Screen =
+  | `delete-account`
   | `guide`
   | `leaderboard`
   | `profile`
@@ -76,6 +78,7 @@ export const Drawer: React.FC<DrawerProps> = memo(
     });
 
     const titles = {
+      "delete-account": `Delete account`,
       "sign-in": solved ? `Post your score` : `Sign in`,
       leaderboard: `Leaderboard`,
       profile: `Profile`,
@@ -88,8 +91,15 @@ export const Drawer: React.FC<DrawerProps> = memo(
       if (view) heading.current?.focus();
     }, [view]);
 
+    // Deleting an account is reached from the settings, on any size of screen, and so leads back to them
+    const within = screen === `delete-account` ? `settings` : null;
+
     const back = useCallback(() => {
-      onView(`menu`);
+      onView(within ?? `menu`);
+    }, [onView, within]);
+
+    const showDelete = useCallback(() => {
+      onView(`delete-account`);
     }, [onView]);
 
     const signIn = useCallback(() => {
@@ -182,10 +192,10 @@ export const Drawer: React.FC<DrawerProps> = memo(
           )}
           <section className={styles.pane} inert={view === `menu`}>
             <header className={styles.header}>
-              {viaMenu && (
+              {(viaMenu || within) && (
                 <button
                   type="button"
-                  aria-label="Back to the menu"
+                  aria-label={within ? `Back to settings` : `Back to the menu`}
                   onClick={back}
                 >
                   <PiCaretLeftThin aria-hidden />
@@ -210,7 +220,10 @@ export const Drawer: React.FC<DrawerProps> = memo(
               )}
               {screen === `profile` && <Profile onSignIn={signIn} />}
               {screen === `guide` && <Guide width={width} height={height} />}
-              {screen === `settings` && <Config />}
+              {screen === `settings` && <Config onDelete={showDelete} />}
+              {screen === `delete-account` && (
+                <DeleteAccount onSignIn={signIn} />
+              )}
             </div>
           </section>
         </div>

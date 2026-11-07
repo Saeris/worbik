@@ -43,7 +43,7 @@ A score that you post is public. It appears on leaderboards along with your hand
 
 Your first solve of a puzzle is the one that counts. Scores are only accepted during a puzzle's own day, with a short grace period, and each one is checked against the game that earned it.
 
-Leaderboards are a bit of fun, and they are not a record of anything. Scores can be corrected, removed, or lost, and a leaderboard can be reset.
+You can delete your account in Settings, which permanently removes your scores. Leaderboards are a bit of fun, and they are not a record of anything. Scores can be corrected, removed, or lost, and a leaderboard can be reset.
 
 ## What you can expect
 

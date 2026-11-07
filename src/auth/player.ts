@@ -133,3 +133,15 @@ export const rememberAccount = ({ did, handle }: Player): void => {
     // The handle can always be typed again
   }
 };
+
+/** Stops suggesting an account when signing in, for a player who has deleted it */
+export const forgetAccount = (did: string): void => {
+  try {
+    localStorage.setItem(
+      ACCOUNTS_KEY,
+      JSON.stringify(getAccounts().filter((account) => account.did !== did))
+    );
+  } catch {
+    // Without storage there are no accounts to forget
+  }
+};

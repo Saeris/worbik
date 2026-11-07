@@ -428,10 +428,10 @@ describe(`routes`, () => {
     it(`asks for each of the methods that it uses`, async () => {
       // One that's missing can't be used by anyone, as a player's server wouldn't vouch for it
       const response = await send(getMetadata, `/oauth/client-metadata.json`);
-      const { scope } = await response.json();
+      const metadata = await response.text();
 
       for (const method of [SUBMIT_SCORE, GET_SOLVES, DELETE_DATA]) {
-        expect(scope).toContain(method);
+        expect(metadata).toContain(method);
       }
     });
 

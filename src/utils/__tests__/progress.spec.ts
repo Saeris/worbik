@@ -1,4 +1,4 @@
-import { formatCountdown, getProgress } from "../progress";
+import { formatCountdown, getProgress, toSavedGame } from "../progress";
 
 describe(`getProgress`, () => {
   it(`is nothing for a puzzle that hasn't been started`, () => {
@@ -24,6 +24,28 @@ describe(`getProgress`, () => {
 
   it(`is nothing for a saved game that can't be read`, () => {
     expect(getProgress(`not a saved game`)).toBeNull();
+  });
+});
+
+describe(`toSavedGame`, () => {
+  const game = {
+    puzzle: `11-06-2026_6x5`,
+    moves: 42,
+    challenge: `Bcaefd`,
+    solution: `abcdef`
+  };
+
+  it(`is read back as the solve that it stands for`, () => {
+    // The list of the day's puzzles reads saved games, and has to show this one as any other solve
+    expect(getProgress(toSavedGame(game))).toStrictEqual({
+      moves: 42,
+      solved: true
+    });
+  });
+
+  it(`begins where the puzzle does, in the form that a saved game does`, () => {
+    // A saved game that doesn't begin where the puzzle does is taken for one of another puzzle, and ignored
+    expect(toSavedGame(game)).toBe(`6|bcaefd,abcdef|ABCDEF|42`);
   });
 });
 

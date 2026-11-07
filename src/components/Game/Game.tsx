@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { cx } from "class-variance-authority";
 import type { PuzzleStateInit } from "#state";
-import { usePuzzle, useScore } from "#hooks";
+import { usePostedGames, usePuzzle, useScore } from "#hooks";
 import { Puzzle } from "./Puzzle";
 import { Drawer, type View } from "../Drawer";
 import { Menu } from "../Menu";
@@ -17,6 +17,7 @@ export interface GameProps {
 
 export const Game: React.FC<GameProps> = ({ puzzleID, init, persist }) => {
   const state = usePuzzle(puzzleID, init, persist);
+  usePostedGames(puzzleID, state.win, state.resume);
   const score = useScore(puzzleID, state.win, state.history);
   const { width, height } = state.initial;
   // What the drawer is showing over the game, if it's open. The game stays as it is underneath.

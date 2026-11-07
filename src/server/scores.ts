@@ -1,8 +1,9 @@
 import { HTTPException } from "hono/http-exception";
-import { and, asc, db, eq } from "void/db";
+import { and, asc, db, eq, inArray } from "void/db";
 import { scores } from "#db/schema";
 import { replay } from "#state";
-import { isOpenForScores, parseSize } from "#utils";
+import { isNonNullable, isOpenForScores, parseSize, sizes } from "#utils";
+import type { PostedGame } from "#utils/progress";
 import { getPuzzle } from "./puzzles";
 
 export interface Score {
@@ -110,6 +111,58 @@ export const getScore = async (
     .limit(1);
 
   return found.at(0) ?? null;
+};
+
+/**
+ * The scores that a player has posted on a day's puzzles.
+ *
+ * It's how a device finds out that it's missing a solve that was made on
+ * another. It says nothing that the day's leaderboards don't, so it's asked
+ * for without proof of who is asking, which saves a trip to the server that
+ * hosts their account every time the game is opened.
+ */
+export const getDayScores = async (
+  did: string,
+  day: string
+): Promise<Array<Pick<PostedGame, "moves" | "puzzle">>> =>
+  db
+    .select({ puzzle: scores.puzzle, moves: scores.moves })
+    .from(scores)
+    .where(
+      and(
+        eq(scores.did, did),
+        inArray(
+          scores.puzzle,
+          sizes.map(([width, height]) => `${day}_${width}x${height}`)
+        )
+      )
+    );
+
+/**
+ * The games that a player has posted on a day's puzzles, along with what it
+ * takes to show them as solved.
+ *
+ * That includes their solutions, which others may still be working out, so
+ * this must only ever be given to the player themselves. Leaderboards name
+ * everyone who has solved a puzzle, so naming a player proves nothing: the
+ * `did` has to come from a proof of identity.
+ */
+export const getPostedGames = async (
+  did: string,
+  day: string
+): Promise<PostedGame[]> => {
+  const posted = await getDayScores(did, day);
+  const games = await Promise.all(
+    posted.map(async ({ puzzle, moves }) => {
+      const found = await getPuzzle(puzzle);
+
+      return (
+        found && { puzzle, moves, challenge: found[1], solution: found[2] }
+      );
+    })
+  );
+
+  return games.filter(isNonNullable);
 };
 
 /** The best scores on a puzzle: those with the fewest moves, and the earliest of any that tie */

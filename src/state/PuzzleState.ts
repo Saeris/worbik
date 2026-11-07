@@ -13,7 +13,13 @@ export type PuzzleStateInit = [perRow: Size, chars: string, target?: number];
 
 export type Challenge = [target: number, challenge: string, solution: string];
 
-export type Snapshot = [width: Size, historyString: string, hint: string];
+export type Snapshot = [
+  width: Size,
+  historyString: string,
+  hint: string,
+  /** How many moves the game took, for one that was played on another device and whose moves aren't known. It's a string when read back from storage. */
+  moves?: number | string
+];
 
 export class PuzzleState {
   #initialized = false;
@@ -22,6 +28,7 @@ export class PuzzleState {
   #hints: string[][];
   #target: number;
   #win = false;
+  #reportedMoves: number | null = null;
   #listeners = new Set<() => void>();
 
   get initial(): Grid {
@@ -45,7 +52,7 @@ export class PuzzleState {
 
   get moves(): number {
     // exclude the initial state to get # of moves
-    return this.#history.length - 1;
+    return this.#reportedMoves ?? this.#history.length - 1;
   }
 
   get hints(): string[][] {
@@ -61,11 +68,12 @@ export class PuzzleState {
   }
 
   get snapshot(): Snapshot {
-    return [
-      this.#grid.width,
-      this.#history.join(`,`),
-      this.#hints.flat().join(``)
-    ];
+    const history = this.#history.join(`,`);
+    const hints = this.#hints.flat().join(``);
+
+    return this.#reportedMoves === null
+      ? [this.#grid.width, history, hints]
+      : [this.#grid.width, history, hints, this.#reportedMoves];
   }
 
   constructor(init: PuzzleStateInit) {
@@ -159,7 +167,7 @@ export class PuzzleState {
     return this.#update();
   };
 
-  restore = ([width, historyString, hint]: Snapshot): this => {
+  restore = ([width, historyString, hint, moves]: Snapshot): this => {
     const history = historyString.split(`,`); //?
     const current = history.at(-1); //?
     if (!hint || !current) {
@@ -168,7 +176,10 @@ export class PuzzleState {
     this.#grid = new Grid(current, width);
     this.#history = history;
     this.#hints = group(hint.split(``), width);
-    return this.#checkWin(this.current.flat().join(``));
+    this.#reportedMoves = moves === undefined ? null : Number(moves);
+    this.#checkWin(this.current.flat().join(``));
+    // A game that was already won is left alone by that check, but may have just been replaced
+    return this.#update();
   };
 
   getNextState = (

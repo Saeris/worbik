@@ -2,13 +2,17 @@ import type { Did, Nsid } from "@atcute/lexicons";
 import { scope } from "@atcute/oauth-types";
 
 /**
- * The one thing that a player's proof of identity may be used for.
+ * What a player's proof of identity may be used for: to submit a score, and
+ * to fetch the games that they have posted, for a device that doesn't have
+ * them. The second is only for the player themselves, as it includes the
+ * solutions to puzzles that others may still be playing.
  *
  * Named under worbik.com, which is where Worbik's lexicons will be
- * published. Changing this changes what players sign in for, so anyone
- * signed in under the old name has to sign in again.
+ * published. Changing these changes what players sign in for, so anyone
+ * signed in under an older list has to sign in again.
  */
 export const SUBMIT_SCORE: Nsid = `com.worbik.submitScore`;
+export const GET_SOLVES: Nsid = `com.worbik.getSolves`;
 
 /**
  * The identity of this service, which is the did:web of wherever it is
@@ -30,11 +34,11 @@ export const serviceDid = (origin: string): Did<"web"> => {
  * Everything that Worbik asks of a player's account when they sign in.
  *
  * That is to know who they are, and to have the server that hosts their
- * account vouch for them when they submit a score. It can't read or write
- * anything in their account, which is why this isn't the catch-all
- * `transition:generic` that most apps ask for.
+ * account vouch for them to Worbik. It can't read or write anything in
+ * their account, which is why this isn't the catch-all `transition:generic`
+ * that most apps ask for.
  */
-export const OAUTH_SCOPE = `atproto ${scope.rpc({ lxm: [SUBMIT_SCORE], aud: `*` })}`;
+export const OAUTH_SCOPE = `atproto ${scope.rpc({ lxm: [GET_SOLVES, SUBMIT_SCORE], aud: `*` })}`;
 
 /** Where a player's account sends them back to once they've approved signing in */
 export const OAUTH_CALLBACK = `/oauth/callback`;

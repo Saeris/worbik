@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import * as v from "valibot";
 import { fetch, FetchError } from "void/client";
 import { isOpenForScores, isPuzzleDay } from "#utils";
+import { SUBMIT_SCORE } from "#utils/service";
 import { markPosted, recordSolve } from "#utils/solves";
 import { usePlayer } from "./usePlayer";
 
@@ -69,7 +70,7 @@ const send = async (
   await fetch(`/api/scores`, {
     method: `POST`,
     body: { puzzle: puzzleID, history: [...history] },
-    headers: { authorization: `Bearer ${await getProof(did)}` }
+    headers: { authorization: `Bearer ${await getProof(did, SUBMIT_SCORE)}` }
   });
   markPosted(puzzleID);
 };

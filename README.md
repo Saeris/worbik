@@ -24,7 +24,7 @@ Rotate a row or column by pressing the arrow beside it, by swiping across its ti
 
 Every size of board has its own ranked leaderboard for every day. To post a score, sign in with an [Atmosphere][atproto] account, the one used for Bluesky and other apps. Worbik has no accounts of its own: it asks the server that hosts the account for two things only, to say who the player is and to vouch for them when they submit a score. It can't read or write anything in the account.
 
-A solve is posted as the whole game, which the server replays to check that it solves the puzzle, so a score is never only the player's word for it. A player's first solve of a puzzle is the one that counts. A leaderboard takes scores for the day that its puzzle is the day's puzzle, plus an hour's grace.
+A solve is posted as the whole game, which the server replays to check that it solves the puzzle, so a score is never only the player's word for it. A player's first solve of a puzzle is the one that counts, and signing in on another device opens the puzzles they have already solved as solved. A leaderboard takes scores for the day that its puzzle is the day's puzzle, plus an hour's grace.
 
 ## 🔥 Streaks
 
@@ -74,7 +74,7 @@ The card is drawn without any image library, to stay within the ten milliseconds
 
 ### Signing in
 
-Signing in happens in the browser, with [atcute][atcute]. The server that hosts a player's account learns about Worbik from `/oauth/client-metadata.json`, which describes the app at whichever address it's served from, and the permission asked for names one method, `com.worbik.submitScore`, that the server vouches for the player to call.
+Signing in happens in the browser, with [atcute][atcute]. The server that hosts a player's account learns about Worbik from `/oauth/client-metadata.json`, which describes the app at whichever address it's served from, and the permission asked for names the two methods that the server vouches for the player to call: `com.worbik.submitScore`, and `com.worbik.getSolves`, which brings a new device up to date. Adding to these makes anyone already signed in sign in again.
 
 ## 🚀 Deploying
 

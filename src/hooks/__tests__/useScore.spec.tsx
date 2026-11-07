@@ -5,6 +5,7 @@ import { fetch } from "void/client";
 import { getProof } from "../../auth/oauth";
 import { setPlayer } from "../../auth/player";
 import { getPuzzleID } from "../../utils/getPuzzleID";
+import { SUBMIT_SCORE } from "../../utils/service";
 import { useScore, type Score } from "../useScore";
 
 /** Stands in for an answer from the server that isn't a success */
@@ -131,7 +132,7 @@ describe(`useScore`, () => {
         headers: { authorization: `Bearer a-token` }
       }
     ]);
-    expect(proof).toHaveBeenCalledExactlyOnceWith(alice.did);
+    expect(proof).toHaveBeenCalledExactlyOnceWith(alice.did, SUBMIT_SCORE);
   });
 
   it(`posts a solve once the player signs in afterwards`, async () => {

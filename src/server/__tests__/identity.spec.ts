@@ -6,6 +6,7 @@ import type {
 import type { Did } from "@atcute/lexicons";
 import { createServiceJwt } from "@atcute/xrpc-server/auth";
 import {
+  GET_SOLVES,
   resolveDid,
   resolveHandle,
   serviceDid,
@@ -87,13 +88,13 @@ describe(`verifyPlayer`, () => {
 
   it(`identifies the player that a proof was issued for`, async () => {
     await expect(
-      verifyPlayer(requestWith(await proof()), { didResolver })
+      verifyPlayer(requestWith(await proof()), SUBMIT_SCORE, { didResolver })
     ).resolves.toBe(alice);
   });
 
   it(`rejects a request that carries no proof`, async () => {
     await expect(
-      verifyPlayer(requestWith(), { didResolver })
+      verifyPlayer(requestWith(), SUBMIT_SCORE, { didResolver })
     ).rejects.toThrow();
   });
 
@@ -104,7 +105,7 @@ describe(`verifyPlayer`, () => {
     });
 
     await expect(
-      verifyPlayer(requestWith(forged), { didResolver })
+      verifyPlayer(requestWith(forged), SUBMIT_SCORE, { didResolver })
     ).rejects.toThrow();
   });
 
@@ -113,7 +114,7 @@ describe(`verifyPlayer`, () => {
     const misaddressed = await proof({ audience: `did:web:elsewhere.test` });
 
     await expect(
-      verifyPlayer(requestWith(misaddressed), { didResolver })
+      verifyPlayer(requestWith(misaddressed), SUBMIT_SCORE, { didResolver })
     ).rejects.toThrow();
   });
 
@@ -123,7 +124,14 @@ describe(`verifyPlayer`, () => {
     });
 
     await expect(
-      verifyPlayer(requestWith(repurposed), { didResolver })
+      verifyPlayer(requestWith(repurposed), SUBMIT_SCORE, { didResolver })
+    ).rejects.toThrow();
+  });
+
+  it(`won't let a proof for submitting a score fetch a player's games`, async () => {
+    // Those include the solutions to the day's puzzles, and a proof is only good for what it was issued for
+    await expect(
+      verifyPlayer(requestWith(await proof()), GET_SOLVES, { didResolver })
     ).rejects.toThrow();
   });
 
@@ -134,7 +142,7 @@ describe(`verifyPlayer`, () => {
     });
 
     await expect(
-      verifyPlayer(requestWith(expired), { didResolver })
+      verifyPlayer(requestWith(expired), SUBMIT_SCORE, { didResolver })
     ).rejects.toThrow();
   });
 });

@@ -54,6 +54,8 @@ export const usePuzzle = (
   initial: Grid;
   current: Grid;
   rotate: (rowOrCol: number, dir: `down` | `left` | `right` | `up`) => void;
+  /** Picks up a saved game, in place of whatever is on the board */
+  resume: (saved: string | null) => void;
 } => {
   const [restore, setRestore] = useState(persist);
   const state = useMemo(() => new PuzzleState(init), [init]);
@@ -62,16 +64,22 @@ export const usePuzzle = (
 
   useHints(state);
 
-  useEffect(() => {
-    if (typeof window !== `undefined` && restore) {
-      const previousSession = localStorage.getItem(puzzleID);
+  const resume = useCallback(
+    (saved: string | null) => {
       // A saved game is only of this puzzle if it began where this puzzle does. One that didn't is of a puzzle that has since been remade, which happens in development.
       if (
-        previousSession?.split(`|`)[1]?.split(`,`)[0] ===
+        saved?.split(`|`)[1]?.split(`,`)[0] ===
         state.initial.toString().toLowerCase()
       ) {
-        state.restore(previousSession.split(`|`) as PuzzleState["snapshot"]);
+        state.restore(saved.split(`|`) as PuzzleState["snapshot"]);
       }
+    },
+    [state]
+  );
+
+  useEffect(() => {
+    if (typeof window !== `undefined` && restore) {
+      resume(localStorage.getItem(puzzleID));
       // purge puzzles older than yesterday, utc-0 + 32hrs
       Object.keys(localStorage).forEach((key) => {
         if (filterExpiredDates(key)) {
@@ -81,7 +89,7 @@ export const usePuzzle = (
 
       setRestore(false);
     }
-  }, [puzzleID, state, restore]);
+  }, [puzzleID, resume, restore]);
 
   const queue = useQueuedAPICall(
     useCallback(
@@ -117,6 +125,7 @@ export const usePuzzle = (
     moves,
     win,
     rotate,
+    resume,
     target: state.target,
     history: state.history,
     getHintAt: state.getHintAt,

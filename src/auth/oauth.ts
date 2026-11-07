@@ -5,7 +5,7 @@ import {
   WebDidDocumentResolver,
   type HandleResolver
 } from "@atcute/identity-resolver";
-import type { Did } from "@atcute/lexicons";
+import type { Did, Nsid } from "@atcute/lexicons";
 import {
   isActorIdentifier,
   isDid,
@@ -26,8 +26,7 @@ import {
   OAUTH_CALLBACK,
   OAUTH_CLIENT_METADATA,
   OAUTH_SCOPE,
-  serviceDid,
-  SUBMIT_SCORE
+  serviceDid
 } from "#utils/service";
 import { normalizeHandle } from "./handle";
 import type { Player } from "./player";
@@ -210,12 +209,13 @@ export const completeSignIn = async (): Promise<{
 
 /**
  * Asks the server that hosts a player's account to vouch for them: a token
- * which says who they are, addressed to Worbik, that is good for submitting
- * a score and nothing else, for about a minute.
+ * which says who they are, addressed to Worbik, that is good for one method
+ * and nothing else, for about a minute.
  *
- * Throws a `SignedOutError` if the player is no longer signed in.
+ * Throws a `SignedOutError` if the player is no longer signed in, or signed
+ * in before Worbik had any need of that method.
  */
-export const getProof = async (did: string): Promise<string> => {
+export const getProof = async (did: string, lxm: Nsid): Promise<string> => {
   if (!isDid(did)) throw new SignedOutError();
 
   configure();
@@ -229,10 +229,12 @@ export const getProof = async (did: string): Promise<string> => {
     throw new SignedOutError();
   }
 
+  if (!agent.session.token.scope.includes(lxm)) throw new SignedOutError();
+
   const response = await agent.handle(
     `/xrpc/com.atproto.server.getServiceAuth?${new URLSearchParams({
       aud: serviceDid(location.origin),
-      lxm: SUBMIT_SCORE
+      lxm
     }).toString()}`
   );
 

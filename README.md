@@ -105,6 +105,8 @@ Void deploys the app to a Cloudflare Worker, creating what it needs on the way: 
 
 Signing in works at whichever address the app is served from. A player's sign-in is tied to the address they signed in at, so moving domains signs everyone out.
 
+Workers Builds deploys every push to `main`, with `yarn deploy` as its deploy command. Leave builds for other branches off: Void has no preview deployments on Cloudflare, and `yarn deploy` would send a branch straight to production. A new version is staged at no traffic and only goes live once `/__void/ready` answers as that version, so a failed deployment leaves the site as it was. That check can fail just by being made too soon after staging, in which case retrying the build is enough.
+
 [ci_badge]: https://github.com/Saeris/worbik/actions/workflows/ci.yml/badge.svg
 [ci]: https://github.com/Saeris/worbik/actions/workflows/ci.yml
 [site]: https://worbik.com

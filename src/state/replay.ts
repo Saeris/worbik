@@ -16,43 +16,67 @@ export const MAX_MOVES = 2000;
  */
 export const MAX_GUESSES = 100;
 
-/** Every row and column of a board, each as the places of its tiles */
-const getLines = (width: number, height: number): number[][] => [
-  ...Array.from({ length: height }, (_, row) =>
-    Array.from({ length: width }, (__, column) => row * width + column)
-  ),
-  ...Array.from({ length: width }, (_, column) =>
-    Array.from({ length: height }, (__, row) => row * width + column)
-  )
-];
+/** A row or column of a board: the place of its first tile, how far apart its tiles are, and how many there are */
+type Line = readonly [start: number, step: number, length: number];
 
 /** Whether a line of tiles on one board is that same line rotated by one place, either way, on the other */
-const isRotated = (line: number[], from: string, to: string): boolean =>
-  [1, line.length - 1].some((by) =>
-    line.every(
-      (tile, index) => to[tile] === from[line[(index + by) % line.length]]
-    )
-  );
+const isRotated = (
+  [start, step, length]: Line,
+  from: string,
+  to: string
+): boolean => {
+  const at = (index: number): number => start + (index % length) * step;
+  let left = true;
+  let right = true;
+
+  for (let index = 0; index < length && (left || right); index += 1) {
+    const letter = to[at(index)];
+
+    left &&= letter === from[at(index + 1)];
+    right &&= letter === from[at(index + length - 1)];
+  }
+
+  return left || right;
+};
 
 /**
  * Whether one board follows from another by a single move.
  *
  * Every move a player makes is checked, and every move of a game is checked
  * again when it's submitted, so this has to be cheap: a Worker has only a few
- * milliseconds to spend on a request. A move only ever touches one line, so
- * only a line holding every tile that changed needs looking at. A line of
- * identical letters is still a move, which changes nothing at all.
+ * milliseconds to spend on a request. A move only ever touches one line, which
+ * has to hold every tile that changed, so only the row and the column of the
+ * first of those can be it. A line of identical letters is still a move, which
+ * changes nothing at all, so a board that's unchanged has to look at them all.
  */
 export const isMove = (width: Size, from: string, to: string): boolean => {
   if (from.length !== to.length) return false;
 
-  const changed = from
-    .split(``)
-    .flatMap((letter, tile) => (letter === to[tile] ? [] : [tile]));
+  const height = from.length / width;
+  const getRow = (row: number): Line => [row * width, 1, width];
+  const getColumn = (column: number): Line => [column, width, height];
+  let first = -1;
+  let inRow = true;
+  let inColumn = true;
 
-  return getLines(width, from.length / width).some(
-    (line) =>
-      changed.every((tile) => line.includes(tile)) && isRotated(line, from, to)
+  for (let tile = 0; tile < from.length; tile += 1) {
+    if (from[tile] !== to[tile]) {
+      if (first < 0) first = tile;
+      inRow &&= Math.floor(tile / width) === Math.floor(first / width);
+      inColumn &&= tile % width === first % width;
+    }
+  }
+
+  if (first < 0) {
+    return [
+      ...Array.from({ length: height }, (_, row) => getRow(row)),
+      ...Array.from({ length: width }, (_, column) => getColumn(column))
+    ].some((line) => isRotated(line, from, to));
+  }
+
+  return (
+    (inRow && isRotated(getRow(Math.floor(first / width)), from, to)) ||
+    (inColumn && isRotated(getColumn(first % width), from, to))
   );
 };
 

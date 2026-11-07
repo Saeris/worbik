@@ -1,5 +1,6 @@
 import { memo, useCallback, useId, useState } from "react";
 import { fetch } from "void/client";
+import { SignedOutError } from "#auth/errors";
 import { normalizeHandle } from "#auth/handle";
 import { forgetAccount, setPlayer } from "#auth/player";
 import { usePlayer } from "#hooks";
@@ -44,7 +45,14 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = memo(
       setStatus(`deleting`);
 
       // Only fetched by those who have signed in
-      const { getProof, signOut, SignedOutError } = await import(`#auth/oauth`);
+      const oauth = await import(`#auth/oauth`).catch(() => null);
+
+      if (!oauth) {
+        setStatus(`failed`);
+        return;
+      }
+
+      const { getProof, signOut } = oauth;
 
       try {
         await fetch(`/api/account`, {

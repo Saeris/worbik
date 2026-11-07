@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { fetch } from "void/client";
+import { SignedOutError } from "#auth/errors";
 import { setPlayer } from "#auth/player";
 import { getProgress, toSavedGame } from "#utils/progress";
 import { GET_SOLVES } from "#utils/service";
@@ -75,8 +76,6 @@ export const usePostedGames = (
       try {
         await sync();
       } catch (cause) {
-        const { SignedOutError } = await import(`#auth/oauth`);
-
         // This device can't be brought up to date without a new sign-in, which is what they will be asked for
         if (cause instanceof SignedOutError && !isStale()) setPlayer(null);
         // Anything else can wait. A puzzle played in the meantime can't take the place of what was posted.

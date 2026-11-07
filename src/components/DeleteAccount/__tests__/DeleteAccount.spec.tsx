@@ -2,6 +2,7 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { fetch } from "void/client";
+import { SignedOutError } from "../../../auth/errors";
 import { getProof, signOut } from "../../../auth/oauth";
 import {
   getAccounts,
@@ -13,18 +14,11 @@ import { DELETE_DATA } from "../../../utils/service";
 import { getGameKey } from "../../../utils/solves";
 import { DeleteAccount } from "../DeleteAccount";
 
-/** Stands in for a sign-in that doesn't cover deleting a player's data */
-class SignedOutError extends Error {}
-
 vi.mock(`void/client`, () => ({ fetch: vi.fn<() => Promise<unknown>>() }));
 
 vi.mock(`../../../auth/oauth`, () => ({
   getProof: vi.fn<() => Promise<string>>(),
-  signOut: vi.fn<() => Promise<void>>(),
-  // Hoisted above the class that it names, which exists by the time that this is read
-  get SignedOutError() {
-    return SignedOutError;
-  }
+  signOut: vi.fn<() => Promise<void>>()
 }));
 
 const request = vi.mocked(

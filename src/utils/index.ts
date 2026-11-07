@@ -7,7 +7,7 @@ export { isExpired } from "./isExpired";
 export {
   getPuzzleStart,
   isOpenForScores,
-  isPuzzleDay,
+  isPastPuzzleDay,
   PUZZLE_DAY,
   SCORING_WINDOW
 } from "./isOpenForScores";

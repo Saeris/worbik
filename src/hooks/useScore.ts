@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import * as v from "valibot";
 import { fetch, FetchError } from "void/client";
-import { isOpenForScores, isPuzzleDay } from "#utils";
+import { SignedOutError } from "#auth/errors";
+import { MAX_MOVES } from "#state";
+import { isOpenForScores, isPastPuzzleDay } from "#utils";
 import { SUBMIT_SCORE } from "#utils/service";
-import { markPosted, recordSolve } from "#utils/solves";
+import { getGameKey, markPosted, recordSolve } from "#utils/solves";
 import { usePlayer } from "./usePlayer";
 
 /** A score as a leaderboard lists it, in the order that it ranks */
@@ -22,14 +24,18 @@ export interface RankedScore {
  * - `expired`: it couldn't be posted, as the player's sign-in has run out
  * - `failed`: it couldn't be posted, and it's worth trying again
  * - `closed`: it was made after the puzzle's day ended, and isn't ranked
+ * - `missed`: it was made in time, but the leaderboard closed before it could be posted
+ * - `too-long`: it took more moves than a game can have and still be checked, and isn't ranked
  */
 export type ScoreStatus =
   | `closed`
   | `expired`
   | `failed`
+  | `missed`
   | `posted`
   | `posting`
-  | `signed-out`;
+  | `signed-out`
+  | `too-long`;
 
 export interface Score {
   /** What has become of the solve, once that's known */
@@ -80,13 +86,14 @@ const post = async (
   history: readonly string[],
   did: string
 ): Promise<void> => {
-  const pending = posting.get(puzzleID) ?? send(puzzleID, history, did);
-  posting.set(puzzleID, pending);
+  const key = getGameKey(puzzleID, did);
+  const pending = posting.get(key) ?? send(puzzleID, history, did);
+  posting.set(key, pending);
 
   try {
     await pending;
   } finally {
-    posting.delete(puzzleID);
+    posting.delete(key);
   }
 };
 
@@ -97,11 +104,9 @@ const message = v.object({ message: v.string() });
  * Why a solve couldn't be posted: in terms of what the player can do about
  * it, and in the words of whatever turned it away.
  */
-const explain = async (
+const explain = (
   cause: unknown
-): Promise<{ status: ScoreStatus; detail: string | null }> => {
-  const { SignedOutError } = await import(`#auth/oauth`);
-
+): { status: ScoreStatus; detail: string | null } => {
   if (cause instanceof SignedOutError)
     return { status: `expired`, detail: null };
 
@@ -110,7 +115,7 @@ const explain = async (
     const detail = `The server answered ${cause.status}${said.success ? `: ${said.output.message}` : ``}`;
 
     // The server is the judge of when a puzzle's day has ended, whatever this device's clock says
-    return { status: cause.status === 403 ? `closed` : `failed`, detail };
+    return { status: cause.status === 403 ? `missed` : `failed`, detail };
   }
 
   return {
@@ -140,7 +145,12 @@ export const useScore = (
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    if (!win) return undefined;
+    if (!win) {
+      // Whatever became of an earlier solve says nothing about the game that's taken its place
+      setStatus(null);
+      setDetail(null);
+      return undefined;
+    }
 
     // Set when the solve is no longer the one being followed, so that nothing more is made of it
     const stale = new AbortController();
@@ -156,11 +166,12 @@ export const useScore = (
 
       if (solve.posted) {
         setStatus(`posted`);
-      } else if (
-        !isPuzzleDay(puzzleID, new Date(solve.at)) ||
-        !isOpenForScores(puzzleID)
-      ) {
+      } else if (isPastPuzzleDay(puzzleID, new Date(solve.at))) {
         setStatus(`closed`);
+      } else if (!isOpenForScores(puzzleID)) {
+        setStatus(`missed`);
+      } else if (history.length - 1 > MAX_MOVES) {
+        setStatus(`too-long`);
       } else if (did) {
         setStatus(`posting`);
 
@@ -172,7 +183,7 @@ export const useScore = (
           setScores(ranked);
           setStatus(`posted`);
         } catch (cause) {
-          const reason = await explain(cause);
+          const reason = explain(cause);
 
           if (isStale()) return;
           console.error(`Couldn't post the score`, cause);

@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { cx } from "class-variance-authority";
 import { usePlayer, type RankedScore, type ScoreStatus } from "#hooks";
+import { MAX_MOVES } from "#state";
 import type { Size } from "#utils";
 import { getNeighbors } from "#utils/getNeighbors";
 import { ordinal } from "#utils/ordinal";
@@ -64,7 +65,12 @@ export const Result: React.FC<ResultProps> = memo(
     const shown = retrying ? `failed` : status;
     // Sharing is the thing to do next unless there is something that needs doing first
     const waiting =
-      shown === `expired` || shown === `failed` || shown === `closed`;
+      shown === `expired` ||
+      shown === `failed` ||
+      shown === `closed` ||
+      shown === `missed`;
+    // Nothing more can be done with this solve, and today's puzzle may be waiting
+    const over = status === `closed` || status === `missed`;
 
     return (
       <section className={cx(styles.result, className)} aria-label="Result">
@@ -80,6 +86,13 @@ export const Result: React.FC<ResultProps> = memo(
               This puzzle’s day ended before you finished, so the solve isn’t
               ranked.
             </p>
+          ) : status === `missed` ? (
+            <p>
+              This puzzle’s leaderboard closed before your score could be
+              posted.
+            </p>
+          ) : status === `too-long` ? (
+            <p>{`Only games of up to ${MAX_MOVES} moves can be ranked.`}</p>
           ) : status === `posting` ? (
             <p>Posting your score…</p>
           ) : (
@@ -118,7 +131,7 @@ export const Result: React.FC<ResultProps> = memo(
               {retrying ? `Trying again…` : `Try again`}
             </button>
           )}
-          {shown === `closed` && (
+          {over && (
             // A plain link, so that the page is loaded afresh with whichever puzzle is now the day's
             <a className={styles.action} href={`/${width}x${height}`}>
               {`Play today’s ${size}`}
@@ -141,9 +154,7 @@ export const Result: React.FC<ResultProps> = memo(
         {rows.length > 0 && (
           <div className={styles.ranking}>
             <header>
-              <h3>
-                {status === `closed` ? `${size} scores` : `Today’s ${size}`}
-              </h3>
+              <h3>{over ? `${size} scores` : `Today’s ${size}`}</h3>
               <button type="button" onClick={onLeaderboard}>
                 {`See all ${scores?.length}`}
               </button>

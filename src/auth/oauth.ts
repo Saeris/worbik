@@ -28,6 +28,7 @@ import {
   OAUTH_SCOPE,
   serviceDid
 } from "#utils/service";
+import { SignedOutError, SignInError } from "./errors";
 import { normalizeHandle } from "./handle";
 import type { Player } from "./player";
 
@@ -107,12 +108,6 @@ const configure = (): void => {
   });
   configured = true;
 };
-
-/** A reason that signing in couldn't begin, in words that are meant for the player */
-export class SignInError extends Error {}
-
-/** Thrown when a player's sign-in turns out to have run out, or to have been withdrawn */
-export class SignedOutError extends Error {}
 
 /**
  * Sends the player to the server that hosts their account, to approve

@@ -2,9 +2,13 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { fetch } from "void/client";
+import { SignedOutError } from "../../auth/errors";
 import { getProof } from "../../auth/oauth";
 import { setPlayer } from "../../auth/player";
+import { MAX_MOVES } from "../../state";
 import { getPuzzleID } from "../../utils/getPuzzleID";
+import { getPuzzleStart } from "../../utils/isOpenForScores";
+import { recordSolve } from "../../utils/solves";
 import { SUBMIT_SCORE } from "../../utils/service";
 import { useScore, type Score } from "../useScore";
 
@@ -18,9 +22,6 @@ class FetchError extends Error {
   }
 }
 
-/** Stands in for a sign-in that has run out */
-class SignedOutError extends Error {}
-
 vi.mock(`void/client`, () => ({
   fetch: vi.fn<() => Promise<unknown>>(),
   // Hoisted above the class that it names, which exists by the time that this is read
@@ -30,10 +31,7 @@ vi.mock(`void/client`, () => ({
 }));
 
 vi.mock(`../../auth/oauth`, () => ({
-  getProof: vi.fn<() => Promise<string>>(),
-  get SignedOutError() {
-    return SignedOutError;
-  }
+  getProof: vi.fn<() => Promise<string>>()
 }));
 
 interface Request {
@@ -60,10 +58,12 @@ const posts = (): Request[] =>
     .filter(({ method }) => method === `POST`);
 
 let score: Score;
+/** The game that was played, for those that need to be something other than the usual one */
+let played = history;
 
 const Game: React.FC<{ win: boolean }> = ({ win }) => {
   // oxlint-disable-next-line react/globals -- hands the hook's result to the tests, which then read it
-  score = useScore(puzzle, win, history);
+  score = useScore(puzzle, win, played);
 
   return <output>{score.status}</output>;
 };
@@ -96,6 +96,7 @@ describe(`useScore`, () => {
     container.remove();
     setPlayer(null);
     localStorage.clear();
+    played = history;
     vi.clearAllMocks();
     vi.unstubAllGlobals();
     vi.useRealTimers();
@@ -181,7 +182,7 @@ describe(`useScore`, () => {
     expect(posts()).toHaveLength(0);
   });
 
-  it(`takes the server's word for it that a puzzle's day has ended`, async () => {
+  it(`takes the server's word for it that a puzzle's leaderboard has closed`, async () => {
     // A device whose clock is wrong can believe that a solve is in time when it isn't
     request.mockImplementation(async (_path, { method }) => {
       if (method === `POST`) throw new FetchError(403);
@@ -190,7 +191,51 @@ describe(`useScore`, () => {
     setPlayer(alice);
     await render(true);
 
-    expect(score.status).toBe(`closed`);
+    expect(score.status).toBe(`missed`);
+  });
+
+  it(`doesn't say that a player finished late when it was the posting that was`, async () => {
+    // They solved it in time, and being told otherwise would be wrong as well as unkind
+    setPlayer(alice);
+    recordSolve(puzzle, alice.did);
+    vi.useFakeTimers({ toFake: [`Date`] });
+    vi.setSystemTime(Date.now() + 2 * 24 * 60 * 60 * 1000);
+    await render(true);
+
+    expect(score.status).toBe(`missed`);
+    expect(posts()).toHaveLength(0);
+  });
+
+  it(`posts a solve from a device whose clock is behind`, async () => {
+    // The server gave them the puzzle, so their solve happened during its day whatever their clock says
+    vi.useFakeTimers({ toFake: [`Date`] });
+    vi.setSystemTime(getPuzzleStart(puzzle) - 5 * 60 * 1000);
+    setPlayer(alice);
+    await render(true);
+
+    expect(posts()).toHaveLength(1);
+  });
+
+  it(`doesn't offer to post a game that's too long to be checked`, async () => {
+    // The server would turn it away every time, so trying again could only ever disappoint
+    played = Array.from({ length: MAX_MOVES + 2 }, () => `abcdef`);
+    setPlayer(alice);
+    await render(true);
+
+    expect(score.status).toBe(`too-long`);
+    expect(posts()).toHaveLength(0);
+  });
+
+  it(`forgets what became of a solve once it's no longer on the board`, async () => {
+    // What was posted as one player says nothing about the game of whoever comes next
+    setPlayer(alice);
+    await render(true);
+
+    expect(score.status).toBe(`posted`);
+
+    await render(false);
+
+    expect(score.status).toBeNull();
   });
 
   it(`can try again to post a solve that didn't get through`, async () => {

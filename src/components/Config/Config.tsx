@@ -97,9 +97,13 @@ const syncScheme = (group: HTMLDivElement): (() => void) => {
 
 /** Tells the server that hosts a player's account that they have signed out of Worbik */
 const endSession = async (did: string): Promise<void> => {
-  // Only fetched by those who have signed in
-  const { signOut } = await import(`#auth/oauth`);
-  await signOut(did);
+  try {
+    // Only fetched by those who have signed in
+    const { signOut } = await import(`#auth/oauth`);
+    await signOut(did);
+  } catch {
+    // They're signed out here regardless, which is what they asked for
+  }
 };
 
 export interface ConfigProps {

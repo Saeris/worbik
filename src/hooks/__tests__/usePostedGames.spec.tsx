@@ -2,6 +2,7 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { fetch } from "void/client";
+import { SignedOutError } from "../../auth/errors";
 import { getProof } from "../../auth/oauth";
 import { getPlayer, setPlayer } from "../../auth/player";
 import { getProgress } from "../../utils/progress";
@@ -9,17 +10,10 @@ import { GET_SOLVES } from "../../utils/service";
 import { getGameKey, recordSolve } from "../../utils/solves";
 import { usePostedGames } from "../usePostedGames";
 
-/** Stands in for a sign-in that has run out, or that doesn't cover what's being asked */
-class SignedOutError extends Error {}
-
 vi.mock(`void/client`, () => ({ fetch: vi.fn<() => Promise<unknown>>() }));
 
 vi.mock(`../../auth/oauth`, () => ({
-  getProof: vi.fn<() => Promise<string>>(),
-  // Hoisted above the class that it names, which exists by the time that this is read
-  get SignedOutError() {
-    return SignedOutError;
-  }
+  getProof: vi.fn<() => Promise<string>>()
 }));
 
 interface Request {

@@ -1,7 +1,7 @@
 import { getPuzzleID } from "../getPuzzleID";
 import {
   isOpenForScores,
-  isPuzzleDay,
+  isPastPuzzleDay,
   SCORING_WINDOW
 } from "../isOpenForScores";
 
@@ -44,33 +44,29 @@ describe(`isOpenForScores`, () => {
   });
 });
 
-describe(`isPuzzleDay`, () => {
+describe(`isPastPuzzleDay`, () => {
   const day = 24 * 60 * 60 * 1000;
 
-  it(`is the puzzle's day from the moment it becomes the day's puzzle`, () => {
-    expect(isPuzzleDay(puzzle, began)).toBe(true);
-    expect(isPuzzleDay(puzzle, after(day - 1))).toBe(true);
+  it(`lasts until the moment that the next day's puzzle takes over`, () => {
+    expect(isPastPuzzleDay(puzzle, began)).toBe(false);
+    expect(isPastPuzzleDay(puzzle, after(day - 1))).toBe(false);
   });
 
-  it(`isn't the puzzle's day once the next day's puzzle takes over`, () => {
-    // The grace that the server allows is for a score to arrive in, and isn't more time to solve the puzzle
-    expect(isPuzzleDay(puzzle, after(day))).toBe(false);
-    expect(isPuzzleDay(puzzle, after(day + 30 * 60 * 1000))).toBe(false);
+  it(`has passed once the next day's puzzle takes over`, () => {
+    // The grace that the server allows is for a score to arrive in, and isn't more time to solve
+    expect(isPastPuzzleDay(puzzle, after(day))).toBe(true);
+    expect(isPastPuzzleDay(puzzle, after(day + 30 * 60 * 1000))).toBe(true);
   });
 
-  it(`isn't the puzzle's day before it begins`, () => {
-    // A device whose clock is behind hasn't solved tomorrow's puzzle early
-    expect(isPuzzleDay(puzzle, after(-1))).toBe(false);
-  });
-
-  it(`is never the day of something that isn't a puzzle`, () => {
-    expect(isPuzzleDay(`not a puzzle`, began)).toBe(false);
+  it(`doesn't hold a slow clock against a player`, () => {
+    // The server gave them this puzzle, so a solve that seems to come before it is a solve like any other
+    expect(isPastPuzzleDay(puzzle, after(-5 * 60 * 1000))).toBe(false);
   });
 
   it(`agrees with which puzzle is being served`, () => {
     // The puzzle a player is given has to be one that their device will report a solve of
     const now = new Date(`2026-07-19T23:30:00Z`);
 
-    expect(isPuzzleDay(getPuzzleID({}, now), now)).toBe(true);
+    expect(isPastPuzzleDay(getPuzzleID({}, now), now)).toBe(false);
   });
 });

@@ -1,7 +1,9 @@
 import type { HeadDescriptor } from "void";
-import { getPuzzleStart } from "#utils";
+import { getPuzzleStart, parseSize } from "#utils";
+import { getDiscordEmbed } from "./embed";
 import { getPuzzle } from "./puzzles";
 import { getScore } from "./scores";
+import { toInlineJSON } from "./seo";
 
 /**
  * What a shared link is about: a puzzle, and the score that someone
@@ -94,10 +96,24 @@ export const getShareHead = (
     : `Worbik ${size} · ${day}`;
   const description = `${score ? `Can you beat it?` : `Can you solve it?`} Play today’s ${size}.`;
   const image = getCardURL(origin, share.puzzle, score ? player : undefined);
+  const alt = `${title}. ${description}`;
+  const [, dimensions] = share.puzzle.split(`_`);
+  const embed = getDiscordEmbed({
+    challenge: share.challenge,
+    width: parseSize(dimensions).width,
+    title,
+    description,
+    image,
+    alt,
+    label: `Play today’s ${size}`,
+    url: `${origin}/${dimensions}`
+  });
 
   return {
     title,
     meta: [
+      // A link to someone's result is for sharing, and is a copy of the game as far as a search engine is concerned
+      { name: `robots`, content: `noindex` },
       { name: `description`, content: description },
       { property: `og:title`, content: title },
       { property: `og:description`, content: description },
@@ -105,10 +121,17 @@ export const getShareHead = (
       { property: `og:image`, content: image },
       { property: `og:image:width`, content: `1200` },
       { property: `og:image:height`, content: `630` },
-      { property: `og:image:alt`, content: `${title}. ${description}` },
+      { property: `og:image:alt`, content: alt },
       { name: `twitter:title`, content: title },
       { name: `twitter:description`, content: description },
       { name: `twitter:image`, content: image }
+    ],
+    script: [
+      {
+        id: `discord:component-embed`,
+        type: `application/json`,
+        innerHTML: toInlineJSON(embed)
+      }
     ]
   };
 };

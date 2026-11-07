@@ -56,6 +56,12 @@ yarn dev
 
 The dev server is served at `http://127.0.0.1:5173`, and the app moves itself there if it's opened at `localhost`. Signing in needs that: the protocol won't send a player back to `localhost`, and what a browser stores for one address isn't shared with the other.
 
+### Keeping guesses honest
+
+`/api/check` says which letters of a guess are in place, so it would give away a puzzle's solution if it answered any guess. Each guess has to be one real move from a board that the server has vouched for, by way of a signed note that comes with each answer and goes back with the next guess, which keeps the route stateless. Restricting it to the game's own origin wouldn't do this: only browsers honor that, and the browser console on the site is the same origin.
+
+This stops a solution being read out of the API. Nothing can stop someone playing a puzzle with real moves in order to learn it, in a second browser for instance, and then posting a perfect game.
+
 ### How puzzles are made
 
 Each puzzle is derived on demand from its ID (its date and size) and the `PUZZLE_SECRET`, the first time it's asked for, and is then kept in Workers KV for good. Solutions never leave the server: the browser sends its guesses to `/api/check`, which answers with the letters that are in the right place.
@@ -67,6 +73,10 @@ Set `PUZZLE_SCRAMBLE=1` in `.env` to have new puzzles scrambled with a single mo
 ### Reviewing the palette
 
 While `yarn dev` is running, `/palette` shows a board with a tile in every state, in both color schemes, as it appears with typical vision, under each color vision deficiency, and in grayscale. It also shows tiles at every size, for checking that a tile's letter and its hint never touch. The page only exists in development. The same guarantees are enforced by `src/theme/__tests__/palette.spec.ts`, which reads the colors straight out of `src/theme/theme.css`.
+
+### Link previews and search
+
+A shared link describes itself to whatever it's pasted into: Open Graph tags for most apps, including Bluesky, and a [component embed](https://docs.discord.com/developers/link-previews/component-embeds) for Discord, built in `src/server/embed.ts`, which can show a button. Discord can show nothing at all for a payload that it doesn't like, so check changes with its Embed Debugger. Shared links are `noindex`. Everything else is listed in `/sitemap.xml`, with its title, description and canonical address coming from `src/server/seo.ts`.
 
 ### Icons and the site's card
 

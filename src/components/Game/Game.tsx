@@ -7,6 +7,7 @@ import { Drawer, type View } from "../Drawer";
 import { Menu } from "../Menu";
 import { Result } from "../Result";
 import { SizePicker } from "../SizePicker";
+import { About } from "./About";
 import styles from "./Game.module.css";
 
 export interface GameProps {
@@ -32,46 +33,49 @@ export const Game: React.FC<GameProps> = ({ puzzleID, init, persist }) => {
   }, []);
 
   return (
-    <main className={cx(styles.main, state.win && styles.solved)}>
-      <h1 className={styles.mark}>Worbik</h1>
-      <SizePicker
-        className={styles.size}
-        puzzleID={puzzleID}
-        width={width}
-        height={height}
-      />
-      <Menu className={styles.menu} open={view !== null} onOpen={setView} />
-      {state.win ? (
-        <Result
-          className={styles.result}
+    <>
+      <main className={cx(styles.main, state.win && styles.solved)}>
+        <h1 className={styles.mark}>Worbik</h1>
+        <SizePicker
+          className={styles.size}
           puzzleID={puzzleID}
           width={width}
           height={height}
-          moves={state.moves}
-          target={state.target}
-          status={score.status}
-          scores={score.scores}
-          detail={score.detail}
-          retrying={score.retrying}
-          retry={score.retry}
-          onLeaderboard={showLeaderboard}
-          onSignIn={showSignIn}
         />
-      ) : (
-        <p className={styles.status}>
-          <strong>{state.moves}</strong>
-          {state.moves === 1 ? ` move` : ` moves`}
-        </p>
-      )}
-      <Puzzle className={styles.board} state={state} />
-      <Drawer
-        view={view}
-        onView={setView}
-        puzzleID={puzzleID}
-        width={width}
-        height={height}
-        solved={state.win}
-      />
-    </main>
+        <Menu className={styles.menu} open={view !== null} onOpen={setView} />
+        {state.win ? (
+          <Result
+            className={styles.result}
+            puzzleID={puzzleID}
+            width={width}
+            height={height}
+            moves={state.moves}
+            target={state.target}
+            status={score.status}
+            scores={score.scores}
+            detail={score.detail}
+            retrying={score.retrying}
+            retry={score.retry}
+            onLeaderboard={showLeaderboard}
+            onSignIn={showSignIn}
+          />
+        ) : (
+          <p className={styles.status}>
+            <strong>{state.moves}</strong>
+            {state.moves === 1 ? ` move` : ` moves`}
+          </p>
+        )}
+        <Puzzle className={styles.board} state={state} />
+        <Drawer
+          view={view}
+          onView={setView}
+          puzzleID={puzzleID}
+          width={width}
+          height={height}
+          solved={state.win}
+        />
+      </main>
+      <About />
+    </>
   );
 };

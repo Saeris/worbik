@@ -3,7 +3,7 @@ import { defineConfig } from "void/config";
 export default defineConfig({
   sourceDir: `src`,
   head: {
-    title: `Worbik`,
+    title: `Worbik: a daily word puzzle`,
     htmlAttrs: { lang: `en` },
     meta: [
       { charset: `utf-8` },
@@ -12,7 +12,10 @@ export default defineConfig({
         // Lets the page reach the edges of a phone's screen, where it keeps clear of the notch itself
         content: `width=device-width, initial-scale=1, viewport-fit=cover`
       },
-      { name: `description`, content: `Word Puzzle Mini-Game` },
+      {
+        name: `description`,
+        content: `A daily word puzzle. Rotate the rows and columns until every row is a word.`
+      },
       { name: `author`, content: `Drake Costa` },
       { name: `creator`, content: `Drake Costa` },
       { name: `color-scheme`, content: `light dark` },
@@ -24,8 +27,11 @@ export default defineConfig({
       { name: `apple-mobile-web-app-title`, content: `Worbik` },
       // The alternative, `black-translucent`, draws white text over the page, which can't be read on the light theme
       { name: `apple-mobile-web-app-status-bar-style`, content: `default` },
-      { property: `og:title`, content: `Worbik` },
-      { property: `og:description`, content: `Word Puzzle Mini-Game` },
+      { property: `og:title`, content: `Worbik: a daily word puzzle` },
+      {
+        property: `og:description`,
+        content: `A daily word puzzle. Rotate the rows and columns until every row is a word.`
+      },
       { property: `og:url`, content: `https://worbik.com` },
       { property: `og:site_name`, content: `Worbik` },
       { property: `og:locale`, content: `en-US` },
@@ -40,8 +46,11 @@ export default defineConfig({
         content: `The letters of Worbik on solved tiles, and an invitation to play`
       },
       { name: `twitter:card`, content: `summary_large_image` },
-      { name: `twitter:title`, content: `Worbik` },
-      { name: `twitter:description`, content: `Word Puzzle Mini-Game` },
+      { name: `twitter:title`, content: `Worbik: a daily word puzzle` },
+      {
+        name: `twitter:description`,
+        content: `A daily word puzzle. Rotate the rows and columns until every row is a word.`
+      },
       { name: `twitter:creator`, content: `@saeris` },
       { name: `twitter:image`, content: `https://worbik.com/share-card.png` }
     ],

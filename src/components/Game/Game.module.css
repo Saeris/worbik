@@ -26,6 +26,8 @@
    * small enough the page scrolls instead, which keeps the bar reachable.
    */
   flex: 1 0 auto;
+  /* The game has the screen to itself, and anything else is found by scrolling past it */
+  min-block-size: 100dvh;
   color: var(--fg);
 
   /* Once the puzzle is solved there is no more need to stay clear of the board, and the result takes the room beneath it */

@@ -2,7 +2,7 @@ import { http, HttpResponse } from "msw";
 import { page } from "vite-plus/test/browser";
 import { render } from "vitest-browser-react";
 import { setPlayer } from "#auth/player";
-import { body } from "#test/game";
+import { body, neverHappens } from "#test/game";
 import { network } from "#test/network";
 import { Profile } from "../Profile";
 
@@ -314,10 +314,7 @@ describe(`profile`, () => {
     setPlayer(bob);
     await expect.poll(() => stat(`Puzzles solved`)).toBe(`1`);
     slow.resolve(undefined);
-    await vi.waitFor(() => {
-      expect(stat(`Puzzles solved`)).toBe(`1`);
-    });
 
-    expect(stat(`Puzzles solved`)).toBe(`1`);
+    await neverHappens(() => stat(`Puzzles solved`) !== `1`);
   });
 });

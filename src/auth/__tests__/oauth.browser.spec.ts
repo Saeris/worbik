@@ -26,6 +26,26 @@ const timeOut = async (): Promise<void> => {
   await vi.advanceTimersByTimeAsync(REQUEST_TIMEOUT);
 };
 
+/** Has a player's identity name the given things, which needn't be a handle */
+const identifiedAs = (...alsoKnownAs: string[]): void => {
+  network.use(
+    http.get(`https://plc.directory/*`, () =>
+      HttpResponse.json({
+        "@context": [`https://www.w3.org/ns/did/v1`],
+        id: carol.did,
+        alsoKnownAs,
+        service: [
+          {
+            id: `#atproto_pds`,
+            type: `AtprotoPersonalDataServer`,
+            serviceEndpoint: PDS
+          }
+        ]
+      })
+    )
+  );
+};
+
 /** Comes back from a player's server, with what was left behind on setting off */
 const returnWith = async (
   state: unknown
@@ -56,7 +76,9 @@ describe(`signing in`, () => {
       // Better said straight away than by way of a failed trip to someone's server
       const leave = vi.spyOn(navigation, `assign`).mockReturnValue();
 
-      await expect(signIn(`not a handle!`)).rejects.toThrow(SignInError);
+      await expect(signIn(`not a handle!`)).rejects.toThrow(
+        `That doesn’t look like a handle`
+      );
       expect(leave).not.toHaveBeenCalled();
     });
 
@@ -118,26 +140,19 @@ describe(`signing in`, () => {
 
     it(`signs a player in without a handle when their identity names none`, async () => {
       // A handle is only for show, so it's no reason to fail at the last moment
-      network.use(
-        http.get(`https://plc.directory/*`, () =>
-          HttpResponse.json({
-            "@context": [`https://www.w3.org/ns/did/v1`],
-            id: carol.did,
-            alsoKnownAs: [`https://elsewhere.test`],
-            service: [
-              {
-                id: `#atproto_pds`,
-                type: `AtprotoPersonalDataServer`,
-                serviceEndpoint: PDS
-              }
-            ]
-          })
-        )
-      );
+      identifiedAs(`https://elsewhere.test`);
 
       const { player } = await returnWith({ from: `/` });
 
       expect(player).toStrictEqual({ did: carol.did, handle: null });
+    });
+
+    it(`picks out their handle from whatever else their identity names`, async () => {
+      identifiedAs(`https://elsewhere.test`, `at://${carol.handle}`);
+
+      const { player } = await returnWith({ from: `/` });
+
+      expect(player).toStrictEqual(carol);
     });
 
     it(`takes the server's answer out of the address`, async () => {

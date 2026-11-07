@@ -1,7 +1,7 @@
 import { delay, http } from "msw";
 import { page } from "vite-plus/test/browser";
 import { render } from "vitest-browser-react";
-import { body } from "#test/game";
+import { body, neverHappens } from "#test/game";
 import { carol, PDS } from "#test/handlers";
 import { network } from "#test/network";
 import { navigation } from "#utils/navigation";
@@ -85,7 +85,9 @@ describe(`signIn`, () => {
 
     window.dispatchEvent(new PageTransitionEvent(`pageshow`));
 
-    await expect.element(proceed).toBeDisabled();
+    await neverHappens(
+      () => !(proceed.element() as HTMLButtonElement).disabled
+    );
   });
 
   it(`points someone without an account to where they can get one`, async () => {

@@ -4,9 +4,10 @@ import * as v from "valibot";
 import { defineHandler } from "void";
 import { GET_SOLVES, verifyPlayer } from "#server/identity";
 import { getDayScores, getPostedGames } from "#server/scores";
+import { dayRegex } from "#utils/dateKeyRegex";
 
 /** A day's puzzles, by the date that begins their IDs */
-const day = v.pipe(v.string(), v.regex(/^\d{2}-\d{2}-\d{4}$/u));
+const day = v.pipe(v.string(), v.regex(dayRegex));
 
 /**
  * The scores that a player has posted on a day's puzzles, which is how a

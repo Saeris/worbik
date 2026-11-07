@@ -111,3 +111,16 @@ describe(`a note of a board`, () => {
     await expect(readBoard(puzzle, `${oneMove}.`)).resolves.toBeNull();
   });
 });
+
+describe(`checkGuesses limits`, () => {
+  it(`refuses more guesses than the game ever sends at once`, async () => {
+    // Each one takes time to check, and this route is open to anyone
+    await expect(
+      checkGuesses(
+        puzzle,
+        game,
+        Array.from({ length: 101 }, () => oneMove)
+      )
+    ).rejects.toMatchObject({ status: 413 });
+  });
+});

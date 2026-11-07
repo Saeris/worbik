@@ -1,5 +1,4 @@
 import type { Size } from "../utils/sizes.ts";
-import { Grid } from "./Grid.ts";
 
 /**
  * The most moves that a game is allowed to take and still be replayed.
@@ -17,27 +16,45 @@ export const MAX_MOVES = 2000;
  */
 export const MAX_GUESSES = 100;
 
-/** Every state that can be reached from the given one in a single move */
-const next = (state: string, width: Size): Set<string> => {
-  const { height } = new Grid(state, width);
-  const moves = new Set<string>();
+/** Every row and column of a board, each as the places of its tiles */
+const getLines = (width: number, height: number): number[][] => [
+  ...Array.from({ length: height }, (_, row) =>
+    Array.from({ length: width }, (__, column) => row * width + column)
+  ),
+  ...Array.from({ length: width }, (_, column) =>
+    Array.from({ length: height }, (__, row) => row * width + column)
+  )
+];
 
-  for (let row = 0; row < height; row++) {
-    moves.add(new Grid(state, width).rotateRowLeft(row).toString());
-    moves.add(new Grid(state, width).rotateRowRight(row).toString());
-  }
+/** Whether a line of tiles on one board is that same line rotated by one place, either way, on the other */
+const isRotated = (line: number[], from: string, to: string): boolean =>
+  [1, line.length - 1].some((by) =>
+    line.every(
+      (tile, index) => to[tile] === from[line[(index + by) % line.length]]
+    )
+  );
 
-  for (let column = 0; column < width; column++) {
-    moves.add(new Grid(state, width).rotateColUp(column).toString());
-    moves.add(new Grid(state, width).rotateColDown(column).toString());
-  }
+/**
+ * Whether one board follows from another by a single move.
+ *
+ * Every move a player makes is checked, and every move of a game is checked
+ * again when it's submitted, so this has to be cheap: a Worker has only a few
+ * milliseconds to spend on a request. A move only ever touches one line, so
+ * only a line holding every tile that changed needs looking at. A line of
+ * identical letters is still a move, which changes nothing at all.
+ */
+export const isMove = (width: Size, from: string, to: string): boolean => {
+  if (from.length !== to.length) return false;
 
-  return moves;
+  const changed = from
+    .split(``)
+    .flatMap((letter, tile) => (letter === to[tile] ? [] : [tile]));
+
+  return getLines(width, from.length / width).some(
+    (line) =>
+      changed.every((tile) => line.includes(tile)) && isRotated(line, from, to)
+  );
 };
-
-/** Whether one board follows from another by a single move */
-export const isMove = (width: Size, from: string, to: string): boolean =>
-  next(from, width).has(to);
 
 /**
  * Replays a game from the states its board went through, and returns how
@@ -69,7 +86,7 @@ export const replay = (
 
   for (const [index, state] of states.entries()) {
     if (current === goal) return index;
-    if (!next(current, width).has(state)) return null;
+    if (!isMove(width, current, state)) return null;
     current = state;
   }
 

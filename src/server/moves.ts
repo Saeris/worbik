@@ -1,6 +1,6 @@
 import { HTTPException } from "hono/http-exception";
 import { env } from "void/env";
-import { isMove, PuzzleState, type Challenge } from "#state";
+import { isMove, MAX_GUESSES, PuzzleState, type Challenge } from "#state";
 import { parseSize } from "#utils";
 
 /**
@@ -86,6 +86,12 @@ export const checkGuesses = async (
   guesses: readonly string[],
   note?: string
 ): Promise<{ hints: string[]; from: string }> => {
+  if (guesses.length > MAX_GUESSES) {
+    throw new HTTPException(413, {
+      message: `No more than ${MAX_GUESSES} guesses can be checked at once`
+    });
+  }
+
   const { width } = parseSize(puzzleID.split(`_`)[1]);
   let board = note ? await readBoard(puzzleID, note) : challenge.toLowerCase();
 

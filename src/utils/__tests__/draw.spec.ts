@@ -1,10 +1,4 @@
-import {
-  drawFrom,
-  drawN,
-  drawNFromBottom,
-  drawNRandom,
-  drawRandom
-} from "../draw";
+import { drawFrom, drawNRandom, drawRandom } from "../draw";
 import { repeat } from "../repeat";
 
 describe(`drawFrom`, () => {
@@ -14,28 +8,6 @@ describe(`drawFrom`, () => {
     expect(drawFrom(arr, 2)).toBe(3);
     expect(arr).toHaveLength(3);
     expect(arr).toStrictEqual(expected);
-  });
-});
-
-describe(`drawN`, () => {
-  it(`draws N number of items from the start of an array`, () => {
-    const arr = [1, 2, 3, 4, 5, 6];
-    const expected = [1, 2, 3];
-    const remaining = [4, 5, 6];
-    expect(drawN(arr, 3)).toStrictEqual(expected);
-    expect(arr).toHaveLength(3);
-    expect(arr).toStrictEqual(remaining);
-  });
-});
-
-describe(`drawNFromBottom`, () => {
-  it(`draws N number of items from the end of an array`, () => {
-    const arr = [1, 2, 3, 4, 5, 6];
-    const expected = [6, 5, 4];
-    const remaining = [1, 2, 3];
-    expect(drawNFromBottom(arr, 3)).toStrictEqual(expected);
-    expect(arr).toHaveLength(3);
-    expect(arr).toStrictEqual(remaining);
   });
 });
 

@@ -5,13 +5,33 @@ import {
   type StrictRequest,
   type DefaultBodyType
 } from "msw";
-import { page } from "vite-plus/test/browser";
+import { page, type Locator } from "vite-plus/test/browser";
 import { checkGuesses } from "#server/moves";
 import type { Challenge } from "#state";
 import { network } from "./network";
 
 /** Everything on the page, for what isn't worth finding one element at a time */
 export const body = page.elementLocator(document.body);
+
+/**
+ * Waits for a sheet to come to rest. A click on something that's still moving
+ * gets it scrolled into view first, and scrolling a sheet is how it's dismissed,
+ * which would take away what was about to be clicked.
+ */
+export const comesToRest = async (sheet: Locator): Promise<void> => {
+  const position = (): number => sheet.element().getBoundingClientRect().top;
+
+  await expect
+    .poll(async () => {
+      const before = position();
+
+      await new Promise(requestAnimationFrame);
+      await new Promise(requestAnimationFrame);
+
+      return position() === before;
+    })
+    .toBe(true);
+};
 
 /**
  * Confirms that something doesn't happen. Checking once would pass in the

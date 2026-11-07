@@ -1,6 +1,6 @@
 import { page } from "vite-plus/test/browser";
 import { render } from "vitest-browser-react";
-import { body } from "#test/game";
+import { body, comesToRest } from "#test/game";
 import { Share, type ShareProps } from "../Share";
 
 const puzzle = `11-07-2026_6x8`;
@@ -24,6 +24,7 @@ describe(`share`, () => {
     await render(<Share puzzleID={puzzle} moves={12} {...props} />);
     await page.getByRole(`button`, { name: `Share` }).click();
     await expect.element(sheet).toBeVisible();
+    await comesToRest(sheet);
   };
 
   const says = async (words: string): Promise<void> => {

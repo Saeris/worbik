@@ -1,7 +1,7 @@
 import { page } from "vite-plus/test/browser";
 import { render } from "vitest-browser-react";
 import { setPlayer } from "#auth/player";
-import { body } from "#test/game";
+import { body, comesToRest } from "#test/game";
 import { Router } from "#test/router";
 import { getGameKey } from "#utils/solves";
 import { SizePicker } from "../SizePicker";
@@ -29,6 +29,7 @@ describe(`sizePicker`, () => {
     await show();
     await page.getByRole(`button`, { name: `Board size: 6×8` }).click();
     await expect.element(body).toMatchTextContent(`Today’s puzzles`);
+    await comesToRest(page.getByRole(`dialog`));
   };
 
   const link = (size: string): HTMLAnchorElement | null =>

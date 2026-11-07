@@ -1,8 +1,6 @@
 import type { Challenge } from "#state";
 import { checkGuesses, readBoard, vouchForBoard } from "../moves";
 
-vi.mock(`void/env`, () => ({ env: { PUZZLE_SECRET: `secret` } }));
-
 const puzzle = `03-02-2026_5x5`;
 const other = `03-03-2026_5x5`;
 const solution = `abcdefghijklmnopqrstuvwxy`;
@@ -109,5 +107,18 @@ describe(`a note of a board`, () => {
   it(`is worth nothing without its signature`, async () => {
     await expect(readBoard(puzzle, oneMove)).resolves.toBeNull();
     await expect(readBoard(puzzle, `${oneMove}.`)).resolves.toBeNull();
+  });
+});
+
+describe(`checkGuesses limits`, () => {
+  it(`refuses more guesses than the game ever sends at once`, async () => {
+    // Each one takes time to check, and this route is open to anyone
+    await expect(
+      checkGuesses(
+        puzzle,
+        game,
+        Array.from({ length: 101 }, () => oneMove)
+      )
+    ).rejects.toMatchObject({ status: 413 });
   });
 });

@@ -1,16 +1,10 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useSyncExternalStore
-} from "react";
-import { fetch } from "void/client";
-import { useQueuedAPICall } from "#hooks";
-import { Grid, PuzzleState, type PuzzleStateInit } from "#state";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { fetch, FetchError } from "void/client";
+import { Grid, MAX_GUESSES, PuzzleState, type PuzzleStateInit } from "#state";
 import { filterExpiredDates } from "#utils";
-import { getProgress } from "#utils/progress";
+import { getProgress, readSavedGame } from "#utils/progress";
 import { getGameKey, getPuzzleOfKey } from "#utils/solves";
+import { REQUEST_TIMEOUT } from "#utils/withTimeout";
 import { usePlayer } from "./usePlayer";
 
 const useMatrix = (state: PuzzleState): string =>
@@ -46,6 +40,50 @@ const useWin = (state: PuzzleState): PuzzleState["win"] =>
     () => state.win
   );
 
+/**
+ * How far the server has got with checking a game.
+ *
+ * What's left to check is always worked out from the game's own moves, so
+ * nothing can be sent twice, or be sent as part of any other game.
+ */
+interface Progress {
+  /** How many of the game's moves have been checked */
+  checked: number;
+  /** The server's note of the board that those moves lead to, without which it won't check the next one */
+  position?: string;
+  /** Whether moves are on their way to the server */
+  busy: boolean;
+  /** How many times a saved game has taken over from what was on the board, which makes any answer on its way out of date */
+  restores: number;
+}
+
+/** Goes with each game, and so goes away along with it */
+const progress = new WeakMap<PuzzleState, Progress>();
+
+const getProgressOf = (state: PuzzleState): Progress => {
+  const known = progress.get(state) ?? { checked: 0, busy: false, restores: 0 };
+
+  progress.set(state, known);
+
+  return known;
+};
+
+/** The game of the given puzzle, which is a new one whenever the player or the puzzle changes */
+const useGame = (key: string, init: PuzzleStateInit): PuzzleState => {
+  const [game, setGame] = useState(() => ({
+    key,
+    init,
+    state: new PuzzleState(init)
+  }));
+
+  if (game.key === key && game.init === init) return game.state;
+
+  const state = new PuzzleState(init);
+  setGame({ key, init, state });
+
+  return state;
+};
+
 export const usePuzzle = (
   puzzleID: string,
   init: PuzzleStateInit,
@@ -59,87 +97,189 @@ export const usePuzzle = (
   rotate: (rowOrCol: number, dir: `down` | `left` | `right` | `up`) => void;
   /** Picks up a saved game, in place of whatever is on the board */
   resume: (saved: string | null) => void;
+  /** Whether the last moves couldn't be checked, which leaves the game unable to go any further until they are */
+  stalled: boolean;
+  /** Tries again to check moves that couldn't be */
+  retry: () => void;
 } => {
   // Each player has a game of their own, so a change of player is a change of game
   const key = getGameKey(puzzleID, usePlayer()?.did);
-  // oxlint-disable-next-line react/exhaustive-deps -- a new player gets a new game, and `key` is how that's known
-  const state = useMemo(() => new PuzzleState(init), [init, key]);
+  const state = useGame(key, init);
   const moves = useMoves(state);
   const win = useWin(state);
-
-  // The server's note of where the game is, without which it won't check the next move
-  const position = useRef<string | undefined>(undefined);
+  const [stalled, setStalled] = useState<PuzzleState | null>(null);
 
   useHints(state);
 
-  const resume = useCallback(
-    (saved: string | null) => {
-      const [, history, , , from] = saved?.split(`|`) ?? [];
-      const progress = getProgress(saved);
+  /**
+   * Brings the server up to date with the game.
+   *
+   * The game is only saved once all of it has been checked, so that what's
+   * saved is always a board along with the server's note of that same board.
+   * Moves that were still on their way are lost if the page goes away, and
+   * can simply be made again.
+   */
+  const check = useCallback(async (): Promise<void> => {
+    const game = getProgressOf(state);
+    const isDone = (): boolean =>
+      state.win || game.checked >= state.history.length - 1;
 
-      // A saved game is only of this puzzle if it began where this puzzle does. One that didn't is of a puzzle that has since been remade, which happens in development.
-      if (history?.split(`,`)[0] !== state.initial.toString().toLowerCase()) {
-        return;
+    if (game.busy || isDone()) return;
+
+    game.busy = true;
+
+    let restarted = false;
+
+    try {
+      while (!isDone()) {
+        const next = game.checked + 1;
+        const guesses = state.history.slice(next, next + MAX_GUESSES);
+        const { restores } = game;
+
+        try {
+          // Each call has to settle before the next starts, so that their results are applied in order
+          // oxlint-disable-next-line no-await-in-loop
+          const { hints, from } = await fetch(`/api/check`, {
+            query: {
+              puzzle: puzzleID,
+              guesses: guesses.join(`,`),
+              ...(game.position && { from: game.position })
+            },
+            timeout: REQUEST_TIMEOUT
+          });
+
+          // What it has to say is about a game that's no longer on the board
+          if (game.restores === restores) {
+            game.position = from;
+            game.checked += guesses.length;
+            state.validate(hints);
+          }
+        } catch (cause) {
+          // The note can't be used, and only the game itself can stand in for it: every move from the start is a move the server can check without one
+          if (
+            !(cause instanceof FetchError && cause.status === 409) ||
+            restarted
+          ) {
+            throw cause;
+          }
+
+          restarted = true;
+          game.checked = 0;
+          game.position = undefined;
+        }
       }
 
-      // A game that was left unfinished before the server began keeping track of moves can't be carried on from
-      if (progress && !progress.solved && !from) return;
+      setStalled((current) => (current === state ? null : current));
 
-      position.current = from;
-      state.restore(saved?.split(`|`) as PuzzleState["snapshot"]);
+      if (persist) {
+        const [width, history, hint, reported = ``] = state.snapshot;
+
+        try {
+          localStorage.setItem(
+            key,
+            [width, history, hint, reported, game.position].join(`|`)
+          );
+        } catch {
+          // A game that can't be saved can still be played, for as long as the page stays open
+        }
+      }
+    } catch (cause) {
+      console.error(`Couldn't check the game's moves`, cause);
+      setStalled(state);
+    } finally {
+      game.busy = false;
+    }
+  }, [key, state, puzzleID, persist]);
+
+  const resume = useCallback(
+    (saved: string | null) => {
+      const found = readSavedGame(saved, state.initial.toString());
+
+      // A saved game is only of this puzzle if it began where this puzzle does. One that didn't is of a puzzle that has since been remade, which happens in development.
+      if (!found) return;
+
+      state.restore([
+        state.config.width,
+        found.history,
+        found.hints,
+        found.reported
+      ]);
+
+      const game = getProgressOf(state);
+
+      game.restores += 1;
+      game.position = found.from;
+      // Without a note, there is no telling how far the server had got with it
+      game.checked = found.from ? state.history.length - 1 : 0;
+      void check();
     },
-    [state]
+    [state, check]
   );
 
   useEffect(() => {
     if (!persist) return;
 
-    position.current = undefined;
-    resume(localStorage.getItem(key));
+    try {
+      resume(localStorage.getItem(key));
 
-    // purge puzzles older than yesterday, utc-0 + 32hrs
-    Object.keys(localStorage).forEach((stored) => {
-      if (filterExpiredDates(getPuzzleOfKey(stored))) {
-        localStorage.removeItem(stored);
-      }
-    });
+      // purge puzzles older than yesterday, utc-0 + 32hrs
+      Object.keys(localStorage).forEach((stored) => {
+        if (filterExpiredDates(getPuzzleOfKey(stored))) {
+          localStorage.removeItem(stored);
+        }
+      });
+    } catch {
+      // Storage can be unavailable, e.g. when site data is blocked. The game is still there to be played, it just won't be kept.
+    }
   }, [key, persist, resume]);
 
-  const queue = useQueuedAPICall(
-    useCallback(
-      async (vals: string[]): Promise<void> => {
-        const { hints, from } = await fetch(`/api/check`, {
-          query: {
-            puzzle: puzzleID,
-            guesses: vals.join(`,`),
-            ...(position.current && { from: position.current })
-          }
-        });
+  // A game can be open in more than one tab, and whichever falls behind would otherwise overwrite the other's moves when it's next saved
+  useEffect(() => {
+    if (!persist) return undefined;
 
-        position.current = from;
+    const follow = (stored: string | null): void => {
+      const saved = getProgress(stored);
 
-        const [width, history, hint, reported = ``] =
-          state.validate(hints).snapshot;
+      if (saved && !state.win && (saved.solved || saved.moves > state.moves)) {
+        resume(stored);
+      }
+    };
 
-        if (persist) {
-          localStorage.setItem(
-            key,
-            [width, history, hint, reported, from].join(`|`)
-          );
-        }
-      },
-      [puzzleID, key, state, persist]
-    )
-  );
+    const onChange = ({ key: changed, newValue }: StorageEvent): void => {
+      if (changed === key) follow(newValue);
+    };
+
+    // A tab that a phone has put to sleep hears nothing of what's been saved in the meantime
+    const onWake = (): void => {
+      if (document.visibilityState !== `visible`) return;
+
+      try {
+        follow(localStorage.getItem(key));
+      } catch {
+        // Without storage, there are no other tabs to keep up with
+      }
+    };
+
+    window.addEventListener(`storage`, onChange);
+    document.addEventListener(`visibilitychange`, onWake);
+
+    return (): void => {
+      window.removeEventListener(`storage`, onChange);
+      document.removeEventListener(`visibilitychange`, onWake);
+    };
+  }, [key, persist, resume, state]);
 
   const rotate = useCallback(
     (rowOrCol: number, dir: `down` | `left` | `right` | `up`) => {
-      if (!win) {
-        queue(state.getNextState(rowOrCol, dir).toString());
-      }
+      state.getNextState(rowOrCol, dir);
+      void check();
     },
-    [queue, state, win]
+    [check, state]
   );
+
+  const retry = useCallback(() => {
+    void check();
+  }, [check]);
 
   return {
     initial: state.initial,
@@ -148,6 +288,8 @@ export const usePuzzle = (
     win,
     rotate,
     resume,
+    stalled: stalled === state,
+    retry,
     target: state.target,
     history: state.history,
     getHintAt: state.getHintAt,

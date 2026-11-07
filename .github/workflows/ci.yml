@@ -35,6 +35,9 @@ jobs:
       - name: Run Checks
         run: yarn vp check
 
+      - name: Install Chromium
+        run: yarn playwright install --with-deps chromium
+
       - name: Run Tests
         run: yarn vp test
 

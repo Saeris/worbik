@@ -1,9 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import * as v from "valibot";
 import { fetch, FetchError } from "void/client";
-import { isOpenForScores, isPuzzleDay } from "#utils";
+import { SignedOutError } from "#auth/errors";
+import { loadOAuth, reloadIfOutdated } from "#auth/load";
+import { MAX_MOVES } from "#state";
+import { isOpenForScores, isPastPuzzleDay } from "#utils";
 import { SUBMIT_SCORE } from "#utils/service";
-import { markPosted, recordSolve } from "#utils/solves";
+import { getGameKey, markPosted, recordSolve, type Solve } from "#utils/solves";
+import { REQUEST_TIMEOUT } from "#utils/withTimeout";
 import { usePlayer } from "./usePlayer";
 
 /** A score as a leaderboard lists it, in the order that it ranks */
@@ -11,6 +15,16 @@ export interface RankedScore {
   readonly did: string;
   readonly handle: string | null;
   readonly moves: number;
+}
+
+/** A puzzle's leaderboard, as much of it as is listed */
+export interface Ranking {
+  /** The best scores, in the order that they rank */
+  readonly scores: readonly RankedScore[];
+  /** How many scores there are in all, which can be more than are listed */
+  readonly total: number;
+  /** The score of the player who is looking, and where it ranks */
+  readonly you: (RankedScore & { readonly place: number }) | null;
 }
 
 /**
@@ -22,34 +36,50 @@ export interface RankedScore {
  * - `expired`: it couldn't be posted, as the player's sign-in has run out
  * - `failed`: it couldn't be posted, and it's worth trying again
  * - `closed`: it was made after the puzzle's day ended, and isn't ranked
+ * - `missed`: it was made in time, but the leaderboard closed before it could be posted
+ * - `too-long`: it took more moves than a game can have and still be checked, and isn't ranked
  */
 export type ScoreStatus =
   | `closed`
   | `expired`
   | `failed`
+  | `missed`
   | `posted`
   | `posting`
-  | `signed-out`;
+  | `signed-out`
+  | `too-long`;
 
 export interface Score {
   /** What has become of the solve, once that's known */
   readonly status: ScoreStatus | null;
   /** The puzzle's leaderboard, once it has loaded */
-  readonly scores: readonly RankedScore[] | null;
+  readonly ranking: Ranking | null;
   /** Why the solve couldn't be posted, in the words of whatever turned it away, for working out what went wrong */
   readonly detail: string | null;
-  /** Whether a solve that couldn't be posted is being posted again */
+  /** Whether another try is under way */
   readonly retrying: boolean;
-  /** Tries again to post a solve that couldn't be posted */
+  /** Tries again to post a solve that couldn't be posted, or to load a leaderboard that couldn't be */
   readonly retry: () => void;
+}
+
+/** What became of a solve, and why, if that needs explaining */
+interface Outcome {
+  readonly status: ScoreStatus;
+  readonly detail?: string | null;
+  /** What went wrong, for working out what it would take to try again */
+  readonly cause?: unknown;
 }
 
 /** Loads the leaderboard of a puzzle, or `null` if it can't be reached */
 export const loadScores = async (
-  puzzleID: string
-): Promise<readonly RankedScore[] | null> => {
+  puzzleID: string,
+  did?: string
+): Promise<Ranking | null> => {
   try {
-    return await fetch(`/api/scores`, { query: { puzzle: puzzleID } });
+    return await fetch(`/api/ranking`, {
+      query: { puzzle: puzzleID, ...(did && { player: did }) },
+      timeout: REQUEST_TIMEOUT
+    });
   } catch {
     // A solve can be posted without its leaderboard having loaded
     return null;
@@ -65,12 +95,13 @@ const send = async (
   did: string
 ): Promise<void> => {
   // Only fetched by those who have signed in
-  const { getProof } = await import(`#auth/oauth`);
+  const { getProof } = await loadOAuth();
 
   await fetch(`/api/scores`, {
     method: `POST`,
     body: { puzzle: puzzleID, history: [...history] },
-    headers: { authorization: `Bearer ${await getProof(did, SUBMIT_SCORE)}` }
+    headers: { authorization: `Bearer ${await getProof(did, SUBMIT_SCORE)}` },
+    timeout: REQUEST_TIMEOUT
   });
   markPosted(puzzleID, did);
 };
@@ -80,13 +111,14 @@ const post = async (
   history: readonly string[],
   did: string
 ): Promise<void> => {
-  const pending = posting.get(puzzleID) ?? send(puzzleID, history, did);
-  posting.set(puzzleID, pending);
+  const key = getGameKey(puzzleID, did);
+  const pending = posting.get(key) ?? send(puzzleID, history, did);
+  posting.set(key, pending);
 
   try {
     await pending;
   } finally {
-    posting.delete(puzzleID);
+    posting.delete(key);
   }
 };
 
@@ -97,11 +129,7 @@ const message = v.object({ message: v.string() });
  * Why a solve couldn't be posted: in terms of what the player can do about
  * it, and in the words of whatever turned it away.
  */
-const explain = async (
-  cause: unknown
-): Promise<{ status: ScoreStatus; detail: string | null }> => {
-  const { SignedOutError } = await import(`#auth/oauth`);
-
+const explain = (cause: unknown): Outcome => {
   if (cause instanceof SignedOutError)
     return { status: `expired`, detail: null };
 
@@ -110,13 +138,32 @@ const explain = async (
     const detail = `The server answered ${cause.status}${said.success ? `: ${said.output.message}` : ``}`;
 
     // The server is the judge of when a puzzle's day has ended, whatever this device's clock says
-    return { status: cause.status === 403 ? `closed` : `failed`, detail };
+    return { status: cause.status === 403 ? `missed` : `failed`, detail };
   }
 
   return {
     status: `failed`,
-    detail: cause instanceof Error ? cause.message : String(cause)
+    detail: cause instanceof Error ? cause.message : String(cause),
+    cause
   };
+};
+
+/**
+ * What is to become of a solve, going by what's known without asking anyone:
+ * `posting` if it's to be sent, or else what has already become of it.
+ */
+const getStatus = (
+  puzzleID: string,
+  solved: Solve,
+  moves: number,
+  did?: string
+): ScoreStatus => {
+  if (solved.posted) return `posted`;
+  if (isPastPuzzleDay(puzzleID, new Date(solved.at))) return `closed`;
+  if (!isOpenForScores(puzzleID)) return `missed`;
+  if (moves > MAX_MOVES) return `too-long`;
+
+  return did ? `posting` : `signed-out`;
 };
 
 /**
@@ -134,13 +181,20 @@ export const useScore = (
   history: readonly string[]
 ): Score => {
   const did = usePlayer()?.did;
-  const [status, setStatus] = useState<ScoreStatus | null>(null);
-  const [detail, setDetail] = useState<string | null>(null);
-  const [scores, setScores] = useState<readonly RankedScore[] | null>(null);
+  // Who solved what, or `null` while nothing has been solved. Whatever became of one solve says nothing about the next.
+  const solve = win ? getGameKey(puzzleID, did) : null;
+  const [outcome, setOutcome] = useState<(Outcome & { solve: string }) | null>(
+    null
+  );
+  const { status = null, detail = null } =
+    outcome?.solve === solve ? outcome : {};
+  const [ranking, setRanking] = useState<Ranking | null>(null);
   const [attempt, setAttempt] = useState(0);
+  // The last attempt to have finished, which falls behind `attempt` while one is under way
+  const [settled, setSettled] = useState(0);
 
   useEffect(() => {
-    if (!win) return undefined;
+    if (solve === null) return undefined;
 
     // Set when the solve is no longer the one being followed, so that nothing more is made of it
     const stale = new AbortController();
@@ -148,40 +202,32 @@ export const useScore = (
     const isStale = (): boolean => stale.signal.aborted;
 
     const follow = async (): Promise<void> => {
-      const solve = recordSolve(puzzleID, did);
-      const loaded = await loadScores(puzzleID);
+      const solved = recordSolve(puzzleID, did);
+      let result: Outcome = {
+        status: getStatus(puzzleID, solved, history.length - 1, did)
+      };
 
-      if (isStale()) return;
-      setScores(loaded);
-
-      if (solve.posted) {
-        setStatus(`posted`);
-      } else if (
-        !isPuzzleDay(puzzleID, new Date(solve.at)) ||
-        !isOpenForScores(puzzleID)
-      ) {
-        setStatus(`closed`);
-      } else if (did) {
-        setStatus(`posting`);
+      // The solve goes first, so that a leaderboard that's slow to load can't hold it up
+      if (result.status === `posting` && did) {
+        setOutcome({ solve, ...result });
 
         try {
           await post(puzzleID, history, did);
-          const ranked = await loadScores(puzzleID);
-
-          if (isStale()) return;
-          setScores(ranked);
-          setStatus(`posted`);
+          result = { status: `posted` };
         } catch (cause) {
-          const reason = await explain(cause);
-
-          if (isStale()) return;
           console.error(`Couldn't post the score`, cause);
-          setDetail(reason.detail);
-          setStatus(reason.status);
+          result = explain(cause);
         }
-      } else {
-        setStatus(`signed-out`);
+
+        if (isStale()) return;
       }
+
+      const loaded = await loadScores(puzzleID, did);
+
+      if (isStale()) return;
+      setRanking(loaded);
+      setOutcome({ solve, ...result });
+      setSettled(attempt);
     };
 
     void follow();
@@ -189,17 +235,20 @@ export const useScore = (
     return (): void => {
       stale.abort();
     };
-  }, [puzzleID, win, history, did, attempt]);
+  }, [puzzleID, solve, history, did, attempt]);
+
+  const failure = outcome?.cause;
 
   const retry = useCallback(() => {
-    setAttempt((count) => count + 1);
-  }, []);
+    // The solve is saved, so it's posted as soon as the page has loaded again
+    if (!reloadIfOutdated(failure)) setAttempt((count) => count + 1);
+  }, [failure]);
 
   return {
     status,
-    scores,
+    ranking,
     detail,
-    retrying: status === `posting` && attempt > 0,
+    retrying: attempt > settled,
     retry
   };
 };

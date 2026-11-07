@@ -1,4 +1,3 @@
-// @vitest-environment happy-dom
 import { getPuzzleID } from "../getPuzzleID";
 import {
   adoptGames,
@@ -128,6 +127,48 @@ describe(`players sharing a device`, () => {
     );
     expect(recordSolve(puzzle, alice, 9000)).toStrictEqual({ at: 1000 });
     expect(localStorage.getItem(puzzle)).toBe(`a game`);
+  });
+
+  it(`hands over everything it can when storage runs out part way`, () => {
+    // Stopping at the first game that doesn't fit would leave the rest behind, and the record of when each was solved
+    const other = puzzle.replace(`5x5`, `6x6`);
+
+    /** Keeps what it's given as its own properties, as storage does, and has no room for one of them */
+    class Crowded {
+      [key: string]: unknown;
+
+      getItem(key: string): string | null {
+        return typeof this[key] === `string` ? this[key] : null;
+      }
+
+      setItem(key: string, value: string): void {
+        if (value.includes(`won't fit`)) {
+          throw new DOMException(`Full`, `QuotaExceededError`);
+        }
+
+        this[key] = value;
+      }
+
+      removeItem(key: string): void {
+        // oxlint-disable-next-line typescript/no-dynamic-delete -- this is what removing something from storage is
+        delete this[key];
+      }
+    }
+
+    const storage = new Crowded();
+
+    storage[puzzle] = `a game that won't fit`;
+    storage[other] = `a game`;
+    storage[`worbik:solves`] = JSON.stringify({ [other]: { at: 1000 } });
+    vi.stubGlobal(`localStorage`, storage);
+
+    adoptGames(alice);
+
+    expect(storage.getItem(getGameKey(other, alice))).toBe(`a game`);
+    expect(recordSolve(other, alice, 9000)).toStrictEqual({ at: 1000 });
+    // Still there to be handed over the next time, rather than lost
+    expect(storage.getItem(puzzle)).toBe(`a game that won't fit`);
+    vi.unstubAllGlobals();
   });
 
   it(`only hands over saved games`, () => {

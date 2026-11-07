@@ -1,7 +1,6 @@
-// @vitest-environment happy-dom
-import { act } from "react";
-import { createRoot, type Root } from "react-dom/client";
 import { DialogProvider } from "@ariakit/react";
+import { render } from "vitest-browser-react";
+import { page } from "vite-plus/test/browser";
 import { isSwipedAway, Sheet } from "../Sheet";
 
 describe(`isSwipedAway`, () => {
@@ -33,66 +32,51 @@ describe(`isSwipedAway`, () => {
 });
 
 describe(`sheet`, () => {
-  let root: Root;
-  let container: HTMLElement;
+  const sheet = page.getByRole(`dialog`, { name: `Menu` });
 
-  const Menu: React.FC = () => (
-    <DialogProvider defaultOpen>
-      <Sheet aria-label="Menu">
-        <button type="button">How to play</button>
-      </Sheet>
-    </DialogProvider>
-  );
-
-  const getSheet = (): Element | null =>
-    document.querySelector(`[role="dialog"]`);
-
-  /** Scrolls the sheet as a swipe would, to the given distance from where it rests */
-  const swipe = async (distance: number): Promise<void> => {
-    const scroller = getSheet()!.parentElement!.parentElement!;
-    Object.defineProperties(scroller, {
-      scrollHeight: { configurable: true, value: 1100 },
-      clientHeight: { configurable: true, value: 800 },
-      scrollTop: { configurable: true, value: -distance }
-    });
-    await act(async () => {
-      scroller.dispatchEvent(new Event(`scroll`));
-    });
+  const open = async (): Promise<void> => {
+    await render(
+      <DialogProvider defaultOpen>
+        <Sheet aria-label="Menu">
+          <button type="button">How to play</button>
+        </Sheet>
+      </DialogProvider>
+    );
   };
 
-  beforeEach(async () => {
-    vi.stubGlobal(`IS_REACT_ACT_ENVIRONMENT`, true);
-    container = document.body.appendChild(document.createElement(`div`));
-    root = createRoot(container);
-    await act(async () => {
-      root.render(<Menu />);
-    });
-  });
+  /** Scrolls the sheet down, as a swipe would, by the given share of how far it can go */
+  const swipe = (share: number): void => {
+    const scroller = sheet.element().closest(`[class*="scroller"]`);
 
-  afterEach(async () => {
-    await act(async () => {
-      root.unmount();
-    });
-    container.remove();
-    vi.unstubAllGlobals();
-  });
+    if (scroller) {
+      const travel = scroller.scrollHeight - scroller.clientHeight;
 
-  it(`is a dialog, so that it's announced and holds focus like one`, () => {
-    expect(getSheet()?.getAttribute(`aria-label`)).toBe(`Menu`);
-    expect(getSheet()?.textContent).toBe(`How to play`);
+      scroller.scrollTop = -travel * share;
+    }
+  };
+
+  it(`is a dialog, so that it's announced and holds focus like one`, async () => {
+    await open();
+
+    await expect.element(sheet).toBeVisible();
+    await expect.element(sheet).toHaveTextContent(`How to play`);
   });
 
   it(`stays open when a swipe stops short of dismissing it`, async () => {
-    await swipe(120);
+    await open();
+    swipe(0.4);
 
-    expect(getSheet()).not.toBeNull();
+    // It's the browser that settles it, by snapping it back to where it rests
+    await expect.poll(() => sheet.element().isConnected).toBe(true);
+    await expect.element(sheet).toBeVisible();
   });
 
   it(`leaves the page once it has been swiped off of the screen`, async () => {
     // The scroller only moves the sheet out of sight. Were it left in the page, it would go on covering the game unseen.
-    await swipe(300);
+    await open();
+    swipe(1);
 
-    expect(getSheet()).toBeNull();
+    await expect.element(sheet).not.toBeInTheDocument();
     expect(document.querySelector(`[class*="scroller"]`)).toBeNull();
   });
 });

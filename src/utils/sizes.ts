@@ -4,6 +4,9 @@ export type Size = 5 | 6 | 7 | 8;
 
 export type Dimensions = `${Size}x${Size}`;
 
+/** How many tiles the largest of boards has */
+export const MAX_TILES = 8 * 8;
+
 export const sizes: Immutable<Array<[Size, Size]>> = [
   [5, 5],
   [5, 6],

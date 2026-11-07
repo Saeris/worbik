@@ -18,7 +18,7 @@ export interface GameProps {
 
 export const Game: React.FC<GameProps> = ({ puzzleID, init, persist }) => {
   const state = usePuzzle(puzzleID, init, persist);
-  usePostedGames(puzzleID, state.win, state.resume);
+  const expired = usePostedGames(puzzleID, state.win, state.resume);
   const score = useScore(puzzleID, state.win, state.history);
   const { width, height } = state.initial;
   // What the drawer is showing over the game, if it's open. The game stays as it is underneath.
@@ -52,7 +52,7 @@ export const Game: React.FC<GameProps> = ({ puzzleID, init, persist }) => {
             moves={state.moves}
             target={state.target}
             status={score.status}
-            scores={score.scores}
+            ranking={score.ranking}
             detail={score.detail}
             retrying={score.retrying}
             retry={score.retry}
@@ -60,9 +60,35 @@ export const Game: React.FC<GameProps> = ({ puzzleID, init, persist }) => {
             onSignIn={showSignIn}
           />
         ) : (
-          <p className={styles.status}>
-            <strong>{state.moves}</strong>
-            {state.moves === 1 ? ` move` : ` moves`}
+          <p
+            className={styles.status}
+            role={state.stalled ? `alert` : undefined}
+          >
+            {state.stalled ? (
+              <>
+                {`Couldn’t check that move. `}
+                <button type="button" onClick={state.retry}>
+                  Try again
+                </button>
+              </>
+            ) : (
+              <>
+                <strong>{state.moves}</strong>
+                {state.moves === 1 ? ` move` : ` moves`}
+                {expired && (
+                  // Beside the count and not in place of it, as this can stay on show for a whole game
+                  <span role="alert" className={styles.notice}>
+                    <button
+                      type="button"
+                      aria-label="Your sign-in has run out. Sign in again"
+                      onClick={showSignIn}
+                    >
+                      Sign in again
+                    </button>
+                  </span>
+                )}
+              </>
+            )}
           </p>
         )}
         <Puzzle className={styles.board} state={state} />

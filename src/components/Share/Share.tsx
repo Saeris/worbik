@@ -7,6 +7,7 @@ import {
 } from "@ariakit/react";
 import { PiXThin } from "react-icons/pi";
 import { getPuzzleStart } from "#utils";
+import { parsePuzzleID } from "#utils/parsePuzzleID";
 import { Sheet } from "../Sheet";
 import styles from "./Share.module.css";
 
@@ -61,12 +62,12 @@ const Contents: React.FC<ContentsProps> = ({
   onShared
 }) => {
   const [copied, setCopied] = useState(false);
-  const [day, dimensions] = puzzleID.split(`_`);
-  const size = dimensions.replace(`x`, `×`);
+  const { day, dimensions, label: size } = parsePuzzleID(puzzleID);
   const path = [`/s`, day, dimensions, ...(player ? [player] : [])].join(`/`);
   const url = `${location.origin}${path}`;
   const card = `/api/card?${new URLSearchParams({ puzzle: puzzleID, ...(player && { player }) }).toString()}`;
-  const text = `Worbik ${size} · ${dayFormat.format(new Date(getPuzzleStart(puzzleID)))} · ${moves} ${moves === 1 ? `move` : `moves`}`;
+  const count = `${moves} ${moves === 1 ? `move` : `moves`}`;
+  const text = `Worbik ${size} · ${dayFormat.format(new Date(getPuzzleStart(puzzleID)))} · ${count}`;
   const compose = `${COMPOSE}?${new URLSearchParams({ text: `${text}\n${url}` }).toString()}`;
   // Read once this is on screen, which is after the page has reached a browser
   const handheld = useMemo(
@@ -123,7 +124,7 @@ const Contents: React.FC<ContentsProps> = ({
         height={630}
         alt={
           player
-            ? `The card that your link shows: ${moves} moves on the ${size}, and an invitation to beat it.`
+            ? `The card that your link shows: ${count} on the ${size}, and an invitation to beat it.`
             : `The card that your link shows: the ${size}, and an invitation to solve it.`
         }
       />

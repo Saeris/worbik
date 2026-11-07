@@ -58,8 +58,8 @@ export const useSwipe = (
           ? event.target.closest<HTMLElement>(`[data-row][data-column]`)
           : null;
 
-      // A swipe belongs to the finger that began it, so any others that land in the meantime are ignored
-      if (!tile || !event.isPrimary || swipe.current) return;
+      // A swipe belongs to the finger that began it, so any others that land in the meantime are ignored. Only the first finger down is primary, so one that is takes the place of a swipe whose end was never heard about.
+      if (!tile || !event.isPrimary) return;
 
       swipe.current = {
         pointer: event.pointerId,

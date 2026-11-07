@@ -91,18 +91,21 @@ export class PuzzleState {
 
     this.#grid = new Grid(chars, perRow);
     this.#history = [this.#grid.toString().toLowerCase()];
-    this.#hints = group(new Array(chars.length).fill(` `), perRow);
+    this.#hints = group(` `.repeat(chars.length).split(``), perRow);
     this.#target = target;
     this.validate(this.#grid.toString());
     this.#initialized = true;
   }
 
-  static compare = (guess: string, solution: string): string =>
-    guess
+  static compare = (guess: string, solution: string): string => {
+    const goal = solution.toLowerCase();
+
+    return guess
       .toLowerCase()
       .split(``)
-      .map((c, i) => (solution.charAt(i) === c ? c.toUpperCase() : c))
+      .map((c, i) => (goal.charAt(i) === c ? c.toUpperCase() : c))
       .join(``);
+  };
 
   #update = (): this => {
     if (this.#initialized) {
@@ -168,8 +171,8 @@ export class PuzzleState {
   };
 
   restore = ([width, historyString, hint, moves]: Snapshot): this => {
-    const history = historyString.split(`,`); //?
-    const current = history.at(-1); //?
+    const history = historyString.split(`,`);
+    const current = history.at(-1);
     if (!hint || !current) {
       throw new Error(`Could not parse snapshot!`);
     }
@@ -241,7 +244,6 @@ export class PuzzleState {
       const axis = [`left`, `right`].includes(dir);
       const limit = (axis ? this.#grid.height : this.#grid.width) - 1;
       const pos = randomInt(0, limit, random);
-      //const pair = [pos, dir, limit, axis]; //?
       this.getNextState(pos, dir);
     });
 

@@ -56,6 +56,16 @@ yarn dev
 
 The dev server is served at `http://127.0.0.1:5173`, and the app moves itself there if it's opened at `localhost`. Signing in needs that: the protocol won't send a player back to `localhost`, and what a browser stores for one address isn't shared with the other.
 
+### Testing
+
+Tests come in two projects. Anything that needs a page goes in a `*.browser.spec.*` file, which runs in real Chromium, and everything else runs in Node. Install the browser once with `yarn playwright install chromium`, and use `yarn vp test run --project node` for a run that takes a few seconds.
+
+Nothing mocks `fetch`. [MSW](https://mswjs.io) stands in for the network at the network, in `src/test/handlers.ts`, and a request that nothing answers for is an error. That includes the server that hosts a player's account, so the library that signs players in runs for real, and proofs are signed and checked for real. Server tests run real SQL, through the real D1 driver and the real migrations, over an in-memory database.
+
+What's left to stand in for is what can't exist in a test: Cloudflare's bindings, and leaving the page, which goes through `src/utils/navigation.ts`.
+
+Keep specs out of `src/routes` and `src/pages`, where they could be taken for routes. A test that leaves a request to a player's server unanswered has to let go of it with `stopAnswering`, as requests to the same server wait in line for each other.
+
 ### Keeping guesses honest
 
 `/api/check` says which letters of a guess are in place, so it would give away a puzzle's solution if it answered any guess. Each guess has to be one real move from a board that the server has vouched for, by way of a signed note that comes with each answer and goes back with the next guess, which keeps the route stateless. Restricting it to the game's own origin wouldn't do this: only browsers honor that, and the browser console on the site is the same origin.
@@ -104,6 +114,8 @@ Void deploys the app to a Cloudflare Worker, creating what it needs on the way: 
 4. Add the domain: `yarn void domain add worbik.com`. Cloudflare has to be the DNS provider for the zone, and creates the record and the certificate itself.
 
 Signing in works at whichever address the app is served from. A player's sign-in is tied to the address they signed in at, so moving domains signs everyone out.
+
+Workers Builds deploys every push to `main`, with `yarn deploy` as its deploy command. Leave builds for other branches off: Void has no preview deployments on Cloudflare, and `yarn deploy` would send a branch straight to production. A new version is staged at no traffic and only goes live once `/__void/ready` answers as that version, so a failed deployment leaves the site as it was. That check can fail just by being made too soon after staging, in which case retrying the build is enough.
 
 [ci_badge]: https://github.com/Saeris/worbik/actions/workflows/ci.yml/badge.svg
 [ci]: https://github.com/Saeris/worbik/actions/workflows/ci.yml

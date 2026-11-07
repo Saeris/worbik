@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "@void/react";
+import { loadOAuth } from "#auth/load";
 import { rememberAccount, setPlayer } from "#auth/player";
+import { navigation } from "#utils/navigation";
 import { adoptGames } from "#utils/solves";
 import styles from "./callback.module.css";
 
@@ -12,7 +14,7 @@ import styles from "./callback.module.css";
 let finishing: Promise<string> | undefined;
 
 const signIn = async (): Promise<string> => {
-  const { completeSignIn } = await import(`#auth/oauth`);
+  const { completeSignIn } = await loadOAuth();
   const { player, from } = await completeSignIn();
   setPlayer(player);
   rememberAccount(player);
@@ -38,7 +40,7 @@ const Page: React.FC = () => {
     const goBack = async (): Promise<void> => {
       try {
         // Loads the puzzle afresh, so that it picks up who has signed in
-        location.replace(await finish());
+        navigation.replace(await finish());
       } catch {
         setFailed(true);
       }

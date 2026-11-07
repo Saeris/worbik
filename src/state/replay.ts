@@ -1,5 +1,4 @@
 import type { Size } from "../utils/sizes.ts";
-import { Grid } from "./Grid.ts";
 
 /**
  * The most moves that a game is allowed to take and still be replayed.
@@ -10,27 +9,76 @@ import { Grid } from "./Grid.ts";
  */
 export const MAX_MOVES = 2000;
 
-/** Every state that can be reached from the given one in a single move */
-const next = (state: string, width: Size): Set<string> => {
-  const { height } = new Grid(state, width);
-  const moves = new Set<string>();
+/**
+ * The most guesses that can be checked at once. They travel in the address
+ * of the request, which has a limit of its own, and this is well within it
+ * for the largest of boards.
+ */
+export const MAX_GUESSES = 100;
 
-  for (let row = 0; row < height; row++) {
-    moves.add(new Grid(state, width).rotateRowLeft(row).toString());
-    moves.add(new Grid(state, width).rotateRowRight(row).toString());
+/** A row or column of a board: the place of its first tile, how far apart its tiles are, and how many there are */
+type Line = readonly [start: number, step: number, length: number];
+
+/** Whether a line of tiles on one board is that same line rotated by one place, either way, on the other */
+const isRotated = (
+  [start, step, length]: Line,
+  from: string,
+  to: string
+): boolean => {
+  const at = (index: number): number => start + (index % length) * step;
+  let left = true;
+  let right = true;
+
+  for (let index = 0; index < length && (left || right); index += 1) {
+    const letter = to[at(index)];
+
+    left &&= letter === from[at(index + 1)];
+    right &&= letter === from[at(index + length - 1)];
   }
 
-  for (let column = 0; column < width; column++) {
-    moves.add(new Grid(state, width).rotateColUp(column).toString());
-    moves.add(new Grid(state, width).rotateColDown(column).toString());
-  }
-
-  return moves;
+  return left || right;
 };
 
-/** Whether one board follows from another by a single move */
-export const isMove = (width: Size, from: string, to: string): boolean =>
-  next(from, width).has(to);
+/**
+ * Whether one board follows from another by a single move.
+ *
+ * Every move a player makes is checked, and every move of a game is checked
+ * again when it's submitted, so this has to be cheap: a Worker has only a few
+ * milliseconds to spend on a request. A move only ever touches one line, which
+ * has to hold every tile that changed, so only the row and the column of the
+ * first of those can be it. A line of identical letters is still a move, which
+ * changes nothing at all, so a board that's unchanged has to look at them all.
+ */
+export const isMove = (width: Size, from: string, to: string): boolean => {
+  if (from.length !== to.length) return false;
+
+  const height = from.length / width;
+  const getRow = (row: number): Line => [row * width, 1, width];
+  const getColumn = (column: number): Line => [column, width, height];
+  let first = -1;
+  let inRow = true;
+  let inColumn = true;
+
+  for (let tile = 0; tile < from.length; tile += 1) {
+    if (from[tile] !== to[tile]) {
+      if (first < 0) first = tile;
+      inRow &&= Math.floor(tile / width) === Math.floor(first / width);
+      inColumn &&= tile % width === first % width;
+    }
+  }
+
+  if (first < 0) {
+    return [
+      ...Array.from({ length: height }, (_, row) => getRow(row)),
+      ...Array.from({ length: width }, (_, column) => getColumn(column))
+    ].some((line) => isRotated(line, from, to));
+  }
+
+  return (
+    (inRow && isRotated(getRow(Math.floor(first / width)), from, to)) ||
+    (inColumn && isRotated(getColumn(first % width), from, to))
+  );
+};
 
 /**
  * Replays a game from the states its board went through, and returns how
@@ -62,7 +110,7 @@ export const replay = (
 
   for (const [index, state] of states.entries()) {
     if (current === goal) return index;
-    if (!next(current, width).has(state)) return null;
+    if (!isMove(width, current, state)) return null;
     current = state;
   }
 

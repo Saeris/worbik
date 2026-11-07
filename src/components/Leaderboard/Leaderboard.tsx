@@ -1,6 +1,6 @@
-import { memo, useCallback, useEffect, useId, useState } from "react";
+import { memo, useCallback, useEffect, useId, useMemo, useState } from "react";
 import { PiCaretLeftThin, PiCaretRightThin } from "react-icons/pi";
-import { loadScores, usePlayer, type RankedScore } from "#hooks";
+import { loadScores, usePlayer, type Ranking } from "#hooks";
 import {
   getPuzzleID,
   getPuzzleStart,
@@ -46,20 +46,20 @@ export const Leaderboard: React.FC<LeaderboardProps> = memo(
     const [ago, setAgo] = useState(0);
     const [loaded, setLoaded] = useState<{
       puzzle: string;
-      scores: readonly RankedScore[] | null;
+      ranking: Ranking | null;
     } | null>(null);
 
     const day = new Date(getPuzzleStart(puzzleID) - ago * PUZZLE_DAY);
-    const puzzle = getPuzzleID(parseSize(size), day);
-    const scores = loaded?.puzzle === puzzle ? loaded.scores : undefined;
+    const puzzle: string = getPuzzleID(parseSize(size), day);
+    const ranking = loaded?.puzzle === puzzle ? loaded.ranking : undefined;
 
     useEffect(() => {
       // Set when another day or size has been picked, so that these scores aren't shown in place of those
       const stale = new AbortController();
 
       const load = async (): Promise<void> => {
-        const result = await loadScores(puzzle);
-        if (!stale.signal.aborted) setLoaded({ puzzle, scores: result });
+        const result = await loadScores(puzzle, you);
+        if (!stale.signal.aborted) setLoaded({ puzzle, ranking: result });
       };
 
       void load();
@@ -67,7 +67,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = memo(
       return (): void => {
         stale.abort();
       };
-    }, [puzzle]);
+    }, [puzzle, you]);
 
     const earlier = useCallback(() => {
       setAgo((days) => days + 1);
@@ -82,6 +82,15 @@ export const Leaderboard: React.FC<LeaderboardProps> = memo(
         setSize(currentTarget.value);
       },
       []
+    );
+
+    // A player beyond the end of what's listed still gets to see where they stand
+    const yours = useMemo(
+      () =>
+        ranking?.you && ranking.you.place > ranking.scores.length
+          ? [ranking.you]
+          : null,
+      [ranking]
     );
 
     const label = size.replace(`x`, `×`);
@@ -121,13 +130,13 @@ export const Leaderboard: React.FC<LeaderboardProps> = memo(
             ))}
           </select>
         </div>
-        {scores === undefined ? (
+        {ranking === undefined ? (
           <p className={styles.empty}>Loading…</p>
-        ) : scores === null ? (
+        ) : ranking === null ? (
           <p className={styles.empty}>
             Couldn’t load these scores. Check your connection and try again.
           </p>
-        ) : scores.length === 0 ? (
+        ) : ranking.total === 0 ? (
           <div className={styles.empty}>
             <strong>No scores yet</strong>
             {ago === 0 ? (
@@ -138,9 +147,10 @@ export const Leaderboard: React.FC<LeaderboardProps> = memo(
           </div>
         ) : (
           <>
-            <Scores scores={scores} you={you} />
+            <Scores scores={ranking.scores} you={you} />
+            {yours && <Scores scores={yours} from={yours[0].place} you={you} />}
             <p className={styles.note}>
-              {`${scores.length === 1 ? `1 player` : `${scores.length} players`} posted a score. Fewest moves wins; ties go to whoever posted first.`}
+              {`${ranking.total === 1 ? `1 player` : `${ranking.total} players`} posted a score${ranking.total > ranking.scores.length ? `, and the top ${ranking.scores.length} are listed` : ``}. Fewest moves wins; ties go to whoever posted first.`}
             </p>
           </>
         )}

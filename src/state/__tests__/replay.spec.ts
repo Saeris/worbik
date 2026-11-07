@@ -1,6 +1,7 @@
 import type { Size } from "../../utils/sizes";
+import { Grid } from "../Grid";
 import { PuzzleState } from "../PuzzleState";
-import { MAX_MOVES, replay } from "../replay";
+import { isMove, MAX_MOVES, replay } from "../replay";
 
 /**
  * A 3×2 puzzle whose solution is `abc` over `def`. From where it starts,
@@ -93,5 +94,64 @@ describe(`replay`, () => {
     expect(
       replay(width, challenge, solution, [challenge, ...stalling])
     ).toBeNull();
+  });
+});
+
+describe(`isMove`, () => {
+  /** Every board that a move leads to, worked out the long way, by making each of them */
+  const reachable = (board: string, columns: Size): Set<string> => {
+    const { height } = new Grid(board, columns);
+    const moves = new Set<string>();
+
+    for (let row = 0; row < height; row += 1) {
+      moves.add(new Grid(board, columns).rotateRowLeft(row).toString());
+      moves.add(new Grid(board, columns).rotateRowRight(row).toString());
+    }
+
+    for (let column = 0; column < columns; column += 1) {
+      moves.add(new Grid(board, columns).rotateColUp(column).toString());
+      moves.add(new Grid(board, columns).rotateColDown(column).toString());
+    }
+
+    return moves;
+  };
+
+  /** A board with few enough letters that lines of identical ones turn up */
+  const scramble = (length: number, letters: string): string =>
+    Array.from(
+      { length },
+      () => letters[Math.floor(Math.random() * letters.length)]
+    ).join(``);
+
+  it.each([
+    [5, 5],
+    [5, 8],
+    [8, 5],
+    [8, 8]
+  ] as [Size, number][])(
+    `agrees with making every move, on a %ix%i board`,
+    (columns, rows) => {
+      // A move that's wrongly refused can't be taken back by a player, and one that's wrongly allowed is a way to cheat
+      for (let round = 0; round < 20; round += 1) {
+        const board = scramble(columns * rows, round % 2 ? `ab` : `abcdefgh`);
+        const moves = reachable(board, columns);
+
+        for (const move of moves) {
+          expect(isMove(columns, board, move)).toBe(true);
+          // Two moves away, or back where it began, is only a move if it can be reached in one
+          for (const further of reachable(move, columns)) {
+            expect(isMove(columns, board, further)).toBe(moves.has(further));
+          }
+        }
+      }
+    }
+  );
+
+  it(`refuses a board that isn't the same size`, () => {
+    expect(isMove(width, challenge, `${challenge}a`)).toBe(false);
+  });
+
+  it(`refuses letters swapped between lines`, () => {
+    expect(isMove(width, `abcdef`, `ebcdaf`)).toBe(false);
   });
 });

@@ -1,6 +1,6 @@
 import * as v from "valibot";
 import { dateKeyRegex } from "./dateKeyRegex";
-import { filterExpiredDates } from "./getDateKey";
+import { filterExpiredDates } from "./isExpired";
 
 /**
  * What a device remembers of each player's games.
@@ -92,6 +92,15 @@ export const markPosted = (puzzleID: string, did?: string): void => {
   write({ ...solves, [puzzleID]: { ...solve, posted: true } }, did);
 };
 
+/** Everything that's kept on this device, which is nothing at all when storage is unavailable */
+const getKeys = (): string[] => {
+  try {
+    return Object.keys(localStorage);
+  } catch {
+    return [];
+  }
+};
+
 /**
  * Hands the games on this device that nobody has signed in for over to the
  * player who just signed in.
@@ -101,18 +110,17 @@ export const markPosted = (puzzleID: string, did?: string): void => {
  * they don't have a game of their own for, and the rest stays where it is.
  */
 export const adoptGames = (did: string): void => {
-  try {
-    for (const key of Object.keys(localStorage)) {
+  for (const key of getKeys()) {
+    try {
       const target = getGameKey(key, did);
 
       if (dateKeyRegex.test(key) && localStorage.getItem(target) === null) {
         localStorage.setItem(target, localStorage.getItem(key) ?? ``);
         localStorage.removeItem(key);
       }
+    } catch {
+      // A game that doesn't fit stays where it is, and that's no reason to leave the rest behind
     }
-  } catch {
-    // Without storage there are no games to hand over
-    return;
   }
 
   const unclaimed = read();

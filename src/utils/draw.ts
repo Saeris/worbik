@@ -11,16 +11,6 @@ export const drawRandom = <T extends unknown[]>(
   random?: Random
 ): T[keyof T] => drawFrom(arr, randomInt(0, arr.length - 1, random));
 
-export const drawN = <T extends unknown[]>(
-  arr: T,
-  count: number
-): Array<T[number]> => repeat<T[number]>(count)(() => arr.shift());
-
-export const drawNFromBottom = <T extends unknown[]>(
-  arr: T,
-  count: number
-): Array<T[number]> => repeat<T[number]>(count)(() => arr.pop());
-
 export const drawNRandom = <T extends unknown[]>(
   arr: T,
   count: number,

@@ -1,9 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { fetch } from "void/client";
-import { setPlayer } from "#auth/player";
+import { SignedOutError } from "#auth/errors";
+import { loadOAuth } from "#auth/load";
+import { parsePuzzleID } from "#utils/parsePuzzleID";
 import { getProgress, toSavedGame } from "#utils/progress";
 import { GET_SOLVES } from "#utils/service";
 import { getGameKey, markPosted } from "#utils/solves";
+import { REQUEST_TIMEOUT } from "#utils/withTimeout";
 import { usePlayer } from "./usePlayer";
 
 /** Whether this device already has a game of a puzzle that matches what the player posted */
@@ -24,13 +27,19 @@ const hasGame = (did: string, puzzle: string, moves: number): boolean => {
  *
  * It looks when a puzzle is opened, and again when it's solved, in case the
  * look before it failed or the other device was used in the meantime.
+ *
+ * Returns whether the player has to sign in again for that to happen. They
+ * stay signed in until they do, as signing them out would swap the game in
+ * front of them for the one kept for nobody in particular.
  */
 export const usePostedGames = (
   puzzleID: string,
   win: boolean,
   resume: (saved: string | null) => void
-): void => {
+): boolean => {
   const did = usePlayer()?.did;
+  // Who has to sign in again, so that it's never said to whoever signs in next
+  const [expired, setExpired] = useState<string | null>(null);
 
   useEffect(() => {
     if (!did) return undefined;
@@ -39,11 +48,12 @@ export const usePostedGames = (
     const stale = new AbortController();
     // Asked afresh each time, as it changes while a request is being waited on
     const isStale = (): boolean => stale.signal.aborted;
-    const [day] = puzzleID.split(`_`);
+    const { day } = parsePuzzleID(puzzleID);
 
     const sync = async (): Promise<void> => {
       const posted = await fetch(`/api/solves`, {
-        query: { player: did, day }
+        query: { player: did, day },
+        timeout: REQUEST_TIMEOUT
       });
       const missing = posted.some(
         ({ puzzle, moves }) => !hasGame(did, puzzle, moves)
@@ -53,11 +63,12 @@ export const usePostedGames = (
       if (!missing || isStale()) return;
 
       // Only fetched by those who have signed in
-      const { getProof } = await import(`#auth/oauth`);
+      const { getProof } = await loadOAuth();
       const games = await fetch(`/api/solves`, {
         method: `POST`,
         body: { day },
-        headers: { authorization: `Bearer ${await getProof(did, GET_SOLVES)}` }
+        headers: { authorization: `Bearer ${await getProof(did, GET_SOLVES)}` },
+        timeout: REQUEST_TIMEOUT
       });
 
       if (isStale()) return;
@@ -75,10 +86,8 @@ export const usePostedGames = (
       try {
         await sync();
       } catch (cause) {
-        const { SignedOutError } = await import(`#auth/oauth`);
-
         // This device can't be brought up to date without a new sign-in, which is what they will be asked for
-        if (cause instanceof SignedOutError && !isStale()) setPlayer(null);
+        if (cause instanceof SignedOutError && !isStale()) setExpired(did);
         // Anything else can wait. A puzzle played in the meantime can't take the place of what was posted.
       }
     };
@@ -89,4 +98,6 @@ export const usePostedGames = (
       stale.abort();
     };
   }, [did, puzzleID, win, resume]);
+
+  return did !== undefined && expired === did;
 };

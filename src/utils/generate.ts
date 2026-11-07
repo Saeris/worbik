@@ -18,9 +18,5 @@ export const generate = (
 ): PuzzleState =>
   new PuzzleState([
     width,
-    drawNRandom(
-      Object.assign(new Array<string>(wordlist[width].length), wordlist[width]),
-      height,
-      random
-    ).join(``)
+    drawNRandom([...wordlist[width]], height, random).join(``)
   ]).randomize(scramble, scramble, random);

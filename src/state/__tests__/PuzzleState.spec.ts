@@ -47,7 +47,7 @@ describe(`puzzleState`, () => {
     // Simulate randomize increasing the move count
     puzzle.getNextState(0, `up`);
     puzzle.getNextState(0, `down`);
-    const actual = puzzle.toChallenge(); //?
+    const actual = puzzle.toChallenge();
     const expected = [2, `ABCD`, `abcd`];
     expect(puzzle.moves).toBe(2);
     expect(puzzle.target).toBe(25);

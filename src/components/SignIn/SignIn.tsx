@@ -1,5 +1,7 @@
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { cx } from "class-variance-authority";
+import { SignInError } from "#auth/errors";
+import { loadOAuth, reloadIfOutdated } from "#auth/load";
 import { HandleField } from "./HandleField";
 import styles from "./SignIn.module.css";
 
@@ -23,13 +25,15 @@ export const SignIn: React.FC<SignInProps> = memo(({ className }) => {
     setPending(true);
     setError(null);
 
-    // Signing in is the only thing that needs this, so it's only fetched by those who do
-    const { signIn, SignInError } = await import(`#auth/oauth`);
-
     try {
+      // Signing in is the only thing that needs this, so it's only fetched by those who do
+      const { signIn } = await loadOAuth();
+
       // Leaves the page when it succeeds
       await signIn(account);
     } catch (cause) {
+      if (reloadIfOutdated(cause)) return;
+
       setPending(false);
       setError(
         cause instanceof SignInError
@@ -37,6 +41,19 @@ export const SignIn: React.FC<SignInProps> = memo(({ className }) => {
           : `Signing in isn’t working right now. Try again in a moment.`
       );
     }
+  }, []);
+
+  // Coming back from the player's server by way of the back button returns to this page just as it was left
+  useEffect(() => {
+    const reset = ({ persisted }: PageTransitionEvent): void => {
+      if (persisted) setPending(false);
+    };
+
+    window.addEventListener(`pageshow`, reset);
+
+    return (): void => {
+      window.removeEventListener(`pageshow`, reset);
+    };
   }, []);
 
   const withHandle = useCallback(

@@ -3,6 +3,8 @@
  * along the top, well clear of the board. A thumb that misses a tile or
  * overshoots a swipe then has nothing nearby to land on by mistake. The
  * count of moves is the only thing near the board, and it can't be pressed.
+ * All that ever joins it is a way out of a problem, which is harmless to
+ * press by mistake.
  */
 .main {
   /* How much of a sideways phone's width is set aside at either end of the board */
@@ -107,8 +109,31 @@
     font-variant-numeric: tabular-nums;
   }
 
+  button {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--fg);
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  /* The column beside the board is too narrow for more than the count, and the board isn't moved by this growing */
   @media (orientation: landscape) and (max-height: 540px) {
     justify-self: end;
+    block-size: auto;
+    line-height: var(--font-height-6);
+    text-align: end;
+  }
+}
+
+.notice {
+  margin-inline-start: var(--spacing-2);
+
+  @media (orientation: landscape) and (max-height: 540px) {
+    display: block;
+    margin-inline-start: 0;
   }
 }
 

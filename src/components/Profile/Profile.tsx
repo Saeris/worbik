@@ -6,7 +6,9 @@ import { usePlayer } from "#hooks";
 import { getPuzzleID, getPuzzleStart } from "#utils";
 import { getMonthLength, getWeeks, toDayKey } from "#utils/calendar";
 import { ordinal } from "#utils/ordinal";
+import { parsePuzzleID } from "#utils/parsePuzzleID";
 import { getStreaks } from "#utils/streak";
+import { REQUEST_TIMEOUT } from "#utils/withTimeout";
 import styles from "./Profile.module.css";
 
 /** What a player has done, as the server tells it */
@@ -305,7 +307,7 @@ interface DetailsProps {
 const Details: React.FC<DetailsProps> = ({ player, history }) => {
   const id = useId();
   const [view, setView] = useState<View>(`month`);
-  const [day] = getPuzzleID().split(`_`);
+  const { day } = parsePuzzleID(getPuzzleID());
   const [month, date, year] = day.split(`-`).map(Number);
   const today = [year, month - 1, date] as const;
   const solved = new Map(
@@ -368,12 +370,12 @@ const Details: React.FC<DetailsProps> = ({ player, history }) => {
           <h2>Recent</h2>
           <ol>
             {history.recent.map(({ puzzle, moves, place }) => {
-              const [when, size] = puzzle.split(`_`);
+              const { day: when, label } = parsePuzzleID(puzzle);
 
               return (
                 <li key={puzzle}>
                   <span>
-                    {`${when === day ? `Today` : dayFormat.format(new Date(getPuzzleStart(puzzle)))} · ${size.replace(`x`, `×`)}`}
+                    {`${when === day ? `Today` : dayFormat.format(new Date(getPuzzleStart(puzzle)))} · ${label}`}
                   </span>
                   <span>{plural(moves, `move`, `moves`)}</span>
                   <span>{ordinal(place)}</span>
@@ -409,7 +411,10 @@ const useHistory = (did: string | undefined): History | null | undefined => {
       let history: History | null = null;
 
       try {
-        history = await fetch(`/api/profile`, { query: { player: did } });
+        history = await fetch(`/api/profile`, {
+          query: { player: did },
+          timeout: REQUEST_TIMEOUT
+        });
       } catch {
         // Shown as a profile that couldn't be loaded, rather than as an empty one
       }

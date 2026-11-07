@@ -9,7 +9,12 @@ const put = vi.hoisted(() =>
   vi.fn<(key: string, value: unknown, options?: { ttl?: number }) => void>()
 );
 
-vi.mock(`void/env`, () => ({ env: { PUZZLE_SECRET: `secret` } }));
+const env = vi.hoisted(() => ({
+  PUZZLE_SECRET: `secret`,
+  PUZZLE_SCRAMBLE: undefined as number | undefined
+}));
+
+vi.mock(`void/env`, () => ({ env }));
 vi.mock(`void/kv`, () => ({
   kv: {
     map: () => ({
@@ -49,6 +54,29 @@ describe(`puzzles`, () => {
     get.mockReset();
     put.mockReset();
     store.clear();
+  });
+
+  it(`only takes a set scramble from development`, async () => {
+    // A puzzle is kept for good, so a setting left on by mistake would leave a day of puzzles solvable in one move
+    env.PUZZLE_SCRAMBLE = 1;
+
+    try {
+      const made = async (): Promise<number | undefined> => {
+        store.clear();
+        const { getPuzzle } = await start();
+
+        return (await getPuzzle(today))?.[0];
+      };
+
+      await expect(made()).resolves.toBe(1);
+
+      vi.stubEnv(`DEV`, false);
+
+      await expect(made()).resolves.toBeGreaterThan(1);
+    } finally {
+      env.PUZZLE_SCRAMBLE = undefined;
+      vi.unstubAllEnvs();
+    }
   });
 
   describe(`getPuzzle`, () => {

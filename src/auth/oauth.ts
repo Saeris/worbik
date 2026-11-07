@@ -22,12 +22,15 @@ import {
 } from "@atcute/oauth-browser-client";
 import * as v from "valibot";
 import { fetch } from "void/client";
+import { navigation } from "#utils/navigation";
 import {
   OAUTH_CALLBACK,
   OAUTH_CLIENT_METADATA,
   OAUTH_SCOPE,
   serviceDid
 } from "#utils/service";
+import { REQUEST_TIMEOUT, withTimeout } from "#utils/withTimeout";
+import { SignedOutError, SignInError } from "./errors";
 import { normalizeHandle } from "./handle";
 import type { Player } from "./player";
 
@@ -69,7 +72,10 @@ const didDocuments = new CompositeDidDocumentResolver({
 /** A browser can't query DNS, which is where most handles are resolved from, so Worbik's server does it */
 const handles: HandleResolver = {
   resolve: async (handle) => {
-    const { did } = await fetch(`/api/handle`, { query: { handle } });
+    const { did } = await fetch(`/api/handle`, {
+      query: { handle },
+      timeout: REQUEST_TIMEOUT
+    });
     return did;
   }
 };
@@ -108,12 +114,6 @@ const configure = (): void => {
   configured = true;
 };
 
-/** A reason that signing in couldn't begin, in words that are meant for the player */
-export class SignInError extends Error {}
-
-/** Thrown when a player's sign-in turns out to have run out, or to have been withdrawn */
-export class SignedOutError extends Error {}
-
 /**
  * Sends the player to the server that hosts their account, to approve
  * signing in. They are found by their handle, or sent to Bluesky's server
@@ -136,16 +136,18 @@ export const signIn = async (handle?: string): Promise<void> => {
   let url: URL;
 
   try {
-    url = await createAuthorizationUrl({
-      target:
-        identifier === null
-          ? { type: `pds`, serviceUrl: BLUESKY }
-          : { type: `account`, identifier },
-      scope: OAUTH_SCOPE,
-      state: {
-        from: location.pathname + location.search
-      } satisfies v.InferOutput<typeof signInState>
-    });
+    url = await withTimeout(
+      createAuthorizationUrl({
+        target:
+          identifier === null
+            ? { type: `pds`, serviceUrl: BLUESKY }
+            : { type: `account`, identifier },
+        scope: OAUTH_SCOPE,
+        state: {
+          from: location.pathname + location.search
+        } satisfies v.InferOutput<typeof signInState>
+      })
+    );
   } catch {
     throw new SignInError(
       identifier === null
@@ -159,7 +161,7 @@ export const signIn = async (handle?: string): Promise<void> => {
     setTimeout(resolve, 200);
   });
 
-  location.assign(url);
+  navigation.assign(url);
 };
 
 /** Whether an identity is of a kind that the Atmosphere uses, and so can be looked up */
@@ -196,7 +198,7 @@ export const completeSignIn = async (): Promise<{
   const params = new URLSearchParams(location.hash.slice(1));
   history.replaceState(null, ``, location.pathname + location.search);
 
-  const { session, state } = await finalizeAuthorization(params);
+  const { session, state } = await withTimeout(finalizeAuthorization(params));
   const did = session.info.sub;
   const { from } = v.parse(v.fallback(signInState, { from: `/` }), state);
 
@@ -207,15 +209,7 @@ export const completeSignIn = async (): Promise<{
   };
 };
 
-/**
- * Asks the server that hosts a player's account to vouch for them: a token
- * which says who they are, addressed to Worbik, that is good for one method
- * and nothing else, for about a minute.
- *
- * Throws a `SignedOutError` if the player is no longer signed in, or signed
- * in before Worbik had any need of that method.
- */
-export const getProof = async (did: string, lxm: Nsid): Promise<string> => {
+const requestProof = async (did: string, lxm: Nsid): Promise<string> => {
   if (!isDid(did)) throw new SignedOutError();
 
   configure();
@@ -250,6 +244,17 @@ export const getProof = async (did: string, lxm: Nsid): Promise<string> => {
   return v.parse(proof, await response.json()).token;
 };
 
+/**
+ * Asks the server that hosts a player's account to vouch for them: a token
+ * which says who they are, addressed to Worbik, that is good for one method
+ * and nothing else, for about a minute.
+ *
+ * Throws a `SignedOutError` if the player is no longer signed in, or signed
+ * in before Worbik had any need of that method.
+ */
+export const getProof = async (did: string, lxm: Nsid): Promise<string> =>
+  withTimeout(requestProof(did, lxm));
+
 /** Signs the player out, here and on the server that hosts their account */
 export const signOut = async (did: string): Promise<void> => {
   if (!isDid(did)) return;
@@ -257,9 +262,11 @@ export const signOut = async (did: string): Promise<void> => {
   configure();
 
   try {
-    await new OAuthUserAgent(
-      await getSession(did, { allowStale: true })
-    ).signOut();
+    await withTimeout(
+      getSession(did, { allowStale: true }).then(async (session) =>
+        new OAuthUserAgent(session).signOut()
+      )
+    );
   } catch {
     // Being signed out here matters more than being able to tell the server about it
     deleteStoredSession(did);

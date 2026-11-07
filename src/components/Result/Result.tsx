@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { cx } from "class-variance-authority";
-import { usePlayer, type RankedScore, type ScoreStatus } from "#hooks";
+import { usePlayer, type Ranking, type ScoreStatus } from "#hooks";
+import { MAX_MOVES } from "#state";
 import type { Size } from "#utils";
 import { getNeighbors } from "#utils/getNeighbors";
 import { ordinal } from "#utils/ordinal";
@@ -20,12 +21,12 @@ export interface ResultProps {
   /** What has become of the solve, once that's known */
   status: ScoreStatus | null;
   /** The puzzle's leaderboard, once it has loaded */
-  scores: readonly RankedScore[] | null;
+  ranking: Ranking | null;
   /** Why the solve couldn't be posted, in the words of whatever turned it away */
   detail: string | null;
-  /** Whether a solve that couldn't be posted is being posted again */
+  /** Whether another try is under way */
   retrying: boolean;
-  /** Tries again to post a solve that couldn't be posted */
+  /** Tries again to post a solve that couldn't be posted, or to load a leaderboard that couldn't be */
   retry: () => void;
   /** Called to see the whole leaderboard */
   onLeaderboard: () => void;
@@ -33,6 +34,22 @@ export interface ResultProps {
   onSignIn: () => void;
   className?: string;
 }
+
+/**
+ * The few scores that are worth showing beside a result: those around the
+ * player's own. A player beyond the end of what's listed has nothing around
+ * them to show, so they're shown on their own.
+ */
+const getRows = (
+  ranking: Ranking | null,
+  you?: string
+): { rows: Ranking["scores"]; from: number } => {
+  const { scores = [], you: mine = null } = ranking ?? {};
+
+  return mine && !scores.some(({ did }) => did === you)
+    ? { rows: [mine], from: mine.place }
+    : getNeighbors(scores, ({ did }) => did === you);
+};
 
 /**
  * What a player is shown once they solve a puzzle: how they did, how that
@@ -47,7 +64,7 @@ export const Result: React.FC<ResultProps> = memo(
     moves,
     target,
     status,
-    scores,
+    ranking,
     detail,
     retrying,
     retry,
@@ -57,29 +74,43 @@ export const Result: React.FC<ResultProps> = memo(
   }) => {
     const you = usePlayer()?.did;
     const size = `${width}×${height}`;
-    const { rows, from } = getNeighbors(scores ?? [], ({ did }) => did === you);
-    const place = (scores ?? []).findIndex(({ did }) => did === you) + 1;
-    const mine = scores?.[place - 1];
+    const mine = ranking?.you;
+    const { rows, from } = getRows(ranking, you);
     // A failure stays on show while the solve is being posted again, so that nothing moves while it is
-    const shown = retrying ? `failed` : status;
+    const shown = retrying && status === `posting` ? `failed` : status;
+    // The score is safe, but where it places can't be said until the leaderboard loads
+    const unranked = status === `posted` && !ranking;
     // Sharing is the thing to do next unless there is something that needs doing first
     const waiting =
-      shown === `expired` || shown === `failed` || shown === `closed`;
+      unranked ||
+      shown === `expired` ||
+      shown === `failed` ||
+      shown === `closed` ||
+      shown === `missed`;
+    // Nothing more can be done with this solve, and today's puzzle may be waiting
+    const over = status === `closed` || status === `missed`;
 
     return (
       <section className={cx(styles.result, className)} aria-label="Result">
         <div className={styles.summary}>
           <h2>{`Solved in ${moves} ${moves === 1 ? `move` : `moves`}`}</h2>
-          {status === `posted` && place > 0 ? (
+          {status === `posted` && ranking && mine ? (
             <p>
-              <strong>{ordinal(place)}</strong>
-              {` of ${scores?.length} today`}
+              <strong>{ordinal(mine.place)}</strong>
+              {` of ${ranking.total} today`}
             </p>
           ) : status === `closed` ? (
             <p>
               This puzzle’s day ended before you finished, so the solve isn’t
               ranked.
             </p>
+          ) : status === `missed` ? (
+            <p>
+              This puzzle’s leaderboard closed before your score could be
+              posted.
+            </p>
+          ) : status === `too-long` ? (
+            <p>{`Only games of up to ${MAX_MOVES} moves can be ranked.`}</p>
           ) : status === `posting` ? (
             <p>Posting your score…</p>
           ) : (
@@ -95,6 +126,12 @@ export const Result: React.FC<ResultProps> = memo(
             {detail && <small>{detail}</small>}
           </p>
         )}
+        {unranked && (
+          <p role="alert" className={styles.alert}>
+            <strong>Couldn’t load the leaderboard</strong>
+            Your score is posted. Try again to see where it places.
+          </p>
+        )}
         {shown === `expired` && (
           <p role="alert" className={styles.alert}>
             <strong>Your sign-in has run out</strong>
@@ -108,7 +145,7 @@ export const Result: React.FC<ResultProps> = memo(
               Sign in again
             </button>
           )}
-          {shown === `failed` && (
+          {(shown === `failed` || unranked) && (
             <button
               type="button"
               className={styles.action}
@@ -118,7 +155,7 @@ export const Result: React.FC<ResultProps> = memo(
               {retrying ? `Trying again…` : `Try again`}
             </button>
           )}
-          {shown === `closed` && (
+          {over && (
             // A plain link, so that the page is loaded afresh with whichever puzzle is now the day's
             <a className={styles.action} href={`/${width}x${height}`}>
               {`Play today’s ${size}`}
@@ -130,10 +167,10 @@ export const Result: React.FC<ResultProps> = memo(
             moves={moves}
             // Posting a score is offered alongside sharing it, to a player who has yet to say who they are
             onSignIn={status === `signed-out` ? onSignIn : undefined}
-            // A link can only show a score that is on the leaderboard, under the name that it's listed by there
+            // A link can only show a score that is on the leaderboard, under the name that it's listed by there. Without the leaderboard, the player's identity finds it just the same.
             player={
-              status === `posted` && mine
-                ? (mine.handle ?? mine.did)
+              status === `posted`
+                ? (mine?.handle ?? mine?.did ?? you)
                 : undefined
             }
           />
@@ -141,11 +178,9 @@ export const Result: React.FC<ResultProps> = memo(
         {rows.length > 0 && (
           <div className={styles.ranking}>
             <header>
-              <h3>
-                {status === `closed` ? `${size} scores` : `Today’s ${size}`}
-              </h3>
+              <h3>{over ? `${size} scores` : `Today’s ${size}`}</h3>
               <button type="button" onClick={onLeaderboard}>
-                {`See all ${scores?.length}`}
+                {`See all ${ranking?.total}`}
               </button>
             </header>
             <Scores scores={rows} from={from} you={you} />

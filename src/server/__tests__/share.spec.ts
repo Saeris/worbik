@@ -1,9 +1,15 @@
-import { getPuzzle } from "../puzzles";
-import { getScore } from "../scores";
+import { db } from "void/db";
+import { scores } from "../../db/schema";
 import { getCardURL, getShare, getShareHead } from "../share";
+import { keepPuzzle, type createTestDb } from "./harness";
 
-vi.mock(`../puzzles`, () => ({ getPuzzle: vi.fn<typeof getPuzzle>() }));
-vi.mock(`../scores`, () => ({ getScore: vi.fn<typeof getScore>() }));
+vi.mock(`void/db`, async (importOriginal) => {
+  const { createTestDb } = await import(`./harness`);
+
+  return { ...(await importOriginal<object>()), db: createTestDb() };
+});
+
+vi.mock(`void/kv`, async () => ({ kv: (await import(`./harness`)).kv }));
 
 const puzzle = `11-19-2026_5x5`;
 const link = `https://worbik.test/s/11-19-2026/5x5/alice.test`;
@@ -17,18 +23,23 @@ const metaOf = (head: ReturnType<typeof getShareHead>, key: string): unknown =>
   )?.content;
 
 describe(`getShare`, () => {
-  beforeEach(() => {
-    vi.mocked(getPuzzle).mockResolvedValue([37, `Ajoouubidm`, `solution..`]);
-    vi.mocked(getScore).mockResolvedValue({
+  /** Puts a score on the puzzle's leaderboard */
+  const post = async (handle: string | null): Promise<void> => {
+    await db.insert(scores).values({
+      puzzle,
       did: `did:plc:alice`,
-      handle: `alice.test`,
+      handle,
       moves: 42,
       createdAt: new Date()
     });
+  };
+
+  beforeEach(() => {
+    keepPuzzle(puzzle, [37, `Ajoouubidm`, `solution..`]);
   });
 
   afterEach(() => {
-    vi.clearAllMocks();
+    (db as unknown as ReturnType<typeof createTestDb>).clear();
   });
 
   it(`describes the puzzle that a link is to`, async () => {
@@ -43,6 +54,8 @@ describe(`getShare`, () => {
 
   it(`never includes anything of the puzzle's solution`, async () => {
     // What is shared is seen by people who have yet to play, on the same day that the puzzle is being played
+    await post(`alice.test`);
+
     const share = await getShare(puzzle, `alice.test`);
 
     expect(JSON.stringify(share)).not.toContain(`solution`);
@@ -51,19 +64,15 @@ describe(`getShare`, () => {
   });
 
   it(`shows the score that the player posted, under the name that the leaderboard has for them`, async () => {
+    await post(`alice.test`);
+
     await expect(getShare(puzzle, `alice.test`)).resolves.toMatchObject({
       score: { moves: 42, player: `@alice.test` }
     });
-    expect(getScore).toHaveBeenCalledExactlyOnceWith(puzzle, `alice.test`);
   });
 
   it(`names a player who has no confirmed handle by their identity`, async () => {
-    vi.mocked(getScore).mockResolvedValue({
-      did: `did:plc:alice`,
-      handle: null,
-      moves: 42,
-      createdAt: new Date()
-    });
+    await post(null);
 
     await expect(getShare(puzzle, `did:plc:alice`)).resolves.toMatchObject({
       score: { player: `did:plc:alice` }
@@ -72,7 +81,7 @@ describe(`getShare`, () => {
 
   it(`shows no score for a player who hasn't posted one`, async () => {
     // Anyone can write a link that names anyone, so a link is never taken at its word
-    vi.mocked(getScore).mockResolvedValue(null);
+    await post(`alice.test`);
 
     await expect(getShare(puzzle, `mallory.test`)).resolves.toMatchObject({
       score: null
@@ -80,11 +89,7 @@ describe(`getShare`, () => {
   });
 
   it(`is nothing for a puzzle that there hasn't been`, async () => {
-    vi.mocked(getPuzzle).mockResolvedValue(null);
-
     await expect(getShare(`01-01-2020_5x5`, `alice.test`)).resolves.toBeNull();
-    // There is no score to look for on a puzzle that doesn't exist
-    expect(getScore).not.toHaveBeenCalled();
   });
 });
 

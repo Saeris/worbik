@@ -24,7 +24,7 @@
     "check": "vp check",
     "format": "vp check --fix",
     "test": "vp test",
-    "deploy": "void deploy"
+    "deploy": "void deploy --platform cloudflare"
   },
   "dependencies": {
     "@ariakit/react": "^0.4.42",

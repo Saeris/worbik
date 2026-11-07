@@ -1,7 +1,7 @@
 import { HTTPException } from "hono/http-exception";
 import { env } from "void/env";
 import { isMove, MAX_GUESSES, PuzzleState, type Challenge } from "#state";
-import { parseSize } from "#utils";
+import { getPuzzleSize } from "#utils/parsePuzzleID";
 
 /**
  * Keeps a player's guesses honest, without keeping anything else.
@@ -92,7 +92,7 @@ export const checkGuesses = async (
     });
   }
 
-  const { width } = parseSize(puzzleID.split(`_`)[1]);
+  const { width } = getPuzzleSize(puzzleID);
   let board = note ? await readBoard(puzzleID, note) : challenge.toLowerCase();
 
   for (const guess of guesses) {

@@ -1,4 +1,4 @@
-import type { DateKey } from "./getDateKey";
+import type { DateKey } from "./dateKeyRegex";
 import type { PuzzleSchema } from "./puzzleSchema";
 import { toDateString } from "./toDateString";
 

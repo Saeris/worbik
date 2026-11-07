@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { fetch } from "void/client";
 import { SignedOutError } from "#auth/errors";
 import { loadOAuth } from "#auth/load";
+import { parsePuzzleID } from "#utils/parsePuzzleID";
 import { getProgress, toSavedGame } from "#utils/progress";
 import { GET_SOLVES } from "#utils/service";
 import { getGameKey, markPosted } from "#utils/solves";
@@ -47,7 +48,7 @@ export const usePostedGames = (
     const stale = new AbortController();
     // Asked afresh each time, as it changes while a request is being waited on
     const isStale = (): boolean => stale.signal.aborted;
-    const [day] = puzzleID.split(`_`);
+    const { day } = parsePuzzleID(puzzleID);
 
     const sync = async (): Promise<void> => {
       const posted = await fetch(`/api/solves`, {

@@ -1,4 +1,4 @@
-import { parseSize } from "./parseSize";
+import { getPuzzleSize } from "./parsePuzzleID";
 
 /** How far a player has got with a puzzle */
 export interface Progress {
@@ -87,7 +87,7 @@ export const toSavedGame = ({
   challenge,
   solution
 }: PostedGame): string => {
-  const { width } = parseSize(puzzle.split(`_`)[1]);
+  const { width } = getPuzzleSize(puzzle);
 
   return [
     width,

@@ -1,5 +1,6 @@
 import type { HeadDescriptor } from "void";
-import { getPuzzleStart, parseSize } from "#utils";
+import { getPuzzleStart } from "#utils";
+import { getPuzzleSize, parsePuzzleID } from "#utils/parsePuzzleID";
 import { getDiscordEmbed } from "./embed";
 import { getPuzzle } from "./puzzles";
 import { getScore } from "./scores";
@@ -58,7 +59,7 @@ export const getShare = async (
 
   return {
     puzzle: puzzleID,
-    size: puzzleID.split(`_`)[1].replace(`x`, `×`),
+    size: parsePuzzleID(puzzleID).label,
     day: dayFormat.format(new Date(getPuzzleStart(puzzleID))),
     challenge,
     score: score && {
@@ -97,10 +98,10 @@ export const getShareHead = (
   const description = `${score ? `Can you beat it?` : `Can you solve it?`} Play today’s ${size}.`;
   const image = getCardURL(origin, share.puzzle, score ? player : undefined);
   const alt = `${title}. ${description}`;
-  const [, dimensions] = share.puzzle.split(`_`);
+  const { dimensions } = parsePuzzleID(share.puzzle);
   const embed = getDiscordEmbed({
     challenge: share.challenge,
-    width: parseSize(dimensions).width,
+    width: getPuzzleSize(share.puzzle).width,
     title,
     description,
     image,

@@ -48,6 +48,14 @@ describe(`puzzles`, () => {
     vi.spyOn(console, `error`).mockImplementation(() => {});
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+    get.mockReset();
+    put.mockReset();
+    store.clear();
+  });
+
   it(`only takes a set scramble from development`, async () => {
     // A puzzle is kept for good, so a setting left on by mistake would leave a day of puzzles solvable in one move
     env.PUZZLE_SCRAMBLE = 1;
@@ -69,14 +77,6 @@ describe(`puzzles`, () => {
       env.PUZZLE_SCRAMBLE = undefined;
       vi.unstubAllEnvs();
     }
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-    vi.restoreAllMocks();
-    get.mockReset();
-    put.mockReset();
-    store.clear();
   });
 
   describe(`getPuzzle`, () => {

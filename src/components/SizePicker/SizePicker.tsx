@@ -8,6 +8,7 @@ import { Link } from "@void/react";
 import { cx } from "class-variance-authority";
 import { PiCaretDownThin } from "react-icons/pi";
 import { getPuzzleStart, PUZZLE_DAY, sizes, type Size } from "#utils";
+import { parsePuzzleID } from "#utils/parsePuzzleID";
 import { formatCountdown, getProgress, type Progress } from "#utils/progress";
 import { getGameKey } from "#utils/solves";
 import { usePlayer } from "#hooks";
@@ -29,7 +30,7 @@ const readDay = (
   puzzleID: string,
   did?: string
 ): Record<string, Progress | null> => {
-  const [day] = puzzleID.split(`_`);
+  const { day } = parsePuzzleID(puzzleID);
 
   return Object.fromEntries(
     sizes.map(([columns, rows]) => {

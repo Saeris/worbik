@@ -355,7 +355,7 @@ describe(`staying in step with the server`, () => {
 
   it(`can always be solved after the page goes away with a move on its way`, async () => {
     // A save of moves the server hadn't reached used to get every later move refused, leaving the puzzle unsolvable for the rest of the day
-    const held = Promise.withResolvers<void>();
+    const held = Promise.withResolvers<undefined>();
     check
       .mockImplementationOnce((async (...args: Parameters<typeof server>) => {
         await held.promise;
@@ -368,7 +368,7 @@ describe(`staying in step with the server`, () => {
       puzzle.rotate(0, `up`);
     });
     await act(async () => {
-      held.resolve();
+      held.resolve(undefined);
     });
     await settle();
     await close();
@@ -438,11 +438,7 @@ describe(`staying in step with the server`, () => {
 
       expect(puzzle.win).toBe(true);
     } finally {
-      Object.defineProperty(
-        globalThis,
-        `localStorage`,
-        storage as PropertyDescriptor
-      );
+      Object.defineProperty(globalThis, `localStorage`, storage!);
     }
   });
 
@@ -585,7 +581,7 @@ describe(`staying in step with the server`, () => {
 
   it(`ignores an answer about a game that another tab has replaced`, async () => {
     // It would leave a note for one board saved beside another, which is what used to make games unwinnable
-    const held = Promise.withResolvers<void>();
+    const held = Promise.withResolvers<undefined>();
 
     check.mockImplementationOnce((async (
       ...args: Parameters<typeof server>
@@ -606,7 +602,7 @@ describe(`staying in step with the server`, () => {
       );
     });
     await act(async () => {
-      held.resolve();
+      held.resolve(undefined);
     });
     await settle();
 

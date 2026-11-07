@@ -2,7 +2,8 @@ import { HTTPException } from "hono/http-exception";
 import { and, asc, db, desc, eq, inArray, sql } from "void/db";
 import { scores } from "#db/schema";
 import { replay } from "#state";
-import { isNonNullable, isOpenForScores, parseSize, sizes } from "#utils";
+import { isNonNullable, isOpenForScores, sizes } from "#utils";
+import { getPuzzleSize } from "#utils/parsePuzzleID";
 import type { PostedGame } from "#utils/progress";
 import { getPuzzle } from "./puzzles";
 
@@ -92,7 +93,7 @@ export const submitGame = async (
   }
 
   const [, challenge, solution] = puzzle;
-  const { width } = parseSize(puzzleID.split(`_`)[1]);
+  const { width } = getPuzzleSize(puzzleID);
   const moves = replay(width, challenge, solution, history);
 
   if (moves === null) {

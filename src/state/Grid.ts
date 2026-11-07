@@ -1,6 +1,16 @@
 import { group } from "../utils/group.ts";
 import type { Size } from "../utils/sizes.ts";
 
+const rotateLeft = (arr: string[]): string[] => {
+  if (arr.length) arr.push(arr.shift()!);
+  return arr;
+};
+
+const rotateRight = (arr: string[]): string[] => {
+  if (arr.length) arr.unshift(arr.pop()!);
+  return arr;
+};
+
 export class Grid {
   #matrix: string[][];
   #width: Size;
@@ -30,16 +40,6 @@ export class Grid {
     this.#size = chars.length;
   }
 
-  #rotateLeft = (arr: string[]): string[] => {
-    if (arr.length) arr.push(arr.shift()!);
-    return arr;
-  };
-
-  #rotateRight = (arr: string[]): string[] => {
-    if (arr.length) arr.unshift(arr.pop()!);
-    return arr;
-  };
-
   #remapRow = (row: number, values: string[]): void => {
     this.#matrix = values.reduce((matrix, val, col) => {
       matrix[row][col] = val;
@@ -55,22 +55,22 @@ export class Grid {
   };
 
   rotateColUp = (col: number): this => {
-    this.#remapCol(col, this.#rotateLeft(this.#matrix.map((row) => row[col])));
+    this.#remapCol(col, rotateLeft(this.#matrix.map((row) => row[col])));
     return this;
   };
 
   rotateColDown = (col: number): this => {
-    this.#remapCol(col, this.#rotateRight(this.#matrix.map((row) => row[col])));
+    this.#remapCol(col, rotateRight(this.#matrix.map((row) => row[col])));
     return this;
   };
 
   rotateRowLeft = (row: number): this => {
-    this.#remapRow(row, this.#rotateLeft(this.#matrix[row].slice(0)));
+    this.#remapRow(row, rotateLeft(this.#matrix[row].slice(0)));
     return this;
   };
 
   rotateRowRight = (row: number): this => {
-    this.#remapRow(row, this.#rotateRight(this.#matrix[row].slice(0)));
+    this.#remapRow(row, rotateRight(this.#matrix[row].slice(0)));
     return this;
   };
 

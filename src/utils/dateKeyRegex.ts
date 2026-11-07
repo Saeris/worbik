@@ -1,3 +1,9 @@
+import type { Dimensions } from "./sizes";
+import type { DateString } from "./toDateString";
+
+/** The ID of a puzzle, as `MM-DD-YYYY_5x5` */
+export type DateKey = `${DateString}_${Dimensions}`;
+
 /** A puzzle's day, as `MM-DD-YYYY` */
 const day = String.raw`\d{2}-\d{2}-\d{4}`;
 

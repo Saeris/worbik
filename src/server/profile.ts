@@ -23,8 +23,8 @@ export interface Profile {
   }>;
 }
 
-/** The day that a puzzle belongs to, which is what its ID begins with */
-const day = sql<string>`substr(${scores.puzzle}, 1, 10)`;
+/** The day that a puzzle belongs to, which is everything in its ID before the size of its board */
+const day = sql<string>`substr(${scores.puzzle}, 1, instr(${scores.puzzle}, '_') - 1)`;
 
 /** Looks up what the player with the given identity has done. A player who has posted nothing has an empty profile. */
 export const getProfile = async (did: string): Promise<Profile> => {

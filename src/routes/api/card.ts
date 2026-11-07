@@ -3,7 +3,7 @@ import * as v from "valibot";
 import { defineHandler } from "void";
 import { renderCard } from "#server/card/card";
 import { getShare } from "#server/share";
-import { parseSize } from "#utils";
+import { getPuzzleSize } from "#utils/parsePuzzleID";
 
 /**
  * The picture that is shown wherever a link to a puzzle, or to a player's
@@ -31,7 +31,7 @@ export const GET = defineHandler.withValidator({
     });
   }
 
-  const { width, height } = parseSize(query.puzzle.split(`_`)[1]);
+  const { width, height } = getPuzzleSize(query.puzzle);
   const card = renderCard({
     challenge: share.challenge,
     width,

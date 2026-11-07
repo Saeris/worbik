@@ -1,9 +1,9 @@
 export { between } from "./between";
-export { getDateKey, filterExpiredDates, type DateKey } from "./getDateKey";
+export { type DateKey } from "./dateKeyRegex";
 export { getPuzzleID, ROLLOVER_HOUR_UTC } from "./getPuzzleID";
 export { group } from "./group";
 export { isNonNullable } from "./isNonNullable";
-export { isExpired } from "./isExpired";
+export { filterExpiredDates, isExpired } from "./isExpired";
 export {
   getPuzzleStart,
   isOpenForScores,
@@ -23,5 +23,4 @@ export { range } from "./range";
 export { repeat } from "./repeat";
 export { seededRandom } from "./seededRandom";
 export { sizes, type Size, type Dimensions } from "./sizes";
-export { toInt } from "./toInt";
 export type { Maybe } from "./types";

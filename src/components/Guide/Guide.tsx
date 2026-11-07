@@ -19,16 +19,16 @@ export const Guide: React.FC<GuideProps> = memo(({ width, height }) => (
   <div className={styles.guide}>
     <p>
       {`Hidden in this puzzle are `}
-      <strong>{`${String(numbers[height])} words`}</strong>
+      <strong>{`${numbers[height]} words`}</strong>
       {` that are each `}
-      <strong>{`${String(numbers[width])} letters`}</strong>
+      <strong>{`${numbers[width]} letters`}</strong>
       {` long.`}
     </p>
     <p>{`There is one word per row.`}</p>
     <p>
       {`Use the buttons around the edges to
         rotate the columns and rows in order to find the correct position of
-        each letter and decode all ${String(numbers[height])} words.`}
+        each letter and decode all ${numbers[height]} words.`}
     </p>
     <div className={styles.row}>
       <Tile x={0} y={0} char="W" hint="W" disabled />

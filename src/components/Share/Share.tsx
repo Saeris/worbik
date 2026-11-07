@@ -7,6 +7,7 @@ import {
 } from "@ariakit/react";
 import { PiXThin } from "react-icons/pi";
 import { getPuzzleStart } from "#utils";
+import { parsePuzzleID } from "#utils/parsePuzzleID";
 import { Sheet } from "../Sheet";
 import styles from "./Share.module.css";
 
@@ -61,8 +62,7 @@ const Contents: React.FC<ContentsProps> = ({
   onShared
 }) => {
   const [copied, setCopied] = useState(false);
-  const [day, dimensions] = puzzleID.split(`_`);
-  const size = dimensions.replace(`x`, `×`);
+  const { day, dimensions, label: size } = parsePuzzleID(puzzleID);
   const path = [`/s`, day, dimensions, ...(player ? [player] : [])].join(`/`);
   const url = `${location.origin}${path}`;
   const card = `/api/card?${new URLSearchParams({ puzzle: puzzleID, ...(player && { player }) }).toString()}`;

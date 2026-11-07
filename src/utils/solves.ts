@@ -1,6 +1,6 @@
 import * as v from "valibot";
 import { dateKeyRegex } from "./dateKeyRegex";
-import { filterExpiredDates } from "./getDateKey";
+import { filterExpiredDates } from "./isExpired";
 
 /**
  * What a device remembers of each player's games.

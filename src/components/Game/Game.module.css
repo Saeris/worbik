@@ -16,7 +16,9 @@
     / 1fr auto auto;
   align-items: center;
   gap: var(--spacing-6) var(--spacing-2);
-  padding: var(--spacing-2) var(--spacing-4) var(--spacing-4);
+  /* Clear of a notch and of the bar along the bottom of a phone, which matter once the game fills the screen */
+  padding-block: max(var(--spacing-2), env(safe-area-inset-top))
+    max(var(--spacing-4), env(safe-area-inset-bottom));
   /* Narrow screens give up some of their padding, to leave more room for the board */
   padding-inline: clamp(var(--spacing-2), 8vw - 24px, var(--spacing-4));
   /*
@@ -24,6 +26,8 @@
    * small enough the page scrolls instead, which keeps the bar reachable.
    */
   flex: 1 0 auto;
+  /* The game has the screen to itself, and anything else is found by scrolling past it */
+  min-block-size: 100dvh;
   color: var(--fg);
 
   /* Once the puzzle is solved there is no more need to stay clear of the board, and the result takes the room beneath it */
@@ -49,7 +53,8 @@
       / var(--side) minmax(0, 1fr) var(--side);
     column-gap: var(--spacing-4);
     padding: var(--spacing-2) max(var(--spacing-4), env(safe-area-inset-right))
-      var(--spacing-4) max(var(--spacing-4), env(safe-area-inset-left));
+      max(var(--spacing-4), env(safe-area-inset-bottom))
+      max(var(--spacing-4), env(safe-area-inset-left));
 
     /* The board moves over to one side, and the result takes the other */
     &.solved {

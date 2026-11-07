@@ -61,7 +61,8 @@ export const SignIn: React.FC<SignInProps> = memo(({ className }) => {
         <HandleField value={handle} onChange={setHandle} />
         <p className={styles.note}>
           You will approve this on your account’s own sign-in page. Worbik never
-          sees your password.
+          sees your password. By signing in you agree to the{` `}
+          <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.
         </p>
         <button type="submit" className={styles.primary} disabled={pending}>
           Continue

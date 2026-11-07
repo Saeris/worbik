@@ -51,6 +51,11 @@ const applyScheme = (scheme: Scheme): void => {
   } else {
     document.documentElement.dataset.theme = scheme;
   }
+
+  // The phone's status bar follows along, as it's outside of the page
+  document
+    .querySelector(`meta[name="theme-color"]`)
+    ?.setAttribute(`content`, getComputedStyle(document.body).backgroundColor);
 };
 
 const changeScheme: React.ChangeEventHandler<HTMLInputElement> = ({
@@ -97,7 +102,12 @@ const endSession = async (did: string): Promise<void> => {
   await signOut(did);
 };
 
-export const Config: React.FC = memo(() => {
+export interface ConfigProps {
+  /** Called when a player asks to delete their Worbik data */
+  onDelete: () => void;
+}
+
+export const Config: React.FC<ConfigProps> = memo(({ onDelete }) => {
   const player = usePlayer();
 
   const leave = useCallback(() => {
@@ -150,8 +160,20 @@ export const Config: React.FC = memo(() => {
               Sign out
             </button>
           </div>
+          <div className={styles.account}>
+            <p>
+              Delete your scores from every leaderboard. This can’t be undone.
+            </p>
+            <button type="button" className={styles.danger} onClick={onDelete}>
+              Delete my Worbik data
+            </button>
+          </div>
         </>
       )}
+      <p className={styles.legal}>
+        <a href="/terms">Terms of Service</a>
+        <a href="/privacy">Privacy Policy</a>
+      </p>
     </div>
   );
 });

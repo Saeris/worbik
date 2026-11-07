@@ -1,5 +1,9 @@
 import { between } from "../../utils";
-import { PuzzleState, type PuzzleStateInit } from "../PuzzleState";
+import {
+  PuzzleState,
+  type PuzzleStateInit,
+  type Snapshot
+} from "../PuzzleState";
 
 describe(`puzzleState`, () => {
   it(`can be instantiated from a an init array`, () => {
@@ -205,5 +209,61 @@ describe(`puzzleState`, () => {
     expect(state.toString()).toBe(`worbik`);
     expect(state.history).toStrictEqual(truncated);
     expect(listener).toHaveBeenCalledTimes(5);
+  });
+
+  describe(`a game that was played on another device`, () => {
+    const init = [3, `bcaefd`, 2] as unknown as PuzzleStateInit;
+    /** A 3×2 puzzle, in the form that a saved game takes */
+    const saved = [3, `bcaefd,abcdef`, `ABCDEF`, `42`] as unknown as Snapshot;
+
+    it(`opens as solved, in the number of moves that it took`, () => {
+      // Only its outcome is known, so the count can't come from the states that it went through
+      const state = new PuzzleState(init).restore(saved);
+
+      expect(state.win).toBe(true);
+      expect(state.moves).toBe(42);
+      expect(state.toString()).toBe(`abcdef`);
+    });
+
+    it(`can't be played any further`, () => {
+      const state = new PuzzleState(init).restore(saved);
+
+      state.getNextState(0, `left`);
+
+      expect(state.moves).toBe(42);
+      expect(state.toString()).toBe(`abcdef`);
+    });
+
+    it(`takes the place of a game that was under way`, () => {
+      const state = new PuzzleState(init);
+      state.getNextState(0, `left`);
+      state.restore(saved);
+
+      expect(state.win).toBe(true);
+      expect(state.moves).toBe(42);
+    });
+
+    it(`takes the place of a solve that was made here, and says so`, () => {
+      // A player's first solve is the one that's kept, so the board has to show that score. A game that's already won is otherwise left alone.
+      const state = new PuzzleState(init);
+      state.restore([3, `bcaefd,abcdef`, `ABCDEF`] as unknown as Snapshot);
+      const listener = vi.fn<() => void>();
+      state.subscribe(listener);
+
+      state.restore(saved);
+
+      expect(state.moves).toBe(42);
+      expect(listener).toHaveBeenCalledWith();
+    });
+
+    it(`survives being saved and restored`, () => {
+      const state = new PuzzleState(init).restore(saved);
+      const restored = new PuzzleState(init).restore(
+        state.snapshot.join(`|`).split(`|`) as unknown as Snapshot
+      );
+
+      expect(restored.moves).toBe(42);
+      expect(restored.win).toBe(true);
+    });
   });
 });

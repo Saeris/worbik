@@ -5,9 +5,15 @@ import { fetch } from "void/client";
 import type { PuzzleStateInit } from "../../state";
 import { usePuzzle } from "../usePuzzleState";
 
-vi.mock(`void/client`, () => ({ fetch: vi.fn<() => Promise<string[]>>() }));
+/** What the server answers with: the letters that are in place, and a note of where the game is */
+interface Answer {
+  hints: string[];
+  from?: string;
+}
 
-const check = vi.mocked(fetch as unknown as () => Promise<string[]>);
+vi.mock(`void/client`, () => ({ fetch: vi.fn<() => Promise<Answer>>() }));
+
+const check = vi.mocked(fetch as unknown as () => Promise<Answer>);
 
 /**
  * A 3×2 puzzle whose solution is `abc` over `def`, in which no letter
@@ -58,7 +64,7 @@ describe(`usePuzzle`, () => {
 
   it(`reveals a hint as soon as the server confirms it`, async () => {
     // A hint that only shows up after the next move tricks players into moving a letter that was already in place
-    check.mockResolvedValue([`ABCefd`]);
+    check.mockResolvedValue({ hints: [`ABCefd`] });
 
     expect(container.textContent).toBe(`   |   `);
 
@@ -74,7 +80,7 @@ describe(`usePuzzle`, () => {
   it(`checks a move right away, rather than waiting to see if more follow`, async () => {
     // Any delay before checking is time in which a player can't tell that a letter is already in place
     // A response from the server that is settled at a moment of the test's choosing
-    const response = Promise.withResolvers<string[]>();
+    const response = Promise.withResolvers<Answer>();
     check.mockReturnValue(response.promise);
 
     await act(async () => {
@@ -87,14 +93,14 @@ describe(`usePuzzle`, () => {
     });
 
     await act(async () => {
-      response.resolve([`ABCefd`]);
+      response.resolve({ hints: [`ABCefd`] });
     });
   });
 
   it(`checks the moves made while waiting on the server together`, async () => {
     // One request per burst of moves keeps the game within the limits of what it's hosted on
-    const first = Promise.withResolvers<string[]>();
-    check.mockReturnValueOnce(first.promise).mockResolvedValue([]);
+    const first = Promise.withResolvers<Answer>();
+    check.mockReturnValueOnce(first.promise).mockResolvedValue({ hints: [] });
 
     await act(async () => {
       puzzle.rotate(0, `right`);
@@ -105,7 +111,7 @@ describe(`usePuzzle`, () => {
     expect(check).toHaveBeenCalledTimes(1);
 
     await act(async () => {
-      first.resolve([`ABCefd`]);
+      first.resolve({ hints: [`ABCefd`] });
     });
 
     expect(check).toHaveBeenCalledTimes(2);
@@ -118,7 +124,7 @@ describe(`usePuzzle`, () => {
     // A letter that landed in place while offline must still be revealed once back online
     check
       .mockRejectedValueOnce(new Error(`Failed to fetch`))
-      .mockResolvedValue([`ABCefd`, `ABCfde`]);
+      .mockResolvedValue({ hints: [`ABCefd`, `ABCfde`] });
 
     await act(async () => {
       puzzle.rotate(0, `right`);
@@ -171,10 +177,41 @@ describe(`restoring a saved game`, () => {
   });
 
   it(`picks up a game of this puzzle where it was left`, async () => {
-    localStorage.setItem(`03-02-2026_3x2`, `3|bcaefd,abcefd|ABC   `);
+    localStorage.setItem(`03-02-2026_3x2`, `3|bcaefd,abcefd|ABC   ||a-note`);
     await render();
 
     expect(puzzle.moves).toBe(1);
+  });
+
+  it(`hands the server's note back with the next move`, async () => {
+    // Without it the server has no way to tell that the move follows from where the game is
+    check.mockResolvedValue({ hints: [`ABCefd`], from: `a-newer-note` });
+    localStorage.setItem(`03-02-2026_3x2`, `3|bcaefd,abcefd|ABC   ||a-note`);
+    await render();
+    await act(async () => {
+      puzzle.rotate(1, `left`);
+    });
+
+    expect(check).toHaveBeenLastCalledWith(`/api/check`, {
+      query: expect.objectContaining({ from: `a-note` })
+    });
+    expect(localStorage.getItem(`03-02-2026_3x2`)).toContain(`a-newer-note`);
+  });
+
+  it(`starts over from an unfinished game that has no note`, async () => {
+    // Games saved before moves were kept track of can't be carried on from, as the server would refuse the next one
+    localStorage.setItem(`03-02-2026_3x2`, `3|bcaefd,abcefd|ABC   `);
+    await render();
+
+    expect(puzzle.moves).toBe(0);
+  });
+
+  it(`keeps a solved game, which needs no note`, async () => {
+    localStorage.setItem(`03-02-2026_3x2`, `3|bcaefd,abcdef|ABCDEF`);
+    await render();
+
+    expect(puzzle.moves).toBe(1);
+    expect(puzzle.win).toBe(true);
   });
 
   it(`leaves a game of a puzzle that has since been remade`, async () => {

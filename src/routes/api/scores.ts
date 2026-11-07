@@ -1,7 +1,7 @@
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
 import { defineHandler } from "void";
-import { resolveHandle, verifyPlayer } from "#server/identity";
+import { resolveHandle, SUBMIT_SCORE, verifyPlayer } from "#server/identity";
 import { getLeaderboard, submitGame } from "#server/scores";
 import { MAX_MOVES } from "#state";
 
@@ -35,7 +35,7 @@ export const POST = defineHandler.withValidator({ body: game })(async (
   c,
   { body }
 ) => {
-  const did = await verifyPlayer(c.req.raw).catch(() => {
+  const did = await verifyPlayer(c.req.raw, SUBMIT_SCORE).catch(() => {
     throw new HTTPException(401, {
       message: `This request does not prove who is making it`
     });

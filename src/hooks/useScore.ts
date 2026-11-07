@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import * as v from "valibot";
 import { fetch, FetchError } from "void/client";
 import { isOpenForScores, isPuzzleDay } from "#utils";
+import { SUBMIT_SCORE } from "#utils/service";
 import { markPosted, recordSolve } from "#utils/solves";
 import { usePlayer } from "./usePlayer";
 
@@ -69,9 +70,9 @@ const send = async (
   await fetch(`/api/scores`, {
     method: `POST`,
     body: { puzzle: puzzleID, history: [...history] },
-    headers: { authorization: `Bearer ${await getProof(did)}` }
+    headers: { authorization: `Bearer ${await getProof(did, SUBMIT_SCORE)}` }
   });
-  markPosted(puzzleID);
+  markPosted(puzzleID, did);
 };
 
 const post = async (
@@ -147,7 +148,7 @@ export const useScore = (
     const isStale = (): boolean => stale.signal.aborted;
 
     const follow = async (): Promise<void> => {
-      const solve = recordSolve(puzzleID);
+      const solve = recordSolve(puzzleID, did);
       const loaded = await loadScores(puzzleID);
 
       if (isStale()) return;

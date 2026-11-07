@@ -1,0 +1,7 @@
+User-agent: *
+# The pictures that links show are fetched from here, by apps that read this file first
+Allow: /api/card
+Disallow: /api/
+Disallow: /oauth/
+
+Sitemap: https://worbik.com/sitemap.xml

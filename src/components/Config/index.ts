@@ -1,1 +1,1 @@
-export { Config } from "./Config";
+export { Config, type ConfigProps } from "./Config";

@@ -1,3 +1,5 @@
+import { parseSize } from "./parseSize";
+
 /** How far a player has got with a puzzle */
 export interface Progress {
   /** How many moves they have made */
@@ -14,15 +16,51 @@ export interface Progress {
  * been through, and the letters that are known to be in place, in that
  * order and separated by `|`. The puzzle is solved once every letter is
  * known to be in place, in the state that the board was left in.
+ *
+ * A game that was played on another device has only its first and last
+ * states, and ends with how many moves it took.
  */
 export const getProgress = (saved: string | null): Progress | null => {
-  const [, history = ``, hints = ``] = saved?.split(`|`) ?? [];
+  const [, history = ``, hints = ``, reported = ``] = saved?.split(`|`) ?? [];
   const states = history.split(`,`);
-  const moves = states.length - 1;
+  const moves = reported ? Number(reported) : states.length - 1;
 
   if (moves < 1) return null;
 
   return { moves, solved: hints.toLowerCase() === states.at(-1) };
+};
+
+/** What is known of a game that was played on another device */
+export interface PostedGame {
+  /** The ID of the puzzle that was solved */
+  readonly puzzle: string;
+  /** How many moves it was solved in */
+  readonly moves: number;
+  /** The scrambled letters that it's played from */
+  readonly challenge: string;
+  /** The letters that it was solved to */
+  readonly solution: string;
+}
+
+/**
+ * Writes a game that was played on another device the way that a game
+ * played on this one is saved, so that it opens as solved. Its moves aren't
+ * known, so it goes straight from how the puzzle began to how it ended.
+ */
+export const toSavedGame = ({
+  puzzle,
+  moves,
+  challenge,
+  solution
+}: PostedGame): string => {
+  const { width } = parseSize(puzzle.split(`_`)[1]);
+
+  return [
+    width,
+    `${challenge.toLowerCase()},${solution.toLowerCase()}`,
+    solution.toUpperCase(),
+    moves
+  ].join(`|`);
 };
 
 /** Spells out a length of time that is under a day, to the minute: "6 h 12 min" */

@@ -8,12 +8,17 @@ import {
   type DidDocumentResolver,
   type HandleResolver
 } from "@atcute/identity-resolver";
-import type { Did } from "@atcute/lexicons";
+import type { Did, Nsid } from "@atcute/lexicons";
 import { isHandle, type AtprotoDid } from "@atcute/lexicons/syntax";
 import { ServiceJwtVerifier } from "@atcute/xrpc-server/auth";
-import { serviceDid, SUBMIT_SCORE } from "#utils/service";
+import {
+  DELETE_DATA,
+  GET_SOLVES,
+  serviceDid,
+  SUBMIT_SCORE
+} from "#utils/service";
 
-export { serviceDid, SUBMIT_SCORE };
+export { DELETE_DATA, GET_SOLVES, serviceDid, SUBMIT_SCORE };
 
 /**
  * The longest that a proof may be valid for: five minutes, plus room for
@@ -52,13 +57,15 @@ export interface Resolvers {
  * against the key in the player's own identity document, so it can't be
  * forged by anyone but the server that the player trusts with their account.
  *
- * Tokens aren't tracked to stop one from being used twice, as the only thing
- * one can do is submit a score, and a player's first score is the one kept.
+ * Each token is good for one method. They aren't tracked to stop one from
+ * being used twice, as a player's first score is the one kept, and a player
+ * is only ever shown their own games.
  *
  * Throws when the request doesn't prove who the player is.
  */
 export const verifyPlayer = async (
   request: Request,
+  lxm: Nsid,
   { didResolver = didDocuments }: Resolvers = {}
 ): Promise<Did> => {
   const verifier = new ServiceJwtVerifier({
@@ -66,9 +73,7 @@ export const verifyPlayer = async (
     maxAge: MAX_TOKEN_SECONDS,
     resolver: didResolver
   });
-  const { issuer } = await verifier.verifyRequest(request, {
-    lxm: SUBMIT_SCORE
-  });
+  const { issuer } = await verifier.verifyRequest(request, { lxm });
 
   return issuer;
 };

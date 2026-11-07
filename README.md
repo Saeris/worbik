@@ -24,7 +24,7 @@ Rotate a row or column by pressing the arrow beside it, by swiping across its ti
 
 Every size of board has its own ranked leaderboard for every day. To post a score, sign in with an [Atmosphere][atproto] account, the one used for Bluesky and other apps. Worbik has no accounts of its own: it asks the server that hosts the account for two things only, to say who the player is and to vouch for them when they submit a score. It can't read or write anything in the account.
 
-A solve is posted as the whole game, which the server replays to check that it solves the puzzle, so a score is never only the player's word for it. A player's first solve of a puzzle is the one that counts. A leaderboard takes scores for the day that its puzzle is the day's puzzle, plus an hour's grace.
+A solve is posted as the whole game, which the server replays to check that it solves the puzzle, so a score is never only the player's word for it. A player's first solve of a puzzle is the one that counts, and signing in on another device opens the puzzles they have already solved as solved. A leaderboard takes scores for the day that its puzzle is the day's puzzle, plus an hour's grace.
 
 ## 🔥 Streaks
 
@@ -56,6 +56,12 @@ yarn dev
 
 The dev server is served at `http://127.0.0.1:5173`, and the app moves itself there if it's opened at `localhost`. Signing in needs that: the protocol won't send a player back to `localhost`, and what a browser stores for one address isn't shared with the other.
 
+### Keeping guesses honest
+
+`/api/check` says which letters of a guess are in place, so it would give away a puzzle's solution if it answered any guess. Each guess has to be one real move from a board that the server has vouched for, by way of a signed note that comes with each answer and goes back with the next guess, which keeps the route stateless. Restricting it to the game's own origin wouldn't do this: only browsers honor that, and the browser console on the site is the same origin.
+
+This stops a solution being read out of the API. Nothing can stop someone playing a puzzle with real moves in order to learn it, in a second browser for instance, and then posting a perfect game.
+
 ### How puzzles are made
 
 Each puzzle is derived on demand from its ID (its date and size) and the `PUZZLE_SECRET`, the first time it's asked for, and is then kept in Workers KV for good. Solutions never leave the server: the browser sends its guesses to `/api/check`, which answers with the letters that are in the right place.
@@ -68,13 +74,25 @@ Set `PUZZLE_SCRAMBLE=1` in `.env` to have new puzzles scrambled with a single mo
 
 While `yarn dev` is running, `/palette` shows a board with a tile in every state, in both color schemes, as it appears with typical vision, under each color vision deficiency, and in grayscale. It also shows tiles at every size, for checking that a tile's letter and its hint never touch. The page only exists in development. The same guarantees are enforced by `src/theme/__tests__/palette.spec.ts`, which reads the colors straight out of `src/theme/theme.css`.
 
+### Link previews and search
+
+A shared link describes itself to whatever it's pasted into: Open Graph tags for most apps, including Bluesky, and a [component embed](https://docs.discord.com/developers/link-previews/component-embeds) for Discord, built in `src/server/embed.ts`, which can show a button. Discord can show nothing at all for a payload that it doesn't like, so check changes with its Embed Debugger. Shared links are `noindex`. Everything else is listed in `/sitemap.xml`, with its title, description and canonical address coming from `src/server/seo.ts`.
+
+### Icons and the site's card
+
+While `yarn dev` is running, `/brand` draws the app's icons and the card that its pages show when linked to, in the game's own font and tile colors, each at the size of its file in `public/`. When the look of the game changes, save them again from there. `favicon.ico` holds the three smallest.
+
 ### The share card
 
 The card is drawn without any image library, to stay within the ten milliseconds of processor time that a Worker gets on Cloudflare's free plan: flat shapes in sixteen colors, with letters that were drawn ahead of time. While `yarn dev` is running, `/glyphs` draws those letters from the game's font. Save what it shows as `src/server/card/glyphs.json` whenever the wording of the card or the font changes.
 
 ### Signing in
 
-Signing in happens in the browser, with [atcute][atcute]. The server that hosts a player's account learns about Worbik from `/oauth/client-metadata.json`, which describes the app at whichever address it's served from, and the permission asked for names one method, `com.worbik.submitScore`, that the server vouches for the player to call.
+Signing in happens in the browser, with [atcute][atcute]. The server that hosts a player's account learns about Worbik from `/oauth/client-metadata.json`, which describes the app at whichever address it's served from, and the permission asked for names the three methods that the server vouches for the player to call: `com.worbik.submitScore`, `com.worbik.getSolves`, which brings a new device up to date, and `com.worbik.deleteData`. Adding to these makes anyone already signed in sign in again.
+
+## 📜 Terms and privacy
+
+The [Terms of Service][terms] and [Privacy Policy][privacy] are written in plain English, as Markdown in `src/pages/(legal)`, and are served at `/terms` and `/privacy`. The privacy policy says what Worbik stores and what the browser sends where, so it has to change along with those.
 
 ## 🚀 Deploying
 
@@ -90,6 +108,8 @@ Signing in works at whichever address the app is served from. A player's sign-in
 [ci_badge]: https://github.com/Saeris/worbik/actions/workflows/ci.yml/badge.svg
 [ci]: https://github.com/Saeris/worbik/actions/workflows/ci.yml
 [site]: https://worbik.com
+[terms]: https://worbik.com/terms
+[privacy]: https://worbik.com/privacy
 [atproto]: https://atproto.com
 [void]: https://void.cloud
 [viteplus]: https://viteplus.dev/

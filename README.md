@@ -1,29 +1,44 @@
-# Worbik
+<div align="center">
 
-**Genre**: Casual, Puzzle
-**Platforms**: Web, Mobile
-**Number of Players**: Single Player
+# 📰 Worbik
 
-## Gameplay
+[![CI status][ci_badge]][ci]
 
-Each game consists of a randomly generated set of words that are scrambled and must be unscrambled similar to solving a Rubik's Cube. Words can be of variable length, but all words in a set will be of the same length. Sets can also be of variable length. For example, one game could have a grid of four 5-letter words, and another could have a grid of five 7-letter words. The range for both word length and set length is between 4 and 7 (to accomodate for reasonable touch input sizing on mobile devices).
+A daily word puzzle, solved like a Rubik's Cube: rotate the rows and columns of a grid of letters until every row is a word.
 
-Players must rotate the rows and columns of this grid to rearrange the letters and find the puzzle's solution. Scoring is measured by the number of moves the player made to solve the puzzle, with the least amount of moves to find a solution being the best score. This means each puzzle has perfect score that players can reach. There is also a `target` score, which is the number of moves used to initially scramble the grid, which may be higher than a perfect score. Like a Rubik's cube, there is no lose condition, and there is always a solution, so players may make any number of moves necessary to reach a solution.
+**[Play at worbik.com][site]**
 
-During gameplay, when a letter is in the correct position, that status is reflected in the game's interface, hinting to the player what the words in each row are and how close they are to solving the puzzle.
+</div>
 
-Upon winning, players are given the option to share their score on social media. Optionally, if they have an account and are logged in, they can place on a daily global leader board and their score + completion status will be logged to their play history.
+---
 
-## Input Methods
+## 🎮 How to play
 
-1. Click controls (current implementation)
-1. Keyboard (WASD rotates current column/row + Up/Left/Down/Right control focus in grid)
-1. Gamepad (D-pad controls focus in grid + A/B/X/Y rotates current column/row)
-1. Touch (Swipe to rotate a column or row)
+Each puzzle is a grid of words, one per row, scrambled by rotating its rows and columns. Rotate them back to find the words. Letters that are in the right place turn yellow and keep a reminder in their corner; a row turns green once its word is complete. Fewest moves wins, and there is always a solution.
 
-## Development
+There are sixteen puzzles a day, one for every size of board from 5×5 to 8×8, and a new day's puzzles arrive at 10:00 UTC for everyone at once. Past puzzles can still be played, but only the day's puzzle counts for its leaderboard.
 
-Worbik is a [Void](https://void.cloud) app that runs on Cloudflare Workers, built and checked with [Vite+](https://viteplus.dev).
+Rotate a row or column by pressing the arrow beside it, by swiping across its tiles, or with the keyboard: the arrow keys move between tiles, and <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> rotate the column or row of the tile that has focus.
+
+## 🏆 Leaderboards
+
+Every size of board has its own ranked leaderboard for every day. To post a score, sign in with an [Atmosphere][atproto] account, the one used for Bluesky and other apps. Worbik has no accounts of its own: it asks the server that hosts the account for two things only, to say who the player is and to vouch for them when they submit a score. It can't read or write anything in the account.
+
+A solve is posted as the whole game, which the server replays to check that it solves the puzzle, so a score is never only the player's word for it. A player's first solve of a puzzle is the one that counts. A leaderboard takes scores for the day that its puzzle is the day's puzzle, plus an hour's grace.
+
+## 🔥 Streaks
+
+A signed-in player's profile shows their streak, their best streak, how many puzzles they have solved, a calendar of the days they played on, and their latest results. A day counts once any one of its puzzles is solved and posted. A streak that reached yesterday is still going, and ends once a whole day passes without a solve.
+
+## 🔗 Sharing
+
+A solve is shared as a link, `/s/<date>/<size>`, with the player's handle on the end once their score is on the leaderboard. Opening one starts today's puzzle of that size. Pasted anywhere that shows link previews, it shows a card with the puzzle's stamp and the player's score. The score on a card is always looked up, never taken from the link, so a link can't claim a score that wasn't posted. Neither the card nor the link gives away the solution or the target.
+
+A puzzle's stamp is a mosaic in the shape of its board, whose color and pattern come from a hash of its scrambled letters, so it is the same for everyone who plays that puzzle.
+
+## 🔧 Development
+
+Worbik is a [Void][void] app that runs on Cloudflare Workers, built and checked with [Vite+][viteplus].
 
 ```sh
 yarn install
@@ -39,45 +54,43 @@ yarn dev
 | `yarn build`  | Build for production                       |
 | `yarn deploy` | Deploy to Cloudflare                       |
 
-### Testing with puzzles that take one move
+The dev server is served at `http://127.0.0.1:5173`, and the app moves itself there if it's opened at `localhost`. Signing in needs that: the protocol won't send a player back to `localhost`, and what a browser stores for one address isn't shared with the other.
 
-Set `PUZZLE_SCRAMBLE=1` in `.env` to have new puzzles scrambled with a single move. Puzzles that were already made are kept, so forget today's with `curl -X POST http://127.0.0.1:5173/api/dev/reset`, which also removes any local scores on them, and clear the site's storage in the browser, which otherwise restores its saved game of the old puzzle. The route only exists on the dev server.
+### How puzzles are made
+
+Each puzzle is derived on demand from its ID (its date and size) and the `PUZZLE_SECRET`, the first time it's asked for, and is then kept in Workers KV for good. Solutions never leave the server: the browser sends its guesses to `/api/check`, which answers with the letters that are in the right place.
+
+### Puzzles that take one move
+
+Set `PUZZLE_SCRAMBLE=1` in `.env` to have new puzzles scrambled with a single move. Puzzles that were already made are kept, so forget today's with `curl -X POST http://127.0.0.1:5173/api/dev/reset`, which also removes any local scores on them. The route only exists on the dev server.
 
 ### Reviewing the palette
 
-While `yarn dev` is running, `/palette` shows a board with a tile in every state, in both color schemes, as it appears with typical vision, under each color vision deficiency, and in grayscale. It also shows tiles at every size from 32px to 80px, for checking that a tile's letter and its hint never touch. The page only exists in development. The same guarantees are enforced by `src/theme/__tests__/palette.spec.ts`, which reads the colors straight out of `src/theme/theme.css`.
+While `yarn dev` is running, `/palette` shows a board with a tile in every state, in both color schemes, as it appears with typical vision, under each color vision deficiency, and in grayscale. It also shows tiles at every size, for checking that a tile's letter and its hint never touch. The page only exists in development. The same guarantees are enforced by `src/theme/__tests__/palette.spec.ts`, which reads the colors straight out of `src/theme/theme.css`.
 
-### How daily puzzles work
+### The share card
 
-Each puzzle is derived on demand from its ID (the puzzle's date and size) and the `PUZZLE_SECRET`, the first time it is requested, and is then stored in Workers KV for good. A puzzle's leaderboard takes new scores for the day that it is the day's puzzle, plus an hour's grace. A new day's puzzles become available at 10:00 UTC. Solutions never leave the server: the browser sends its guesses to `/api/check`, which reports the letters that are in the right position.
+The card is drawn without any image library, to stay within the ten milliseconds of processor time that a Worker gets on Cloudflare's free plan: flat shapes in sixteen colors, with letters that were drawn ahead of time. While `yarn dev` is running, `/glyphs` draws those letters from the game's font. Save what it shows as `src/server/card/glyphs.json` whenever the wording of the card or the font changes.
 
-### Deploying
+### Signing in
+
+Signing in happens in the browser, with [atcute][atcute]. The server that hosts a player's account learns about Worbik from `/oauth/client-metadata.json`, which describes the app at whichever address it's served from, and the permission asked for names one method, `com.worbik.submitScore`, that the server vouches for the player to call.
+
+## 🚀 Deploying
 
 Void deploys the app to a Cloudflare Worker, creating what it needs on the way: the KV namespace that holds puzzles and the D1 database that holds scores, with the migrations in `src/db/migrations` applied. Everything fits within the Workers Free plan.
 
 1. Connect the project to the Cloudflare account, once: `yarn void connect --platform cloudflare`.
 2. Set the production secret: `yarn void secret put PUZZLE_SECRET`. Use a long random value. Puzzles are derived from it, so changing it later changes every puzzle that hasn't been stored yet.
-3. Deploy: `yarn void deploy`. The first deploy writes the IDs of the resources it created to `void.lock.json`, which should be committed.
-4. Add the domain: `yarn void domain add worbik.com`. Cloudflare has to be the DNS provider for the zone, and it creates the record and the certificate itself.
+3. Deploy: `yarn void deploy`. The resources it creates are recorded in `void.lock.json`, which is committed.
+4. Add the domain: `yarn void domain add worbik.com`. Cloudflare has to be the DNS provider for the zone, and creates the record and the certificate itself.
 
-Signing in works at whichever address the app is served from, as the document that describes the app to a player's server is written for that address. A player's sign-in is tied to the address they signed in at, so moving domains signs everyone out.
+Signing in works at whichever address the app is served from. A player's sign-in is tied to the address they signed in at, so moving domains signs everyone out.
 
-### How streaks work
-
-A player's profile is made of the scores that they have posted, so only a player who has signed in has one. A day counts towards a streak once any one of its puzzles is solved and posted. A streak that reached yesterday is still going, and ends once a whole day passes without a solve. A day is a puzzle's day, which begins at 10:00 UTC for everyone.
-
-### How sharing works
-
-A solve is shared as a link: `/s/<date>/<size>`, with the player's handle on the end once their score is on the leaderboard. Opening one starts the puzzle of that size that is being played today. Pasting one shows a card, drawn by `/api/card`, with the puzzle's stamp and the player's score. The score on a card is always looked up, never taken from the link, so a link can't claim a score that wasn't posted. Neither the card nor the link gives away the solution or the target.
-
-A puzzle's stamp is a mosaic in the shape of its board, whose color and pattern come from a hash of its scrambled letters. It is the same for everyone who plays that puzzle.
-
-The card is drawn without any image library, to stay within the ten milliseconds of processor time that a Worker gets on Cloudflare's free plan: flat shapes in sixteen colors, with letters that were drawn ahead of time. While `yarn dev` is running, `/glyphs` draws those letters from the game's font. Save what it shows as `src/server/card/glyphs.json` whenever the wording of the card or the font changes.
-
-### How signing in works
-
-Worbik has no accounts of its own. A player signs in with their [Atmosphere](https://atproto.com) account, on the server that hosts it, and only to earn a place on a leaderboard: the game itself never asks. Worbik asks that server for two things: to say who the player is, and to vouch for them when they submit a score. It can't read or write anything in their account.
-
-Signing in happens in the browser. The server that hosts the player's account learns about Worbik from `/oauth/client-metadata.json`, which describes the app at whichever address it is served from.
-
-During development the app is served at `http://127.0.0.1:5173`, and moves itself there if it's opened at `localhost`. The protocol doesn't allow a player to be sent back to `localhost` after signing in, and what a browser stores for one address isn't shared with the other.
+[ci_badge]: https://github.com/Saeris/worbik/actions/workflows/ci.yml/badge.svg
+[ci]: https://github.com/Saeris/worbik/actions/workflows/ci.yml
+[site]: https://worbik.com
+[atproto]: https://atproto.com
+[void]: https://void.cloud
+[viteplus]: https://viteplus.dev/
+[atcute]: https://github.com/mary-ext/atcute

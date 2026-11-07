@@ -66,7 +66,8 @@ const Contents: React.FC<ContentsProps> = ({
   const path = [`/s`, day, dimensions, ...(player ? [player] : [])].join(`/`);
   const url = `${location.origin}${path}`;
   const card = `/api/card?${new URLSearchParams({ puzzle: puzzleID, ...(player && { player }) }).toString()}`;
-  const text = `Worbik ${size} · ${dayFormat.format(new Date(getPuzzleStart(puzzleID)))} · ${moves} ${moves === 1 ? `move` : `moves`}`;
+  const count = `${moves} ${moves === 1 ? `move` : `moves`}`;
+  const text = `Worbik ${size} · ${dayFormat.format(new Date(getPuzzleStart(puzzleID)))} · ${count}`;
   const compose = `${COMPOSE}?${new URLSearchParams({ text: `${text}\n${url}` }).toString()}`;
   // Read once this is on screen, which is after the page has reached a browser
   const handheld = useMemo(
@@ -123,7 +124,7 @@ const Contents: React.FC<ContentsProps> = ({
         height={630}
         alt={
           player
-            ? `The card that your link shows: ${moves} moves on the ${size}, and an invitation to beat it.`
+            ? `The card that your link shows: ${count} on the ${size}, and an invitation to beat it.`
             : `The card that your link shows: the ${size}, and an invitation to solve it.`
         }
       />

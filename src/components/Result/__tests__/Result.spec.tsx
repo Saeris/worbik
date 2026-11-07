@@ -88,6 +88,21 @@ describe(`result`, () => {
     expect(retry).toHaveBeenCalledTimes(1);
   });
 
+  it(`keeps the score on a shared link when the leaderboard couldn't be loaded`, async () => {
+    // The score is posted either way, and the link finds it by who the player is
+    vi.stubGlobal(`matchMedia`, () => ({ matches: false }));
+    await render({ ranking: null });
+    await act(async () => {
+      [...container.querySelectorAll(`button`)]
+        .find((button) => button.textContent === `Share`)
+        ?.click();
+    });
+
+    expect(document.body.textContent).toContain(
+      `/s/11-07-2026/5x5/${alice.did}`
+    );
+  });
+
   it(`won't try again while it's already trying`, async () => {
     await render({ ranking: null, retrying: true });
 
@@ -100,6 +115,52 @@ describe(`result`, () => {
     await render({ status: `posting`, ranking: null, retrying: true });
 
     expect(container.textContent).toContain(`Couldn’t post your score`);
+  });
+
+  it.each([
+    // It wasn't their doing that the post came too late, and being told that they finished late would be wrong as well as unkind
+    [`closed`, `day ended before you finished`],
+    [`missed`, `closed before your score could be`],
+    [`too-long`, `can be ranked`]
+  ] as const)(
+    `explains what became of a solve that's %s`,
+    async (status, words) => {
+      await render({ status, ranking: null });
+
+      expect(container.textContent).toContain(words);
+    }
+  );
+
+  it.each([`closed`, `missed`] as const)(
+    `points to today's puzzle once a solve is %s`,
+    async (status) => {
+      // Nothing more can be done with this one, and a new day's is waiting
+      await render({ status, ranking: null });
+
+      expect(container.querySelector(`a[href="/5x5"]`)?.textContent).toBe(
+        `Play today’s 5×5`
+      );
+    }
+  );
+
+  it(`doesn't send a player off to today's puzzle while a solve still counts`, async () => {
+    await render({ status: `failed`, ranking: null });
+
+    expect(container.querySelector(`a[href="/5x5"]`)).toBeNull();
+  });
+
+  it(`asks a player whose sign-in has run out to sign in again`, async () => {
+    await render({ status: `expired`, ranking: null });
+
+    expect(container.textContent).toContain(`Your sign-in has run out`);
+
+    await act(async () => {
+      [...container.querySelectorAll(`button`)]
+        .find((button) => button.textContent === `Sign in again`)
+        ?.click();
+    });
+
+    expect(nothing).toHaveBeenCalledTimes(1);
   });
 
   it(`says nothing of the leaderboard before a score is posted`, async () => {

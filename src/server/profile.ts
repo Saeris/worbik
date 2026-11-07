@@ -1,5 +1,6 @@
 import { db, desc, eq, sql } from "void/db";
 import { scores } from "#db/schema";
+import { place } from "./scores";
 
 /** How many of a player's latest results a profile lists */
 const RECENT = 5;
@@ -24,23 +25,6 @@ export interface Profile {
 
 /** The day that a puzzle belongs to, which is what its ID begins with */
 const day = sql<string>`substr(${scores.puzzle}, 1, 10)`;
-
-/**
- * Where a score placed: one more than the number of scores on the same
- * puzzle that took fewer moves, or as many and were posted earlier.
- *
- * The score being placed is named by its table in full. Left to itself,
- * the query builder names columns without their table, and each would then
- * be taken for a column of the scores that it's being compared against.
- */
-const place = sql<number>`(
-  select count(*) + 1 from scores as ahead
-  where ahead.puzzle = scores.puzzle
-    and (
-      ahead.moves < scores.moves
-      or (ahead.moves = scores.moves and ahead.created_at < scores.created_at)
-    )
-)`;
 
 /** Looks up what the player with the given identity has done. A player who has posted nothing has an empty profile. */
 export const getProfile = async (did: string): Promise<Profile> => {

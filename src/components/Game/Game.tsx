@@ -52,7 +52,7 @@ export const Game: React.FC<GameProps> = ({ puzzleID, init, persist }) => {
             moves={state.moves}
             target={state.target}
             status={score.status}
-            scores={score.scores}
+            ranking={score.ranking}
             detail={score.detail}
             retrying={score.retrying}
             retry={score.retry}

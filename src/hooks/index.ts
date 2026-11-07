@@ -6,6 +6,7 @@ export {
   loadScores,
   useScore,
   type RankedScore,
+  type Ranking,
   type Score,
   type ScoreStatus
 } from "./useScore";

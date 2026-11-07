@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { cx } from "class-variance-authority";
-import { usePlayer, type RankedScore, type ScoreStatus } from "#hooks";
+import { usePlayer, type Ranking, type ScoreStatus } from "#hooks";
 import { MAX_MOVES } from "#state";
 import type { Size } from "#utils";
 import { getNeighbors } from "#utils/getNeighbors";
@@ -21,7 +21,7 @@ export interface ResultProps {
   /** What has become of the solve, once that's known */
   status: ScoreStatus | null;
   /** The puzzle's leaderboard, once it has loaded */
-  scores: readonly RankedScore[] | null;
+  ranking: Ranking | null;
   /** Why the solve couldn't be posted, in the words of whatever turned it away */
   detail: string | null;
   /** Whether a solve that couldn't be posted is being posted again */
@@ -36,6 +36,22 @@ export interface ResultProps {
 }
 
 /**
+ * The few scores that are worth showing beside a result: those around the
+ * player's own. A player beyond the end of what's listed has nothing around
+ * them to show, so they're shown on their own.
+ */
+const getRows = (
+  ranking: Ranking | null,
+  you?: string
+): { rows: Ranking["scores"]; from: number } => {
+  const { scores = [], you: mine = null } = ranking ?? {};
+
+  return mine && !scores.some(({ did }) => did === you)
+    ? { rows: [mine], from: mine.place }
+    : getNeighbors(scores, ({ did }) => did === you);
+};
+
+/**
  * What a player is shown once they solve a puzzle: how they did, how that
  * compares to everyone else who solved it that day, and what they can do
  * next.
@@ -48,7 +64,7 @@ export const Result: React.FC<ResultProps> = memo(
     moves,
     target,
     status,
-    scores,
+    ranking,
     detail,
     retrying,
     retry,
@@ -58,9 +74,8 @@ export const Result: React.FC<ResultProps> = memo(
   }) => {
     const you = usePlayer()?.did;
     const size = `${width}×${height}`;
-    const { rows, from } = getNeighbors(scores ?? [], ({ did }) => did === you);
-    const place = (scores ?? []).findIndex(({ did }) => did === you) + 1;
-    const mine = scores?.[place - 1];
+    const mine = ranking?.you;
+    const { rows, from } = getRows(ranking, you);
     // A failure stays on show while the solve is being posted again, so that nothing moves while it is
     const shown = retrying ? `failed` : status;
     // Sharing is the thing to do next unless there is something that needs doing first
@@ -76,10 +91,10 @@ export const Result: React.FC<ResultProps> = memo(
       <section className={cx(styles.result, className)} aria-label="Result">
         <div className={styles.summary}>
           <h2>{`Solved in ${moves} ${moves === 1 ? `move` : `moves`}`}</h2>
-          {status === `posted` && place > 0 ? (
+          {status === `posted` && ranking && mine ? (
             <p>
-              <strong>{ordinal(place)}</strong>
-              {` of ${scores?.length} today`}
+              <strong>{ordinal(mine.place)}</strong>
+              {` of ${ranking.total} today`}
             </p>
           ) : status === `closed` ? (
             <p>
@@ -156,7 +171,7 @@ export const Result: React.FC<ResultProps> = memo(
             <header>
               <h3>{over ? `${size} scores` : `Today’s ${size}`}</h3>
               <button type="button" onClick={onLeaderboard}>
-                {`See all ${scores?.length}`}
+                {`See all ${ranking?.total}`}
               </button>
             </header>
             <Scores scores={rows} from={from} you={you} />

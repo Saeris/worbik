@@ -15,6 +15,16 @@ export interface RankedScore {
   readonly moves: number;
 }
 
+/** A puzzle's leaderboard, as much of it as is listed */
+export interface Ranking {
+  /** The best scores, in the order that they rank */
+  readonly scores: readonly RankedScore[];
+  /** How many scores there are in all, which can be more than are listed */
+  readonly total: number;
+  /** The score of the player who is looking, and where it ranks */
+  readonly you: (RankedScore & { readonly place: number }) | null;
+}
+
 /**
  * What has become of a solve:
  *
@@ -41,7 +51,7 @@ export interface Score {
   /** What has become of the solve, once that's known */
   readonly status: ScoreStatus | null;
   /** The puzzle's leaderboard, once it has loaded */
-  readonly scores: readonly RankedScore[] | null;
+  readonly ranking: Ranking | null;
   /** Why the solve couldn't be posted, in the words of whatever turned it away, for working out what went wrong */
   readonly detail: string | null;
   /** Whether a solve that couldn't be posted is being posted again */
@@ -52,10 +62,13 @@ export interface Score {
 
 /** Loads the leaderboard of a puzzle, or `null` if it can't be reached */
 export const loadScores = async (
-  puzzleID: string
-): Promise<readonly RankedScore[] | null> => {
+  puzzleID: string,
+  did?: string
+): Promise<Ranking | null> => {
   try {
-    return await fetch(`/api/scores`, { query: { puzzle: puzzleID } });
+    return await fetch(`/api/scores`, {
+      query: { puzzle: puzzleID, ...(did && { player: did }) }
+    });
   } catch {
     // A solve can be posted without its leaderboard having loaded
     return null;
@@ -148,7 +161,7 @@ export const useScore = (
   } | null>(null);
   const { status = null, detail = null } =
     outcome?.solve === solve ? outcome : {};
-  const [scores, setScores] = useState<readonly RankedScore[] | null>(null);
+  const [ranking, setRanking] = useState<Ranking | null>(null);
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
@@ -161,10 +174,10 @@ export const useScore = (
 
     const follow = async (): Promise<void> => {
       const solved = recordSolve(puzzleID, did);
-      const loaded = await loadScores(puzzleID);
+      const loaded = await loadScores(puzzleID, did);
 
       if (isStale()) return;
-      setScores(loaded);
+      setRanking(loaded);
 
       if (solved.posted) {
         setOutcome({ solve, status: `posted` });
@@ -179,10 +192,10 @@ export const useScore = (
 
         try {
           await post(puzzleID, history, did);
-          const ranked = await loadScores(puzzleID);
+          const ranked = await loadScores(puzzleID, did);
 
           if (isStale()) return;
-          setScores(ranked);
+          setRanking(ranked);
           setOutcome({ solve, status: `posted` });
         } catch (cause) {
           const reason = explain(cause);
@@ -209,7 +222,7 @@ export const useScore = (
 
   return {
     status,
-    scores,
+    ranking,
     detail,
     retrying: status === `posting` && attempt > 0,
     retry

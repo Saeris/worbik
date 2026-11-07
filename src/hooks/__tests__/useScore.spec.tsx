@@ -49,7 +49,8 @@ const proof = vi.mocked(getProof);
 const puzzle = getPuzzleID();
 const history = [`bcaefd`, `abcefd`, `abcdef`];
 const alice = { did: `did:plc:alice`, handle: `alice.test` } as const;
-const ranking = [{ did: alice.did, handle: alice.handle, moves: 2 }];
+const alices = { did: alice.did, handle: alice.handle, moves: 2 };
+const ranking = { scores: [alices], total: 1, you: { ...alices, place: 1 } };
 
 /** Every score that was sent to the server */
 const posts = (): Request[] =>
@@ -84,7 +85,7 @@ describe(`useScore`, () => {
     root = createRoot(container);
     // The leaderboard is read with a GET, and a score is posted with a POST
     request.mockImplementation(async (_path, { method }) =>
-      method === `POST` ? ranking[0] : ranking
+      method === `POST` ? alices : ranking
     );
     proof.mockResolvedValue(`a-token`);
   });
@@ -116,7 +117,7 @@ describe(`useScore`, () => {
     await render(true);
 
     expect(score.status).toBe(`signed-out`);
-    expect(score.scores).toStrictEqual(ranking);
+    expect(score.ranking).toStrictEqual(ranking);
     expect(posts()).toHaveLength(0);
   });
 

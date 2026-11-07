@@ -1,5 +1,5 @@
 import { HTTPException } from "hono/http-exception";
-import { and, asc, db, desc, eq, inArray } from "void/db";
+import { and, asc, db, desc, eq, inArray, sql } from "void/db";
 import { scores } from "#db/schema";
 import { replay } from "#state";
 import { isNonNullable, isOpenForScores, parseSize, sizes } from "#utils";
@@ -19,6 +19,23 @@ const columns = {
   moves: scores.moves,
   createdAt: scores.createdAt
 };
+
+/**
+ * Where a score placed: one more than the number of scores on the same
+ * puzzle that took fewer moves, or as many and were posted earlier.
+ *
+ * The score being placed is named by its table in full. Left to itself,
+ * the query builder names columns without their table, and each would then
+ * be taken for a column of the scores that it's being compared against.
+ */
+export const place = sql<number>`(
+  select count(*) + 1 from scores as ahead
+  where ahead.puzzle = scores.puzzle
+    and (
+      ahead.moves < scores.moves
+      or (ahead.moves = scores.moves and ahead.created_at < scores.created_at)
+    )
+)`;
 
 /**
  * Records the score that a player earned on a puzzle, and returns the score
@@ -186,3 +203,35 @@ export const getLeaderboard = async (
     .where(eq(scores.puzzle, puzzle))
     .orderBy(asc(scores.moves), asc(scores.createdAt))
     .limit(limit);
+
+/** A puzzle's leaderboard, as far as it's listed, and where one player stands on the whole of it */
+export interface Ranking {
+  /** The best scores, which aren't all of them on a puzzle that many have solved */
+  readonly scores: Score[];
+  /** How many scores there are in all */
+  readonly total: number;
+  /** The score of the player who asked, and its place, wherever that is */
+  readonly you: (Score & { readonly place: number }) | null;
+}
+
+/** Ranks a puzzle's scores, for the player with the given identity if there is one */
+export const getRanking = async (
+  puzzle: string,
+  player?: string
+): Promise<Ranking> => {
+  const [top, [{ total }], standing] = await Promise.all([
+    getLeaderboard(puzzle),
+    db
+      .select({ total: sql<number>`count(*)` })
+      .from(scores)
+      .where(eq(scores.puzzle, puzzle)),
+    player
+      ? db
+          .select({ ...columns, place })
+          .from(scores)
+          .where(and(eq(scores.puzzle, puzzle), eq(scores.did, player)))
+      : []
+  ]);
+
+  return { scores: top, total, you: standing.at(0) ?? null };
+};

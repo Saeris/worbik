@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useState } from "react";
 import { cx } from "class-variance-authority";
 import { SignInError } from "#auth/errors";
+import { loadOAuth, reloadIfOutdated } from "#auth/load";
 import { HandleField } from "./HandleField";
 import styles from "./SignIn.module.css";
 
@@ -26,11 +27,13 @@ export const SignIn: React.FC<SignInProps> = memo(({ className }) => {
 
     try {
       // Signing in is the only thing that needs this, so it's only fetched by those who do
-      const { signIn } = await import(`#auth/oauth`);
+      const { signIn } = await loadOAuth();
 
       // Leaves the page when it succeeds
       await signIn(account);
     } catch (cause) {
+      if (reloadIfOutdated(cause)) return;
+
       setPending(false);
       setError(
         cause instanceof SignInError

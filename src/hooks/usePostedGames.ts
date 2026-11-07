@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetch } from "void/client";
 import { SignedOutError } from "#auth/errors";
+import { loadOAuth } from "#auth/load";
 import { getProgress, toSavedGame } from "#utils/progress";
 import { GET_SOLVES } from "#utils/service";
 import { getGameKey, markPosted } from "#utils/solves";
@@ -61,7 +62,7 @@ export const usePostedGames = (
       if (!missing || isStale()) return;
 
       // Only fetched by those who have signed in
-      const { getProof } = await import(`#auth/oauth`);
+      const { getProof } = await loadOAuth();
       const games = await fetch(`/api/solves`, {
         method: `POST`,
         body: { day },

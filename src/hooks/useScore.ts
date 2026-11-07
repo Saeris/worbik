@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import * as v from "valibot";
 import { fetch, FetchError } from "void/client";
 import { SignedOutError } from "#auth/errors";
+import { loadOAuth, reloadIfOutdated } from "#auth/load";
 import { MAX_MOVES } from "#state";
 import { isOpenForScores, isPastPuzzleDay } from "#utils";
 import { SUBMIT_SCORE } from "#utils/service";
@@ -65,6 +66,8 @@ export interface Score {
 interface Outcome {
   readonly status: ScoreStatus;
   readonly detail?: string | null;
+  /** What went wrong, for working out what it would take to try again */
+  readonly cause?: unknown;
 }
 
 /** Loads the leaderboard of a puzzle, or `null` if it can't be reached */
@@ -92,7 +95,7 @@ const send = async (
   did: string
 ): Promise<void> => {
   // Only fetched by those who have signed in
-  const { getProof } = await import(`#auth/oauth`);
+  const { getProof } = await loadOAuth();
 
   await fetch(`/api/scores`, {
     method: `POST`,
@@ -140,7 +143,8 @@ const explain = (cause: unknown): Outcome => {
 
   return {
     status: `failed`,
-    detail: cause instanceof Error ? cause.message : String(cause)
+    detail: cause instanceof Error ? cause.message : String(cause),
+    cause
   };
 };
 
@@ -233,9 +237,12 @@ export const useScore = (
     };
   }, [puzzleID, solve, history, did, attempt]);
 
+  const failure = outcome?.cause;
+
   const retry = useCallback(() => {
-    setAttempt((count) => count + 1);
-  }, []);
+    // The solve is saved, so it's posted as soon as the page has loaded again
+    if (!reloadIfOutdated(failure)) setAttempt((count) => count + 1);
+  }, [failure]);
 
   return {
     status,

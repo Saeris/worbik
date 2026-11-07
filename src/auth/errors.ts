@@ -11,3 +11,6 @@ export class SignInError extends Error {}
 
 /** Thrown when a player's sign-in turns out to have run out, or to have been withdrawn */
 export class SignedOutError extends Error {}
+
+/** Thrown when the code for signing in can't be fetched, which is what a page sees once a deployment has replaced it */
+export class OutdatedError extends Error {}

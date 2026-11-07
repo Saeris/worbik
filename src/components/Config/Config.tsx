@@ -7,6 +7,7 @@ import {
   PiYinYang,
   PiYinYangFill
 } from "react-icons/pi";
+import { loadOAuth } from "#auth/load";
 import { setPlayer } from "#auth/player";
 import { usePlayer } from "#hooks";
 import styles from "./Config.module.css";
@@ -99,7 +100,7 @@ const syncScheme = (group: HTMLDivElement): (() => void) => {
 const endSession = async (did: string): Promise<void> => {
   try {
     // Only fetched by those who have signed in
-    const { signOut } = await import(`#auth/oauth`);
+    const { signOut } = await loadOAuth();
     await signOut(did);
   } catch {
     // They're signed out here regardless, which is what they asked for

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@void/react";
+import { loadOAuth } from "#auth/load";
 import { rememberAccount, setPlayer } from "#auth/player";
 import { adoptGames } from "#utils/solves";
 import styles from "./callback.module.css";
@@ -12,7 +13,7 @@ import styles from "./callback.module.css";
 let finishing: Promise<string> | undefined;
 
 const signIn = async (): Promise<string> => {
-  const { completeSignIn } = await import(`#auth/oauth`);
+  const { completeSignIn } = await loadOAuth();
   const { player, from } = await completeSignIn();
   setPlayer(player);
   rememberAccount(player);

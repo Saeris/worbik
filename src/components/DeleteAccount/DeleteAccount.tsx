@@ -2,6 +2,7 @@ import { memo, useCallback, useId, useState } from "react";
 import { fetch } from "void/client";
 import { SignedOutError } from "#auth/errors";
 import { normalizeHandle } from "#auth/handle";
+import { isOutdated, loadOAuth } from "#auth/load";
 import { forgetAccount, setPlayer } from "#auth/player";
 import { usePlayer } from "#hooks";
 import { DELETE_DATA } from "#utils/service";
@@ -15,7 +16,20 @@ export interface DeleteAccountProps {
 }
 
 /** What has become of an attempt to delete the player's data */
-type Status = `deleted` | `deleting` | `expired` | `failed` | `idle`;
+type Status =
+  | `deleted`
+  | `deleting`
+  | `expired`
+  | `failed`
+  | `idle`
+  | `outdated`;
+
+/** What it would take to get past a failure to delete a player's data */
+const explain = (cause: unknown): Status => {
+  if (cause instanceof SignedOutError) return `expired`;
+
+  return isOutdated(cause) ? `outdated` : `failed`;
+};
 
 /**
  * Deletes a player's scores from Worbik, which is everything that it knows
@@ -45,17 +59,10 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = memo(
     const remove = useCallback(async (did: string) => {
       setStatus(`deleting`);
 
-      // Only fetched by those who have signed in
-      const oauth = await import(`#auth/oauth`).catch(() => null);
-
-      if (!oauth) {
-        setStatus(`failed`);
-        return;
-      }
-
-      const { getProof, signOut } = oauth;
-
       try {
+        // Only fetched by those who have signed in
+        const { getProof } = await loadOAuth();
+
         await fetch(`/api/account`, {
           method: `DELETE`,
           headers: {
@@ -64,7 +71,7 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = memo(
           timeout: REQUEST_TIMEOUT
         });
       } catch (cause) {
-        setStatus(cause instanceof SignedOutError ? `expired` : `failed`);
+        setStatus(explain(cause));
         return;
       }
 
@@ -72,7 +79,14 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = memo(
       forgetGames(did);
       forgetAccount(did);
       setPlayer(null);
+
+      const { signOut } = await loadOAuth();
+
       await signOut(did);
+    }, []);
+
+    const reload = useCallback(() => {
+      location.reload();
     }, []);
 
     const submit = useCallback(
@@ -139,6 +153,16 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = memo(
         {status === `failed` && (
           <p role="alert" className={styles.error}>
             Couldn’t delete your Worbik data. Try again in a moment.
+          </p>
+        )}
+        {status === `outdated` && (
+          // Reloading isn't done for them here, as it would look as if the deletion had gone through
+          <p role="alert" className={styles.error}>
+            Worbik has been updated, so this page has to be reloaded first.
+            Nothing was deleted.{` `}
+            <button type="button" className={styles.link} onClick={reload}>
+              Reload
+            </button>
           </p>
         )}
         {status === `expired` && (
